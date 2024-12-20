@@ -1,0 +1,71 @@
+{
+  "name": "inesweeper",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Web Application for Minesweeper Variants",
+  "homepage": "https://github.com/osutaiko/inesweeper#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/osutaiko/inesweeper.git"
+  },
+  "author": "Dongheon Han <henongod@kaist.ac.kr>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/osutaiko/inesweeper/issues"
+  },
+  "keywords": [
+    "react",
+    "vite",
+    "typescript",
+    "tailwind",
+    "template",
+    "starter",
+    "eslint",
+    "prettier"
+  ],
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not IE 11"
+  ],
+  "engines": {
+    "node": ">=18",
+    "yarn": ">=1.22.5"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@heroicons/react": "2.1.5",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.468.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-router-dom": "^7.0.2",
+    "tailwind-merge": "^2.5.5",
+    "tailwindcss-animate": "^1.0.7",
+    "unplugin-fonts": "^1.3.1"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "19.5.0",
+    "@eslint/js": "9.13.0",
+    "@tailwindcss/forms": "0.5.9",
+    "@types/react": "18.3.12",
+    "@types/react-dom": "18.3.1",
+    "@vitejs/plugin-react": "4.3.3",
+    "autoprefixer": "^10.4.20",
+    "eslint": "9.13.0",
+    "eslint-plugin-react-hooks": "5.0.0",
+    "eslint-plugin-react-refresh": "0.4.14",
+    "lint-staged": "15.2.10",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.14",
+    "typescript": "5.6.3",
+    "typescript-eslint": "8.10.0",
+    "vite": "^5.4.10"
+  }
+}

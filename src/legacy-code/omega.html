@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-M2DKNVS7XK"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-M2DKNVS7XK');
+  </script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+  <title>Omega | Inesweeper</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <script src="main.js"></script>
+
+  <header id="header">
+    <div id="navigation-bar">
+      <div class="container-transparent">
+        <h1 class="logo">Inesweeper</h1>
+        <div class="buttons-right">
+          <button id="settings-button" class="button"></button>
+          <button id="help-button" class="button"></button>
+          <button id="mytimes-button" class="button"></button>
+          <button id="github-button" class="button" target="_blank"></button>
+        </div>
+      </div>
+    </div>
+    <div id="modal-settings" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Flag Toggle Button Position</h2>
+        <select id="toggle-location">
+          <option value="bottom-left">Bottom Left</option>
+          <option value="bottom-right">Bottom Right</option>
+          <option value="center-left">Center Left</option>
+          <option value="center-right">Center Right</option>
+        </select>
+        <h2>Grid Cell Size: <span id="grid-size-display">25</span></h2>
+        <input type="range" id="grid-size-slider" min="20" max="50" value="25">
+        <button id="default-settings">Restore to Default</button>
+      </div>
+    </div>
+    <div id="modal-help" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Classic</h2>
+          <p>The classic Minesweeper experience. To win, reveal all safe tiles without clicking on any mines. 
+            Numbered tiles indicate the number of mines hidden in the adjacent eight tiles.</p>
+        <h2>Multimines</h2>
+          <p>Minesweeper, but with up to four mines per tile.</p>
+        <h2>Omega</h2>
+          <p>Minesweeper, but also with negative mines. All tiles adjacent to '0's are automatically revealed
+            if they contain no mines (either positive or negative). This means all unrevealed tiles adjacent to '0's are guaranteed to contain a mine. 
+            You may only chord on number tiles with exactly one unrevealed adjacent tile remaining.</p>
+        <h2>Liar</h2>
+          <p>Minesweeper, but number tiles "lie" by displaying numbers as one off from the actual value. You may only chord in the following trivial cases: 
+            <ul>
+              <li>The number of adjacent flags exceeds the value of the number tile</li>
+              <li>When only one adjecent tile is hidden, and the number of adjacent flags is exactly one greater than the value of the number tile</li>
+            </ul>
+          </p>
+        <ul class = "modal-list">
+          <li>[Space]: Restart game</li>
+          <li>[Left Click]: Reveal tile</li>
+          <li>[Right Click]: Flag tile</li>
+          <li>[Left+Right Click]: Chord on number tile</li>
+        </ul>
+      </div>
+    </div>
+    <div id="modal-mytimes" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Classic</h2> 
+        <table>
+          <tr>
+            <th>Beginner</th>
+            <th>Intermediate</th>
+            <th>Expert</th>
+          </tr>
+          <tr>
+            <td id="classic-beginner-time"></td>
+            <td id="classic-intermediate-time"></td>
+            <td id="classic-expert-time"></td>
+          </tr>
+        </table>
+        <h2>Multimines</h2> 
+        <table>
+          <tr>
+            <th>Beginner</th>
+            <th>Intermediate</th>
+            <th>Expert</th>
+          </tr>
+          <tr>
+            <td id="multimines-beginner-time">N/A</td>
+            <td id="multimines-intermediate-time">N/A</td>
+            <td id="multimines-expert-time">N/A</td>
+          </tr>
+        </table>
+        <h2>Omega</h2> 
+        <table>
+          <tr>
+            <th>Beginner</th>
+            <th>Intermediate</th>
+            <th>Expert</th>
+          </tr>
+          <tr>
+            <td id="omega-beginner-time">N/A</td>
+            <td id="omega-intermediate-time">N/A</td>
+            <td id="omega-expert-time">N/A</td>
+          </tr>
+        </table>
+        <h2>Liar</h2> 
+        <table>
+          <tr>
+            <th>Beginner</th>
+            <th>Intermediate</th>
+            <th>Expert</th>
+          </tr>
+          <tr>
+            <td id="liar-beginner-time">N/A</td>
+            <td id="liar-intermediate-time">N/A</td>
+            <td id="liar-expert-time">N/A</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="column">
+      <ul class="gamemode-list">
+        <li><a href="index.html">Classic</a></li>
+        <li><a href="multimines.html">Multimines</a></li>
+        <li><a href="omega.html"><b>Omega</b></a></li>
+        <li><a href="liar.html">Liar</a></li>
+        <hr>
+        <li><a href="artofwar.html"><s>Art of War</s></a></li>
+      </ul>
+    </div>
+    <div class="column">
+      <h2>Omega</h2>
+      <div id="difficulty-selector">
+        <button class="difficulty-option" id="beginner"></button>
+        <button class="difficulty-option" id="intermediate"></button>
+        <button class="difficulty-option" id="expert"></button>
+      </div>
+      <br>
+      <div class="board-info-bar">
+        <span><span mines-left title="Positive mines left"></span> <span neg-mines-left title="Negative mines left"></span></span>
+        <button id="status-button" title="Restart game">🙂</button>
+        <span id="timer" title="Time">0.00</span>
+      </div>
+      <div class="board"></div>
+      <script src="ms-omega.js"></script>
+      <p style="color: #d33;"><br>We highly recommend reading the "How to Play" section to learn the unintuitive special rules for this variation.</p>
+    </div>
+  </div>
+  <br>
+  <div class="container-transparent">
+    <p></p>
+  </div>
+  <button id="toggle-button">⛏️</button>
+</body>
+
+</html>
