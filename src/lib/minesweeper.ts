@@ -1,4 +1,4 @@
-import { Board, BoardConfig, BoardConfigLibrary } from "./types";
+import { Board, BoardConfig, BoardConfigLibrary, Cell } from "./types";
 
 export const boardConfigLibrary: BoardConfigLibrary = {
   "classic": {
@@ -64,19 +64,19 @@ export const createBoard = (config: BoardConfig): Cell[][] | undefined => {
   return board;
 };
 
-const isWin = (board: Board): boolean => {
+export const isWin = (board: Board): boolean => {
   return board.every(row =>
     row.every(cell =>
-      (cell.state.type === "revealed" && cell.mineNum === 0) || 
-      (cell.state.type === "flagged" && cell.state.flagNum !== 0 && cell.mineNum !== 0)
+      (cell.mineNum === 0 && cell.state.type === "revealed") || 
+      cell.mineNum !== 0
     )
   );
 };
 
-const isLoss = (board: Board): boolean => {
+export const isLoss = (board: Board): boolean => {
   return board.some(row =>
     row.some(cell =>
-      cell.state.type === "revealed" && cell.mineNum !== 0
+      cell.mineNum !== 0 && cell.state.type === "revealed"
     )
   );
 };
@@ -116,6 +116,9 @@ export const handleClick = (board: Board, row: number, col: number, config: Boar
   const cellNumber = getCellNumber(board, row, col, config);
   
   cell.state = { type: "revealed", num: cellNumber };
+  if (cell.mineNum !== 0) {
+    return;
+  }
 
   if (cellNumber === null) {
     for (let dx = -1; dx <= 1; dx++) {

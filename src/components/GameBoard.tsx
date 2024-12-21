@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Board, DifficultyName, VariantName, Cell } from "@/lib/types";
-import { boardConfigLibrary, createBoard, getCellNumber, handleClick, handleChord, handleFlag } from "@/lib/minesweeper";
+import { boardConfigLibrary, createBoard, getCellNumber, handleClick, handleChord, handleFlag, isWin, isLoss } from "@/lib/minesweeper";
 import { Flag, Smile, Sun } from "lucide-react";
 import { Button } from "./ui/button";
 
@@ -14,6 +14,7 @@ export const GameBoard: React.FC<{
   const [isFirstClick, setIsFirstClick] = useState(true);
   const [isLmbDown, setIsLmbDown] = useState(false);
   const [isRmbDown, setIsRmbDown] = useState(false);
+  const [isGameOver, setIsGameOver] = useState(false);
 
   useEffect(() => {
     if (config) {
@@ -22,7 +23,53 @@ export const GameBoard: React.FC<{
     }
   }, [variant, difficulty, config]);
 
+  useEffect(() => {
+    if (isGameOver) {
+      return;
+    }
+
+    if (isWin(board)) {
+      setIsGameOver(true);
+      alert("You Win! 🎉");
+
+      const updatedBoard = board.map(row =>
+        row.map(cell => {
+          if (cell.mineNum !== 0) {
+            return {
+              ...cell,
+              state: { ...cell.state, type: "flagged", flagNum: cell.mineNum },
+            };
+          }
+          return cell;
+        })
+      );
+      setBoard(updatedBoard);
+    }
+    
+    if (isLoss(board)) {
+      setIsGameOver(true);
+      alert("Game Over! 💥");
+
+      const updatedBoard = board.map(row =>
+        row.map(cell => {
+          if (cell.mineNum !== 0) {
+            return {
+              ...cell,
+              state: { ...cell.state, type: "revealed" },
+            };
+          }
+          return cell;
+        })
+      );
+      setBoard(updatedBoard);
+    }
+  }, [JSON.stringify(board)]);
+
   const handleMouseDown = (e: React.MouseEvent, row: number, col: number) => {
+    if (isGameOver) {
+      return;
+    }
+
     if (e.button === 0) {
       setIsLmbDown(true);
     } else if (e.button === 2) {
@@ -34,6 +81,10 @@ export const GameBoard: React.FC<{
   };
 
   const handleMouseUp = (e: React.MouseEvent, row: number, col: number) => {
+    if (isGameOver) {
+      return;
+    }
+
     if (e.button === 0) {
       setIsLmbDown(false);
       if (isRmbDown) {
@@ -68,10 +119,6 @@ export const GameBoard: React.FC<{
       }
     }
   };
-
-  if (!board) {
-    return <div>Error: Invalid board configuration</div>;
-  }
 
   const getNumberColorClass = (num: number | null) => {
     if (num === null) {
