@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Board, DifficultyName, VariantName, Cell } from "@/lib/types";
 import { boardConfigLibrary, createBoard, getCellNumber, handleClick, handleChord, handleFlag } from "@/lib/minesweeper";
-import { Flag, Sun } from "lucide-react";
+import { Flag, Smile, Sun } from "lucide-react";
+import { Button } from "./ui/button";
 
 export const GameBoard: React.FC<{
   variant: VariantName;
@@ -80,81 +81,94 @@ export const GameBoard: React.FC<{
   }
 
   return (
-    <div
-      className="grid border border-gray-500"
-      style={{
-        gridTemplateColumns: `repeat(${board[0].length}, ${cellWidth}px)`,
-        gridTemplateRows: `repeat(${board.length}, ${cellWidth}px)`,
-      }}
-      onContextMenu={(e) => e.preventDefault()}
-    >
-      {board.map((row, rowIndex) =>
-        row.map((cell, colIndex) => (
-          <div
-            key={`${rowIndex}-${colIndex}`}
-            className={`flex justify-center items-center border border-gray-400 ${
-              cell.state.type === "revealed" ? "bg-gray-300" : "bg-gray-100"
-            }`}
-            style={{
-              width: cellWidth,
-              height: cellWidth,
-              borderWidth: cellWidth / 20,
-            }}
-            onMouseDown={(e) => handleMouseDown(e, rowIndex, colIndex)}
-            onMouseUp={(e) => handleMouseUp(e, rowIndex, colIndex)}
-          >
-            {cell.state.type === "revealed" && (
-              cell.mineNum ? 
+    <div className="flex flex-col bg-gray-100 rounded-md overflow-hidden">
+      <div className="flex justify-between p-2 border-t-8 border-x-8 border-gray-400">
+        <div className="w-[100px] bg-red-100">
+          timer
+        </div>
+        <Button className="bg-gray-400" size="icon">
+          <Smile />
+        </Button>
+        <div className="w-[100px] bg-red-100">
+          flags
+        </div>
+      </div>
+      <div
+        className="grid border-8 border-gray-400"
+        style={{
+          gridTemplateColumns: `repeat(${board[0].length}, ${cellWidth}px)`,
+          gridTemplateRows: `repeat(${board.length}, ${cellWidth}px)`,
+        }}
+        onContextMenu={(e) => e.preventDefault()}
+      >
+        {board.map((row, rowIndex) =>
+          row.map((cell, colIndex) => (
+            <div
+              key={`${rowIndex}-${colIndex}`}
+              className={`flex justify-center items-center border border-gray-400 ${
+                cell.state.type === "revealed" ? "bg-gray-300" : "bg-gray-100"
+              }`}
+              style={{
+                width: cellWidth,
+                height: cellWidth,
+                borderWidth: cellWidth / 20,
+              }}
+              onMouseDown={(e) => handleMouseDown(e, rowIndex, colIndex)}
+              onMouseUp={(e) => handleMouseUp(e, rowIndex, colIndex)}
+            >
+              {cell.state.type === "revealed" && (
+                cell.mineNum ? 
+                  <div
+                    className="flex flex-wrap justify-center items-center"
+                    style={{ gap: cellWidth / 20 }}
+                  >
+                    {Array.from({ length: Math.abs(cell.mineNum) }).map((_, idx) => (
+                      <Sun
+                        key={`bomb-${idx}`}
+                        className={`${cell.mineNum < 0 ? "rotate-180" : ""}`}
+                        style={{
+                          width: Math.abs(cell.mineNum) > 1 ? cellWidth * 0.35 : cellWidth * 0.6,
+                          height: Math.abs(cell.mineNum) > 1 ? cellWidth * 0.35 : cellWidth * 0.6,
+                        }}
+                        stroke={cell.mineNum > 0 ? "black" : "white"}
+                      />
+                    ))}
+                  </div> : 
+                <p
+                  className={`font-bold`}
+                  style={{
+                    height: cellWidth,
+                    fontSize: cellWidth * 0.65,
+                    lineHeight: `${cellWidth}px`,
+                    color: getNumberColorClass(getCellNumber(board, rowIndex, colIndex, config))
+                  }}
+                >
+                  {getCellNumber(board, rowIndex, colIndex, config)}
+                </p>
+              )}
+              {cell.state.type === "flagged" && (
                 <div
                   className="flex flex-wrap justify-center items-center"
                   style={{ gap: cellWidth / 20 }}
                 >
-                  {Array.from({ length: Math.abs(cell.mineNum) }).map((_, idx) => (
-                    <Sun
-                      key={`bomb-${idx}`}
-                      className={`${cell.mineNum < 0 ? "rotate-180" : ""}`}
+                  {Array.from({ length: Math.abs(cell.state.flagNum) }).map((_, idx) => (
+                    <Flag
+                      key={`flag-${idx}`}
+                      className={`${cell.state.flagNum < 0 ? "rotate-180" : ""}`}
                       style={{
-                        width: Math.abs(cell.mineNum) > 1 ? cellWidth * 0.35 : cellWidth * 0.6,
-                        height: Math.abs(cell.mineNum) > 1 ? cellWidth * 0.35 : cellWidth * 0.6,
+                        width: Math.abs(cell.state.flagNum) > 1 ? cellWidth * 0.35 : cellWidth * 0.6,
+                        height: Math.abs(cell.state.flagNum) > 1 ? cellWidth * 0.35 : cellWidth * 0.6,
                       }}
-                      stroke={cell.mineNum > 0 ? "black" : "white"}
+                      stroke={cell.state.flagNum > 0 ? "red" : "blue"}
+                      fill={cell.state.flagNum > 0 ? "red" : "blue"}
                     />
                   ))}
-                </div> : 
-              <p
-                className={`font-bold`}
-                style={{
-                  height: cellWidth,
-                  fontSize: cellWidth * 0.75,
-                  lineHeight: `${cellWidth}px`,
-                  color: getNumberColorClass(getCellNumber(board, rowIndex, colIndex, config))
-                }}
-              >
-                {getCellNumber(board, rowIndex, colIndex, config)}
-              </p>
-            )}
-            {cell.state.type === "flagged" && (
-              <div
-                className="flex flex-wrap justify-center items-center"
-                style={{ gap: cellWidth / 20 }}
-              >
-                {Array.from({ length: Math.abs(cell.state.flagNum) }).map((_, idx) => (
-                  <Flag
-                    key={`flag-${idx}`}
-                    className={`${cell.state.flagNum < 0 ? "rotate-180" : ""}`}
-                    style={{
-                      width: Math.abs(cell.state.flagNum) > 1 ? cellWidth * 0.35 : cellWidth * 0.6,
-                      height: Math.abs(cell.state.flagNum) > 1 ? cellWidth * 0.35 : cellWidth * 0.6,
-                    }}
-                    stroke={cell.state.flagNum > 0 ? "red" : "blue"}
-                    fill={cell.state.flagNum > 0 ? "red" : "blue"}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        ))
-      )}
+                </div>
+              )}
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
 };
