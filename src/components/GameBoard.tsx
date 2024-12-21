@@ -16,10 +16,11 @@ export const GameBoard: React.FC<{
   const [isRmbDown, setIsRmbDown] = useState(false);
 
   useEffect(() => {
-    if (!board) {
-      return <div>Error: Invalid board configuration</div>;
+    if (config) {
+      setBoard(createBoard(config) || []);
+      setIsFirstClick(true);
     }
-  }, [board]);
+  }, [variant, difficulty, config]);
 
   const handleMouseDown = (e: React.MouseEvent, row: number, col: number) => {
     if (e.button === 0) {
@@ -72,7 +73,10 @@ export const GameBoard: React.FC<{
     return <div>Error: Invalid board configuration</div>;
   }
 
-  const getNumberColorClass = (num: number) => {
+  const getNumberColorClass = (num: number | null) => {
+    if (num === null) {
+      return "";
+    }
     if (num >= 0) {
       return ["#4600ff", "#008809", "#ff0000", "#1e007c", "#8e0000", "#008483", "#000000", "#808080"][(num - 1) % 8];
     } else {
@@ -81,15 +85,15 @@ export const GameBoard: React.FC<{
   }
 
   return (
-    <div className="flex flex-col bg-gray-100 rounded-md overflow-hidden">
+    <div className="flex flex-col w-min h-min bg-gray-100 rounded-md overflow-hidden">
       <div className="flex justify-between p-2 border-t-8 border-x-8 border-gray-400">
-        <div className="w-[100px] bg-red-100">
+        <div className="w-[80px] bg-red-100">
           timer
         </div>
         <Button className="bg-gray-400" size="icon">
           <Smile />
         </Button>
-        <div className="w-[100px] bg-red-100">
+        <div className="w-[80px] bg-red-100">
           flags
         </div>
       </div>
@@ -140,10 +144,10 @@ export const GameBoard: React.FC<{
                     height: cellWidth,
                     fontSize: cellWidth * 0.65,
                     lineHeight: `${cellWidth}px`,
-                    color: getNumberColorClass(getCellNumber(board, rowIndex, colIndex, config))
+                    color: getNumberColorClass(cell.state.num)
                   }}
                 >
-                  {getCellNumber(board, rowIndex, colIndex, config)}
+                  {cell.state.num}
                 </p>
               )}
               {cell.state.type === "flagged" && (

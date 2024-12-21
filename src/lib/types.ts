@@ -8,6 +8,7 @@ export type BoardConfig = {
   mineTileCount: number;
   posMineCount: number;
   negMineCount: number;
+  lie: boolean;
 };
 
 export type BoardConfigLibrary = {
@@ -18,7 +19,7 @@ export type BoardConfigLibrary = {
 
 export type CellState = 
   | { type: "hidden" } 
-  | { type: "revealed" } 
+  | { type: "revealed"; num: number | null; } 
   | { type: "flagged"; flagNum: number; };
 
 export type Cell = {

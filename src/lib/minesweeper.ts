@@ -1,25 +1,25 @@
-import { Board, BoardConfig, BoardConfigLibrary, Cell, DifficultyName, VariantName } from "./types";
+import { Board, BoardConfig, BoardConfigLibrary } from "./types";
 
 export const boardConfigLibrary: BoardConfigLibrary = {
   "classic": {
-    "beg": { width: 9, height: 9, mineTileCount: 10, posMineCount: 10, negMineCount: 0, maxMinesPerCell: 1 },
-    "int": { width: 16, height: 16, mineTileCount: 40, posMineCount: 40, negMineCount: 0, maxMinesPerCell: 1 },
-    "exp": { width: 30, height: 16, mineTileCount: 99, posMineCount: 99, negMineCount: 0, maxMinesPerCell: 1 },
+    "beg": { width: 9, height: 9, mineTileCount: 10, posMineCount: 10, negMineCount: 0, maxMinesPerCell: 1, lie: false },
+    "int": { width: 16, height: 16, mineTileCount: 40, posMineCount: 40, negMineCount: 0, maxMinesPerCell: 1, lie: false },
+    "exp": { width: 30, height: 16, mineTileCount: 99, posMineCount: 99, negMineCount: 0, maxMinesPerCell: 1, lie: false },
   },
   "multimines": {
-    "beg": { width: 9, height: 9, mineTileCount: 10, posMineCount: Infinity, negMineCount: 0, maxMinesPerCell: 4 },
-    "int": { width: 16, height: 16, mineTileCount: 40, posMineCount: Infinity, negMineCount: 0, maxMinesPerCell: 4 },
-    "exp": { width: 30, height: 16, mineTileCount: 99, posMineCount: Infinity, negMineCount: 0, maxMinesPerCell: 4 },
+    "beg": { width: 9, height: 9, mineTileCount: 10, posMineCount: Infinity, negMineCount: 0, maxMinesPerCell: 4, lie: false },
+    "int": { width: 16, height: 16, mineTileCount: 40, posMineCount: Infinity, negMineCount: 0, maxMinesPerCell: 4, lie: false },
+    "exp": { width: 30, height: 16, mineTileCount: 99, posMineCount: Infinity, negMineCount: 0, maxMinesPerCell: 4, lie: false },
   },
   "liar": {
-    "beg": { width: 9, height: 9, mineTileCount: 10, posMineCount: 10, negMineCount: 0, maxMinesPerCell: 1 },
-    "int": { width: 16, height: 16, mineTileCount: 40, posMineCount: 40, negMineCount: 0, maxMinesPerCell: 1 },
-    "exp": { width: 30, height: 16, mineTileCount: 99, posMineCount: 99, negMineCount: 0, maxMinesPerCell: 1 },
+    "beg": { width: 9, height: 9, mineTileCount: 10, posMineCount: 10, negMineCount: 0, maxMinesPerCell: 1, lie: true },
+    "int": { width: 16, height: 16, mineTileCount: 40, posMineCount: 40, negMineCount: 0, maxMinesPerCell: 1, lie: true },
+    "exp": { width: 30, height: 16, mineTileCount: 99, posMineCount: 99, negMineCount: 0, maxMinesPerCell: 1, lie: true },
   },
   "omega": {
-    "beg": { width: 9, height: 9, mineTileCount: 10, posMineCount: 5, negMineCount: 5, maxMinesPerCell: 1 },
-    "int": { width: 16, height: 16, mineTileCount: 36, posMineCount: 18, negMineCount: 18, maxMinesPerCell: 1 },
-    "exp": { width: 30, height: 16, mineTileCount: 90, posMineCount: 45, negMineCount: 45, maxMinesPerCell: 1 },
+    "beg": { width: 9, height: 9, mineTileCount: 10, posMineCount: 5, negMineCount: 5, maxMinesPerCell: 1, lie: false },
+    "int": { width: 16, height: 16, mineTileCount: 36, posMineCount: 18, negMineCount: 18, maxMinesPerCell: 1, lie: false },
+    "exp": { width: 30, height: 16, mineTileCount: 90, posMineCount: 45, negMineCount: 45, maxMinesPerCell: 1, lie: false },
   },
 };
 
@@ -102,16 +102,20 @@ export const getCellNumber = (board: Board, row: number, col: number, config: Bo
     }
   }
 
+  if (config.lie && cellNumber !== null) {
+    cellNumber = Math.random() < 0.5 ? cellNumber - 1 : cellNumber + 1;
+  }
+
   return cellNumber;
 };
 
 export const handleClick = (board: Board, row: number, col: number, config: BoardConfig) => {
   const cell = board[row][col];
   if (cell.state.type !== "hidden") return;
-  
-  cell.state = { type: "revealed" };
-  
+
   const cellNumber = getCellNumber(board, row, col, config);
+  
+  cell.state = { type: "revealed", num: cellNumber };
 
   if (cellNumber === null) {
     for (let dx = -1; dx <= 1; dx++) {
