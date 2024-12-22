@@ -139,6 +139,7 @@ export const handleChord = (board: Board, row: number, col: number, config: Boar
   if (cell.state.type !== "revealed") return;
 
   let surroundingFlags = 0;
+  let surroundingHiddens = 0;
 
   for (let dx = -1; dx <= 1; dx++) {
     for (let dy = -1; dy <= 1; dy++) {
@@ -148,14 +149,14 @@ export const handleChord = (board: Board, row: number, col: number, config: Boar
         const neighbor = board[nx][ny];
         if (neighbor.state.type === "flagged") {
           surroundingFlags += neighbor.state.flagNum;
+        } else if (neighbor.state.type === "hidden") {
+          surroundingHiddens++;
         }
       }
     }
   }
 
-  const cellNumber = getCellNumber(board, row, col, config);
-
-  if (surroundingFlags === cellNumber) {
+  const revealSurroundingHiddens = () => {
     for (let dx = -1; dx <= 1; dx++) {
       for (let dy = -1; dy <= 1; dy++) {
         const nx = row + dx;
@@ -167,6 +168,26 @@ export const handleChord = (board: Board, row: number, col: number, config: Boar
         }
       }
     }
+  }
+
+  // Chording rules for Liar
+  if (config.lie) { 
+    if (cell.state.num === surroundingFlags - 1 || (surroundingHiddens === 1 && cell.state.num === surroundingFlags + 1)) {
+      revealSurroundingHiddens();
+    }
+    return;
+  }
+
+  // Chording rules for Omega
+  if (config.negMineCount > 0) { 
+    if (surroundingHiddens === 1 && surroundingFlags === cell.state.num) {
+      revealSurroundingHiddens();
+    }
+    return;
+  }
+
+  if (surroundingFlags === cell.state.num) {
+    revealSurroundingHiddens();
   }
 
   return false;
@@ -203,4 +224,37 @@ export const handleFlag = (board: Board, row: number, col: number, config: Board
       }
     }
   }
+};
+
+export const countRemainingFlags = (board: Board): { remainingPosFlags: number; remainingNegFlags: number } => {
+  let totalPosMines = 0;
+  let totalNegMines = 0;
+  let placedPosFlags = 0;
+  let placedNegFlags = 0;
+
+  for (const row of board) {
+    for (const cell of row) {
+      if (cell.mineNum > 0) {
+        totalPosMines += cell.mineNum;
+      } else if (cell.mineNum < 0) {
+        totalNegMines += Math.abs(cell.mineNum);
+      }
+
+      if (cell.state.type === "flagged") {
+        if (cell.state.flagNum > 0) {
+          placedPosFlags += cell.state.flagNum;
+        } else {
+          placedNegFlags += Math.abs(cell.state.flagNum);
+        }
+      }
+    }
+  }
+
+  const remainingPosFlags = totalPosMines - placedPosFlags;
+  const remainingNegFlags = totalNegMines - placedNegFlags;
+
+  return {
+    remainingPosFlags: remainingPosFlags,
+    remainingNegFlags: remainingNegFlags,
+  };
 };

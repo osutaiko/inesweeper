@@ -21,6 +21,28 @@ const Layout = () => {
       <header className="flex flex-row w-full px-4 gap-6 md:px-8 py-4 justify-between items-center border-b">
         <h2>Inesweeper</h2>
         <div className="flex flex-row gap-2">
+          
+          <Button variant="secondary" size="icon">
+            <Settings />
+          </Button>
+          <Button variant="secondary" size="icon">
+            <ChartColumnIncreasing />
+          </Button>
+          <Button variant="secondary" size="icon">
+            <CircleHelp />
+          </Button>
+          <Button variant="secondary" size="icon">
+            <User />
+          </Button>
+        </div>
+      </header>
+      <main className="flex flex-col gap-2 justify-center items-center w-full h-[calc(100vh-74px)] px-4 md:px-8 py-6 md:py-8 overflow-y-auto">
+        <GameBoard
+          variant={variant}
+          difficulty={difficulty}
+          cellWidth={30}
+        />
+        <div className="flex flex-row gap-2">
           <Select value={variant} onValueChange={(value) => setVariant(value)}>
             <SelectTrigger className="w-[140px]">
               <SelectValue placeholder="Variant" />
@@ -42,26 +64,7 @@ const Layout = () => {
               <SelectItem value="exp">Expert</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="secondary" size="icon">
-            <Settings />
-          </Button>
-          <Button variant="secondary" size="icon">
-            <ChartColumnIncreasing />
-          </Button>
-          <Button variant="secondary" size="icon">
-            <CircleHelp />
-          </Button>
-          <Button variant="secondary" size="icon">
-            <User />
-          </Button>
         </div>
-      </header>
-      <main className="flex flex-col items-center w-full h-[calc(100vh-74px)] px-4 md:px-8 py-6 md:py-8 overflow-y-auto">
-        <GameBoard
-          variant={variant}
-          difficulty={difficulty}
-          cellWidth={30}
-        />
       </main>
     </div>
   );

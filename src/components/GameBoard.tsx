@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { Board, DifficultyName, VariantName, Cell } from "@/lib/types";
-import { boardConfigLibrary, createBoard, getCellNumber, handleClick, handleChord, handleFlag, isWin, isLoss } from "@/lib/minesweeper";
-import { Flag, Smile, Sun } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { Board, DifficultyName, VariantName } from "@/lib/types";
+import { boardConfigLibrary, createBoard, handleClick, handleChord, handleFlag, isWin, isLoss, countRemainingFlags } from "@/lib/minesweeper";
+import { Flag, Laugh, Skull, Smile, Sun } from "lucide-react";
 import { Button } from "./ui/button";
 
 export const GameBoard: React.FC<{
@@ -14,9 +14,60 @@ export const GameBoard: React.FC<{
   const [isFirstClick, setIsFirstClick] = useState(true);
   const [isLmbDown, setIsLmbDown] = useState(false);
   const [isRmbDown, setIsRmbDown] = useState(false);
-  const [isGameOver, setIsGameOver] = useState(false);
+  const [isGameOver, setIsGameOver] = useState<"win" | "loss" | null>(null);
+  const [startTime, setStartTime] = useState<number | null>(null);
+  const [timeElapsed, setTimeElapsed] = useState(0);
+  const animationFrameRef = useRef<number | null>(null);
+
+  const handleReset = () => {
+    if (config) {
+      setBoard(createBoard(config) || []);
+      setIsFirstClick(true);
+      setIsLmbDown(false);
+      setIsRmbDown(false);
+      setIsGameOver(null);
+      setStartTime(null);
+      setTimeElapsed(0);
+    }
+  };
 
   useEffect(() => {
+    const handleKeydown = (e: KeyboardEvent) => {
+      if (e.code === "Space") {
+        e.preventDefault();
+        handleReset();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeydown);
+    return () => {
+      window.removeEventListener("keydown", handleKeydown);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isGameOver) return;
+
+    const updateTime = () => {
+      if (startTime !== null) {
+        setTimeElapsed(Date.now() - startTime);
+      }
+      animationFrameRef.current = requestAnimationFrame(updateTime);
+    };
+
+    if (startTime !== null) {
+      updateTime();
+    }
+
+    return () => {
+      if (animationFrameRef.current !== null) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [startTime, isGameOver]);
+
+  useEffect(() => {
+    handleReset();
     if (config) {
       setBoard(createBoard(config) || []);
       setIsFirstClick(true);
@@ -29,8 +80,7 @@ export const GameBoard: React.FC<{
     }
 
     if (isWin(board)) {
-      setIsGameOver(true);
-      alert("You Win! 🎉");
+      setIsGameOver("win");
 
       const updatedBoard = board.map(row =>
         row.map(cell => {
@@ -45,14 +95,13 @@ export const GameBoard: React.FC<{
       );
       setBoard(updatedBoard);
     }
-    
+
     if (isLoss(board)) {
-      setIsGameOver(true);
-      alert("Game Over! 💥");
+      setIsGameOver("loss");
 
       const updatedBoard = board.map(row =>
         row.map(cell => {
-          if (cell.mineNum !== 0) {
+          if (cell.mineNum !== 0 && cell.state.type !== "flagged") {
             return {
               ...cell,
               state: { ...cell.state, type: "revealed" },
@@ -92,6 +141,8 @@ export const GameBoard: React.FC<{
       } else {
         if (isFirstClick) {
           setIsFirstClick(false);
+          setStartTime(Date.now());
+
           if (board[row][col].mineNum) {
             let moved = false;
 
@@ -120,6 +171,8 @@ export const GameBoard: React.FC<{
     }
   };
 
+  const { remainingPosFlags, remainingNegFlags } = countRemainingFlags(board, config);
+
   const getNumberColorClass = (num: number | null) => {
     if (num === null) {
       return "";
@@ -129,19 +182,35 @@ export const GameBoard: React.FC<{
     } else {
       return ["#b9ff00", "#ff77f6", "#00ffff", "#e1ff83", "#71ffff", "#ff7b7c", "#ffffff", "#7f7f7f"][(-num - 1) % 8];
     }
-  }
+  };
 
   return (
     <div className="flex flex-col w-min h-min bg-gray-100 rounded-md overflow-hidden">
-      <div className="flex justify-between p-2 border-t-8 border-x-8 border-gray-400">
-        <div className="w-[80px] bg-red-100">
-          timer
+      <div className="relative h-[64px] flex justify-between p-2 border-t-8 border-x-8 border-gray-400">
+        <div className="flex flex-col justify-center px-3 -space-y-0.5 bg-gray-300 rounded-md overflow-hidden">
+          {config.posMineCount > 0 && 
+            <div className="flex flex-row items-center gap-2">
+              <Flag stroke="red" fill="red" size={config.negMineCount > 0 ? 15 : 20} />
+              <p className={`font-bold ${config.negMineCount > 0 ? "text-sm" : "text-xl"}`}>{remainingPosFlags}</p>
+            </div>
+          }
+          {config.negMineCount > 0 && 
+            <div className="flex flex-row items-center gap-2">
+              <Flag stroke="blue" fill="blue" size={config.posMineCount > 0 ? 15 : 20} className="rotate-180" />
+              <p className={`font-bold ${config.posMineCount > 0 ? "text-sm" : "text-xl"}`}>{remainingNegFlags}</p>
+            </div>
+          }
         </div>
-        <Button className="bg-gray-400" size="icon">
-          <Smile />
+        <Button
+          className="absolute top-0 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gray-400" size="icon"
+          onClick={handleReset}
+        >
+          {isGameOver === null && <Smile />}
+          {isGameOver === "win" && <Laugh />}
+          {isGameOver === "loss" && <Skull />}
         </Button>
-        <div className="w-[80px] bg-red-100">
-          flags
+        <div className="flex justify-center items-center px-3 bg-gray-300 rounded-md overflow-hidden">
+          <p className="font-bold text-xl">{startTime ? (isGameOver ? (timeElapsed / 1000).toFixed(3) : Math.floor(timeElapsed / 1000)) : 0}</p>
         </div>
       </div>
       <div
@@ -156,9 +225,7 @@ export const GameBoard: React.FC<{
           row.map((cell, colIndex) => (
             <div
               key={`${rowIndex}-${colIndex}`}
-              className={`flex justify-center items-center border border-gray-400 ${
-                cell.state.type === "revealed" ? "bg-gray-300" : "bg-gray-100"
-              }`}
+              className={`flex justify-center items-center border border-gray-400 ${cell.state.type === "revealed" ? "bg-gray-300" : "bg-gray-100"}`}
               style={{
                 width: cellWidth,
                 height: cellWidth,
@@ -169,10 +236,7 @@ export const GameBoard: React.FC<{
             >
               {cell.state.type === "revealed" && (
                 cell.mineNum ? 
-                  <div
-                    className="flex flex-wrap justify-center items-center"
-                    style={{ gap: cellWidth / 20 }}
-                  >
+                  <div className="flex flex-wrap w-full h-full justify-center items-center">
                     {Array.from({ length: Math.abs(cell.mineNum) }).map((_, idx) => (
                       <Sun
                         key={`bomb-${idx}`}
@@ -182,6 +246,7 @@ export const GameBoard: React.FC<{
                           height: Math.abs(cell.mineNum) > 1 ? cellWidth * 0.35 : cellWidth * 0.6,
                         }}
                         stroke={cell.mineNum > 0 ? "black" : "white"}
+                        fill={cell.mineNum > 0 ? "black" : "white"}
                       />
                     ))}
                   </div> : 
@@ -198,10 +263,7 @@ export const GameBoard: React.FC<{
                 </p>
               )}
               {cell.state.type === "flagged" && (
-                <div
-                  className="flex flex-wrap justify-center items-center"
-                  style={{ gap: cellWidth / 20 }}
-                >
+                <div className="flex flex-wrap w-full h-full justify-center items-center">
                   {Array.from({ length: Math.abs(cell.state.flagNum) }).map((_, idx) => (
                     <Flag
                       key={`flag-${idx}`}
