@@ -18,7 +18,7 @@ export const GameBoard: React.FC<{
   const [explodedCell, setExplodedCell] = useState<{ row: number, col: number } | null>(null);
   const [incorrectFlagCells, setIncorrectFlagCells] = useState<{ row: number, col: number }[] | null>(null);
 
-  const animationFrameRef = useRef<number | null>(null);
+  const animationFrameRef = useRef<number | null>(null);console.log(incorrectFlagCells, board)
 
   const handleReset = () => {
     const newBoard = createBoard(config);
@@ -102,14 +102,14 @@ export const GameBoard: React.FC<{
       let tempIncorrectFlagCells: { row: number; col: number }[] = [];
       const updatedBoard = board.map((row, rowIndex) =>
         row.map((cell, colIndex) => {
+          if (cell.state.type === "flagged" && cell.state.flagNum !== cell.mineNum ) {
+            tempIncorrectFlagCells.push({ rowIndex, colIndex });
+          }
           if (cell.mineNum !== 0 && cell.state.type !== "flagged") {
             return {
               ...cell,
               state: { ...cell.state, type: "revealed" },
             };
-          }
-          if (cell.mineNum !== cell.flagNum) {
-            tempIncorrectFlagCells.push({ rowIndex, colIndex });
           }
           return cell;
         })
@@ -248,7 +248,14 @@ export const GameBoard: React.FC<{
             >
               {cell.state.type === "revealed" && (
                 cell.mineNum ? 
-                  <div className={`flex flex-wrap w-full h-full justify-center items-center`}>
+                  <div
+                    className={`flex flex-wrap w-full h-full justify-center items-center ${
+                      isGameOver === "loss" && explodedCell && explodedCell.row === rowIndex && explodedCell.col === colIndex ? "bg-destructive" : "" 
+                    }`}
+                    style={{
+                      columnGap: cellWidth * 0.05,
+                    }}
+                  >
                     {Array.from({ length: Math.abs(cell.mineNum) }).map((_, idx) => (
                       <Sun
                         key={`bomb-${idx}`}
@@ -275,7 +282,16 @@ export const GameBoard: React.FC<{
                 </p>
               )}
               {cell.state.type === "flagged" && (
-                <div className="flex flex-wrap w-full h-full justify-center items-center">
+                <div
+                  className={`flex flex-wrap w-full h-full justify-center items-center ${
+                    isGameOver === "loss" && incorrectFlagCells.some(
+                      ({ rowIndex: r, colIndex: c }) => r === rowIndex && c === colIndex
+                    ) ? "bg-yellow-300" : ""
+                  }`}
+                  style={{
+                    columnGap: cellWidth * 0.05,
+                  }}
+                >
                   {Array.from({ length: Math.abs(cell.state.flagNum) }).map((_, idx) => (
                     <Flag
                       key={`flag-${idx}`}
