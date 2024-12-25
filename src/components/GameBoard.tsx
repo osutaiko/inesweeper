@@ -1,15 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Board, DifficultyName, VariantName } from "@/lib/types";
-import { boardConfigLibrary, createBoard, handleClick, handleChord, handleFlag, isWin, isLoss, countRemainingFlags } from "@/lib/minesweeper";
+import { Board, BoardConfig } from "@/lib/types";
+import { createBoard, handleClick, handleChord, handleFlag, isWin, isLoss, countRemainingFlags } from "@/lib/minesweeper";
 import { Flag, Laugh, Skull, Smile, Sun } from "lucide-react";
 import { Button } from "./ui/button";
 
 export const GameBoard: React.FC<{
-  variant: VariantName;
-  difficulty: DifficultyName;
+  config: BoardConfig;
   cellWidth: number;
-}> = ({ variant, difficulty, cellWidth }) => {
-  const config = boardConfigLibrary[variant]?.[difficulty];
+}> = ({ config, cellWidth }) => {
   const [board, setBoard] = useState<Board>(createBoard(config) || []);
   const [isFirstClick, setIsFirstClick] = useState(true);
   const [isLmbDown, setIsLmbDown] = useState(false);
@@ -17,19 +15,27 @@ export const GameBoard: React.FC<{
   const [isGameOver, setIsGameOver] = useState<"win" | "loss" | null>(null);
   const [startTime, setStartTime] = useState<number | null>(null);
   const [timeElapsed, setTimeElapsed] = useState(0);
+  const [explodedCell, setExplodedCell] = useState<{ row: number, col: number } | null>(null);
+  const [incorrectFlagCells, setIncorrectFlagCells] = useState<{ row: number, col: number }[] | null>(null);
+
   const animationFrameRef = useRef<number | null>(null);
 
   const handleReset = () => {
-    if (config) {
-      setBoard(createBoard(config) || []);
-      setIsFirstClick(true);
-      setIsLmbDown(false);
-      setIsRmbDown(false);
-      setIsGameOver(null);
-      setStartTime(null);
-      setTimeElapsed(0);
-    }
+    const newBoard = createBoard(config);
+    setBoard(newBoard || []);
+    setIsFirstClick(true);
+    setIsLmbDown(false);
+    setIsRmbDown(false);
+    setIsGameOver(null);
+    setStartTime(null);
+    setTimeElapsed(0);
+    setExplodedCell(null);
+    setIncorrectFlagCells(null);
   };
+
+  useEffect(() => {
+    handleReset();
+  }, [config]);
 
   useEffect(() => {
     const handleKeydown = (e: KeyboardEvent) => {
@@ -38,12 +44,12 @@ export const GameBoard: React.FC<{
         handleReset();
       }
     };
-
+  
     window.addEventListener("keydown", handleKeydown);
     return () => {
       window.removeEventListener("keydown", handleKeydown);
     };
-  }, []);
+  }, [config]);
 
   useEffect(() => {
     if (isGameOver) return;
@@ -67,14 +73,6 @@ export const GameBoard: React.FC<{
   }, [startTime, isGameOver]);
 
   useEffect(() => {
-    handleReset();
-    if (config) {
-      setBoard(createBoard(config) || []);
-      setIsFirstClick(true);
-    }
-  }, [variant, difficulty, config]);
-
-  useEffect(() => {
     if (isGameOver) {
       return;
     }
@@ -96,21 +94,28 @@ export const GameBoard: React.FC<{
       setBoard(updatedBoard);
     }
 
-    if (isLoss(board)) {
+    const isLossValue = isLoss(board);
+    if (isLossValue) {
       setIsGameOver("loss");
+      setExplodedCell(isLossValue);
 
-      const updatedBoard = board.map(row =>
-        row.map(cell => {
+      let tempIncorrectFlagCells: { row: number; col: number }[] = [];
+      const updatedBoard = board.map((row, rowIndex) =>
+        row.map((cell, colIndex) => {
           if (cell.mineNum !== 0 && cell.state.type !== "flagged") {
             return {
               ...cell,
               state: { ...cell.state, type: "revealed" },
             };
           }
+          if (cell.mineNum !== cell.flagNum) {
+            tempIncorrectFlagCells.push({ rowIndex, colIndex });
+          }
           return cell;
         })
       );
       setBoard(updatedBoard);
+      setIncorrectFlagCells(tempIncorrectFlagCells);
     }
   }, [JSON.stringify(board)]);
 
@@ -186,7 +191,14 @@ export const GameBoard: React.FC<{
 
   return (
     <div className="flex flex-col w-min h-min bg-gray-100 rounded-md overflow-hidden">
-      <div className="relative h-[64px] flex justify-between p-2 border-t-8 border-x-8 border-gray-400">
+      <div
+        className="relative h-[64px] flex justify-between p-2 border-gray-400"
+        style={{
+          borderTopWidth: 8 + cellWidth / 20,
+          borderLeftWidth: 8 + cellWidth / 20,
+          borderRightWidth: 8 + cellWidth / 20,
+        }}
+      >
         <div className="flex flex-col justify-center px-3 -space-y-0.5 bg-gray-300 rounded-md overflow-hidden">
           {config.posMineCount > 0 && 
             <div className="flex flex-row items-center gap-2">
@@ -236,7 +248,7 @@ export const GameBoard: React.FC<{
             >
               {cell.state.type === "revealed" && (
                 cell.mineNum ? 
-                  <div className="flex flex-wrap w-full h-full justify-center items-center">
+                  <div className={`flex flex-wrap w-full h-full justify-center items-center`}>
                     {Array.from({ length: Math.abs(cell.mineNum) }).map((_, idx) => (
                       <Sun
                         key={`bomb-${idx}`}
@@ -251,7 +263,7 @@ export const GameBoard: React.FC<{
                     ))}
                   </div> : 
                 <p
-                  className={`font-bold`}
+                  className="font-bold"
                   style={{
                     height: cellWidth,
                     fontSize: cellWidth * 0.65,

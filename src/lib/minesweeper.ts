@@ -73,12 +73,16 @@ export const isWin = (board: Board): boolean => {
   );
 };
 
-export const isLoss = (board: Board): boolean => {
-  return board.some(row =>
-    row.some(cell =>
-      cell.mineNum !== 0 && cell.state.type === "revealed"
-    )
-  );
+export const isLoss = (board: Board): { row: number; col: number } | null => {
+  for (let row = 0; row < board.length; row++) {
+    for (let col = 0; col < board[row].length; col++) {
+      const cell = board[row][col];
+      if (cell.mineNum !== 0 && cell.state.type === "revealed") {
+        return { row, col };
+      }
+    }
+  }
+  return null;
 };
 
 export const getCellNumber = (board: Board, row: number, col: number, config: BoardConfig): number | null => {

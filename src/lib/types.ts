@@ -18,7 +18,7 @@ export type BoardConfigLibrary = {
 };
 
 export type CellState = 
-  | { type: "hidden" } 
+  | { type: "hidden"; } 
   | { type: "revealed"; num: number | null; } 
   | { type: "flagged"; flagNum: number; };
 
