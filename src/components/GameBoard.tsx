@@ -6,8 +6,8 @@ import { Button } from "./ui/button";
 
 export const GameBoard: React.FC<{
   config: BoardConfig;
-  cellWidth: number;
-}> = ({ config, cellWidth }) => {
+  isTouchscreen: boolean;
+}> = ({ config, isTouchscreen }) => {
   const [board, setBoard] = useState<Board>(createBoard(config) || []);
   const [isFirstClick, setIsFirstClick] = useState(true);
   const [isLmbDown, setIsLmbDown] = useState(false);
@@ -18,7 +18,7 @@ export const GameBoard: React.FC<{
   const [explodedCell, setExplodedCell] = useState<{ row: number, col: number } | null>(null);
   const [incorrectFlagCells, setIncorrectFlagCells] = useState<{ row: number, col: number }[] | null>(null);
 
-  const animationFrameRef = useRef<number | null>(null);console.log(incorrectFlagCells, board)
+  const animationFrameRef = useRef<number | null>(null);
 
   const handleReset = () => {
     const newBoard = createBoard(config);
@@ -192,12 +192,7 @@ export const GameBoard: React.FC<{
   return (
     <div className="flex flex-col w-min h-min bg-gray-100 rounded-md overflow-hidden">
       <div
-        className="relative h-[64px] flex justify-between p-2 border-gray-400"
-        style={{
-          borderTopWidth: 8 + cellWidth / 20,
-          borderLeftWidth: 8 + cellWidth / 20,
-          borderRightWidth: 8 + cellWidth / 20,
-        }}
+        className="relative h-[64px] flex justify-between p-2 border-t-[9px] border-x-[9px] border-gray-400"
       >
         <div className="flex flex-col justify-center px-3 -space-y-0.5 bg-gray-300 rounded-md overflow-hidden">
           {config.posMineCount > 0 && 
@@ -222,14 +217,14 @@ export const GameBoard: React.FC<{
           {isGameOver === "loss" && <Skull />}
         </Button>
         <div className="flex justify-center items-center px-3 bg-gray-300 rounded-md overflow-hidden">
-          <p className="font-bold text-xl">{startTime ? (isGameOver ? (timeElapsed / 1000).toFixed(3) : Math.floor(timeElapsed / 1000)) : 0}</p>
+          <p className="font-bold text-xl">{startTime ? (isGameOver ? (timeElapsed / 1000).toFixed(2) : Math.floor(timeElapsed / 1000)) : 0}</p>
         </div>
       </div>
       <div
-        className="grid border-8 border-gray-400"
+        className="grid border-[8px] border-gray-400"
         style={{
-          gridTemplateColumns: `repeat(${board[0].length}, ${cellWidth}px)`,
-          gridTemplateRows: `repeat(${board.length}, ${cellWidth}px)`,
+          gridTemplateColumns: `repeat(${board[0].length}, 30px)`,
+          gridTemplateRows: `repeat(${board.length}, 30px)`,
         }}
         onContextMenu={(e) => e.preventDefault()}
       >
@@ -238,11 +233,6 @@ export const GameBoard: React.FC<{
             <div
               key={`${rowIndex}-${colIndex}`}
               className={`flex justify-center items-center border border-gray-400 ${cell.state.type === "revealed" ? "bg-gray-300" : "bg-gray-100"}`}
-              style={{
-                width: cellWidth,
-                height: cellWidth,
-                borderWidth: cellWidth / 20,
-              }}
               onMouseDown={(e) => handleMouseDown(e, rowIndex, colIndex)}
               onMouseUp={(e) => handleMouseUp(e, rowIndex, colIndex)}
             >
@@ -252,31 +242,19 @@ export const GameBoard: React.FC<{
                     className={`flex flex-wrap w-full h-full justify-center items-center ${
                       isGameOver === "loss" && explodedCell && explodedCell.row === rowIndex && explodedCell.col === colIndex ? "bg-destructive" : "" 
                     }`}
-                    style={{
-                      columnGap: cellWidth * 0.05,
-                    }}
                   >
                     {Array.from({ length: Math.abs(cell.mineNum) }).map((_, idx) => (
                       <Sun
                         key={`bomb-${idx}`}
-                        className={`${cell.mineNum < 0 ? "rotate-180" : ""}`}
-                        style={{
-                          width: Math.abs(cell.mineNum) > 1 ? cellWidth * 0.35 : cellWidth * 0.6,
-                          height: Math.abs(cell.mineNum) > 1 ? cellWidth * 0.35 : cellWidth * 0.6,
-                        }}
+                        className={`${cell.mineNum < 0 ? "rotate-180" : ""} ${Math.abs(cell.mineNum) > 1 ? "w-[12px] h-[12px]" : "w-[18px] h-[18px]"}`}
                         stroke={cell.mineNum > 0 ? "black" : "white"}
                         fill={cell.mineNum > 0 ? "black" : "white"}
                       />
                     ))}
                   </div> : 
                 <p
-                  className="font-bold"
-                  style={{
-                    height: cellWidth,
-                    fontSize: cellWidth * 0.65,
-                    lineHeight: `${cellWidth}px`,
-                    color: getNumberColorClass(cell.state.num)
-                  }}
+                  className="font-bold text-xl"
+                  style={{ color: getNumberColorClass(cell.state.num) }}
                 >
                   {cell.state.num}
                 </p>
@@ -288,18 +266,11 @@ export const GameBoard: React.FC<{
                       ({ rowIndex: r, colIndex: c }) => r === rowIndex && c === colIndex
                     ) ? "bg-yellow-300" : ""
                   }`}
-                  style={{
-                    columnGap: cellWidth * 0.05,
-                  }}
                 >
                   {Array.from({ length: Math.abs(cell.state.flagNum) }).map((_, idx) => (
                     <Flag
                       key={`flag-${idx}`}
-                      className={`${cell.state.flagNum < 0 ? "rotate-180" : ""}`}
-                      style={{
-                        width: Math.abs(cell.state.flagNum) > 1 ? cellWidth * 0.35 : cellWidth * 0.6,
-                        height: Math.abs(cell.state.flagNum) > 1 ? cellWidth * 0.35 : cellWidth * 0.6,
-                      }}
+                      className={`${cell.state.flagNum < 0 ? "rotate-180" : ""} ${Math.abs(cell.state.flagNum) > 1 ? "w-[10px] h-[10px]" : "w-[18px] h-[18px]"}`}
                       stroke={cell.state.flagNum > 0 ? "red" : "blue"}
                       fill={cell.state.flagNum > 0 ? "red" : "blue"}
                     />
