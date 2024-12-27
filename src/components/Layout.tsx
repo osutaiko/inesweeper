@@ -1,4 +1,7 @@
 import { useEffect, useState } from "react";
+import { DifficultyName, TimeRecord, VariantName } from "@/lib/types";
+import { boardConfigLibrary, difficultyMap, variantMap } from "@/lib/constants";
+
 import GameBoard from "./GameBoard";
 
 import { Button } from "./ui/button";
@@ -30,9 +33,8 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Separator } from "./ui/separator";
 
-import { LandPlot, ChartColumnIncreasing, Settings, Info, Github } from "lucide-react";
-import { DifficultyName, TimeRecord, VariantName } from "@/lib/types";
-import { boardConfigLibrary, difficultyMap, variantMap } from "@/lib/constants";
+import InesweeperLogo from "@/assets/images/inesweeper-logo.svg";
+import { ChartColumnIncreasing, Settings, Info, Github } from "lucide-react";
 
 const Layout = () => {
   const [isTouchscreen, setIsTouchscreen] = useState(false);
@@ -86,10 +88,10 @@ const Layout = () => {
 
   return (
     <div className="flex flex-col items-center min-h-screen overflow-hidden">
-      <header className="flex flex-row w-full px-4 gap-6 sm:px-8 py-2 sm:py-4 justify-between items-center border-b overflow-x-auto">
+      <header className="flex flex-row w-full gap-4 px-2 sm:px-8 py-2 sm:py-4 justify-between items-center border-b overflow-x-auto">
         <a href="/">
           <div className="flex flex-row items-center gap-3">
-            <LandPlot size={28} stroke="salmon" />
+            <img src={InesweeperLogo} alt="Inesweeper Logo" className="w-[40px] h-[40px] min-w-[40px] min-h-[40px]" />
             <h2 className="hidden sm:block">Inesweeper</h2>
           </div>
         </a>
