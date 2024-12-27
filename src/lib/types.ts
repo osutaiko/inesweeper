@@ -17,13 +17,10 @@ export type BoardConfigLibrary = {
   }
 };
 
-export type CellState = 
-  | { type: "hidden"; } 
-  | { type: "revealed"; num: number | null; } 
-  | { type: "flagged"; flagNum: number; };
-
 export type Cell = {
-  state: CellState;
+  state: { type: "hidden"; } 
+       | { type: "revealed"; num: number | null; } 
+       | { type: "flagged"; flagNum: number; };
   mineNum: number;
 };
 

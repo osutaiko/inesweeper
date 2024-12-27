@@ -94,7 +94,7 @@ const Layout = () => {
           </div>
         </a>
         <div className="flex flex-row gap-2">
-          <Select value={variant} onValueChange={(value) => setVariant(value)}>
+          <Select value={variant} onValueChange={(value) => setVariant(value as VariantName)}>
             <SelectTrigger className="w-[140px]">
               <SelectValue placeholder="Variant" />
             </SelectTrigger>
@@ -105,7 +105,7 @@ const Layout = () => {
               <SelectItem value="omega">Omega</SelectItem>
             </SelectContent>
           </Select>
-          <Select value={difficulty} onValueChange={(value) => setDifficulty(value)}>
+          <Select value={difficulty} onValueChange={(value) => setDifficulty(value as DifficultyName)}>
             <SelectTrigger className="w-[140px]">
               <SelectValue placeholder="Difficulty" />
             </SelectTrigger>
@@ -182,11 +182,11 @@ const Layout = () => {
               <TableBody>
                 {Object.keys(boardConfigLibrary).map((mode) => (
                   <TableRow key={mode}>
-                    <TableCell>{variantMap[mode]}</TableCell>
+                    <TableCell>{variantMap[mode as keyof typeof variantMap]}</TableCell>
                     {Object.keys(difficultyMap).map((difficultyKey) => {
                       const filteredRecords = records.filter(
                         (record) =>
-                          JSON.stringify(record.boardConfig) === JSON.stringify(boardConfigLibrary[mode][difficultyKey])
+                          JSON.stringify(record.boardConfig) === JSON.stringify(boardConfigLibrary[mode as keyof typeof boardConfigLibrary][difficultyKey as keyof typeof difficultyMap])
                       );
 
                       const bestTime = filteredRecords.reduce(

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Board, BoardConfig, TimeRecord } from "@/lib/types";
+import { Board, BoardConfig, Cell, TimeRecord } from "@/lib/types";
 import { createBoard, handleClick, handleChord, handleFlag, isWin, isLoss, countRemainingFlags, extractMinesFromBoard } from "@/lib/minesweeper";
 import { Flag, Laugh, Meh, Shovel, Skull, Smile, Sun } from "lucide-react";
 import { Button } from "./ui/button";
@@ -91,9 +91,9 @@ export const GameBoard: React.FC<{
         row.map(cell => {
           if (cell.mineNum !== 0) {
             return {
-              ...cell,
-              state: { ...cell.state, type: "flagged", flagNum: cell.mineNum },
-            };
+              state: { type: "flagged", flagNum: cell.mineNum },
+              mineNum: cell.mineNum,
+            } as Cell;
           }
           return cell;
         })
@@ -117,13 +117,13 @@ export const GameBoard: React.FC<{
       const updatedBoard = board.map((row, rowIndex) =>
         row.map((cell, colIndex) => {
           if (cell.state.type === "flagged" && cell.state.flagNum !== cell.mineNum ) {
-            tempIncorrectFlagCells.push({ rowIndex, colIndex });
+            tempIncorrectFlagCells.push({ row: rowIndex, col: colIndex });
           }
           if (cell.mineNum !== 0 && cell.state.type !== "flagged") {
             return {
-              ...cell,
-              state: { ...cell.state, type: "revealed" },
-            };
+              mineNum: cell.mineNum,
+              state: { type: "revealed", num: null },
+            } as Cell;
           }
           return cell;
         })
@@ -203,7 +203,7 @@ export const GameBoard: React.FC<{
     }
   };
 
-  const { remainingPosFlags, remainingNegFlags } = countRemainingFlags(board, config);
+  const { remainingPosFlags, remainingNegFlags } = countRemainingFlags(board);
 
   const getNumberColorClass = (num: number | null) => {
     if (num === null) {
@@ -308,19 +308,24 @@ export const GameBoard: React.FC<{
                 {cell.state.type === "flagged" && (
                   <div
                     className={`flex flex-wrap w-full h-full justify-center items-center ${
-                      isGameOver === "loss" && incorrectFlagCells.some(
-                        ({ rowIndex: r, colIndex: c }) => r === rowIndex && c === colIndex
+                      isGameOver === "loss" && incorrectFlagCells!.some(
+                        ({ row: r, col: c }) => r === rowIndex && c === colIndex
                       ) ? "bg-yellow-300" : ""
                     }`}
                   >
-                    {Array.from({ length: Math.abs(cell.state.flagNum) }).map((_, idx) => (
-                      <Flag
-                        key={`flag-${idx}`}
-                        className={`${cell.state.flagNum < 0 ? "rotate-180" : ""} ${Math.abs(cell.state.flagNum) > 1 ? "w-[10px] h-[10px]" : "w-[18px] h-[18px]"}`}
-                        stroke={cell.state.flagNum > 0 ? "red" : "blue"}
-                        fill={cell.state.flagNum > 0 ? "red" : "blue"}
-                      />
-                    ))}
+                    {(() => {
+                      const flagNum = cell.state.flagNum;
+                      return Array.from({ length: Math.abs(flagNum) }).map((_, idx) => (
+                        <Flag
+                          key={`flag-${idx}`}
+                          className={`${
+                            flagNum < 0 ? "rotate-180" : ""
+                          } ${Math.abs(flagNum) > 1 ? "w-[10px] h-[10px]" : "w-[18px] h-[18px]"}`}
+                          stroke={flagNum > 0 ? "red" : "blue"}
+                          fill={flagNum > 0 ? "red" : "blue"}
+                        />
+                      ));
+                    })()}
                   </div>
                 )}
               </div>
