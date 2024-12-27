@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import GameBoard from "./GameBoard";
 
 import { Button } from "./ui/button";
@@ -29,7 +29,7 @@ import {
 } from "./ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 
-import { BugPlay, ChartColumnIncreasing, CircleHelp, Settings } from "lucide-react";
+import { LandPlot, ChartColumnIncreasing, CircleHelp, Settings, Info, Github } from "lucide-react";
 import { DifficultyName, TimeRecord, VariantName } from "@/lib/types";
 import { boardConfigLibrary, difficultyMap, variantMap } from "@/lib/constants";
 
@@ -76,10 +76,12 @@ const Layout = () => {
   return (
     <div className="flex flex-col items-center min-h-screen select-none overflow-hidden">
       <header className="flex flex-row w-full px-4 gap-6 sm:px-8 py-2 sm:py-4 justify-between items-center border-b">
-        <div className="flex flex-row items-center gap-3">
-          <BugPlay size={28} />
-          <h2 className="hidden sm:block">Inesweeper</h2>
-        </div>
+        <a href="/">
+          <div className="flex flex-row items-center gap-3">
+            <LandPlot size={28} stroke="salmon" />
+            <h2 className="hidden sm:block">Inesweeper</h2>
+          </div>
+        </a>
         <div className="flex flex-row gap-2">
           <Select value={variant} onValueChange={(value) => setVariant(value)}>
             <SelectTrigger className="w-[140px]">
@@ -96,7 +98,7 @@ const Layout = () => {
             <SelectTrigger className="w-[140px]">
               <SelectValue placeholder="Difficulty" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="w-[160px]">
               <SelectItem value="beg">Beginner</SelectItem>
               <SelectItem value="int">Intermediate</SelectItem>
               <SelectItem value="exp">Expert</SelectItem>
@@ -117,7 +119,7 @@ const Layout = () => {
               </DialogHeader>
               <div className="flex flex-col gap-3">
                 <p>Board Scale: {zoom}%</p>
-                <Slider value={[zoom]} onValueChange={(value) => setZoom(value[0])} min={60} max={300} step={10} />
+                <Slider value={[zoom]} onValueChange={(value) => setZoom(value[0])} min={60} max={200} step={10} />
               </div>
             </DialogContent>
           </Dialog>
@@ -175,7 +177,7 @@ const Layout = () => {
           <Dialog>
             <DialogTrigger asChild>
               <Button variant="secondary" size="icon">
-                <CircleHelp />
+                <Info />
               </Button>
             </DialogTrigger>
             <DialogContent className="gap-6">
@@ -193,12 +195,23 @@ const Layout = () => {
                   <TabsTrigger value="omega">Omega</TabsTrigger>
                 </TabsList>
                 <TabsContent value="classic">
-                  <p>sd</p>
+                  <p>The classic Minesweeper experience. To win, reveal all safe tiles without clicking on any mines. Numbered tiles indicate the number of mines hidden in the adjacent eight tiles.</p>
                 </TabsContent>
-                <TabsContent value="multimines">Cha</TabsContent>
-                <TabsContent value="liar">M</TabsContent>
-                <TabsContent value="omega">M</TabsContent>
+                <TabsContent value="multimines">
+                  <p>Minesweeper, but with up to four mines per tile.</p>
+                </TabsContent>
+                <TabsContent value="liar">
+                  <p>Minesweeper, but number tiles "lie" by displaying numbers as one off from the actual value.</p>
+                </TabsContent>
+                <TabsContent value="omega">
+                  <p>Minesweeper, but also with negative mines. All tiles adjacent to '0's are automatically revealed if they contain no mines (either positive or negative). This means all unrevealed tiles adjacent to '0's are guaranteed to contain a mine.</p>
+                </TabsContent>
               </Tabs>
+              <div className="flex justify-end">
+                <a href="https://github.com/osutaiko/inesweeper">
+                  <Github />
+                </a>
+              </div>
             </DialogContent>
           </Dialog>
         </div>
