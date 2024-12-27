@@ -192,7 +192,7 @@ export const GameBoard: React.FC<{
   };
 
   const handleMouseUp = (e: React.MouseEvent, row: number, col: number) => {
-    if (isGameOver) {
+    if (isGameOver || isTouchscreen) {
       return;
     }
 
@@ -291,7 +291,7 @@ export const GameBoard: React.FC<{
                 onMouseUp={(e) => handleMouseUp(e, rowIndex, colIndex)}
               >
                 {cell.state.type === "hidden" && isFlagToggled && (
-                  <Flag className="w-[18px] h-[18px]" stroke="red" fill="red" opacity={0.15} />
+                  <Flag className="w-[18px] h-[18px]" stroke="red" fill="red" opacity={0.1} />
                 )}
                 {cell.state.type === "revealed" && (
                   cell.mineNum ? 
