@@ -87,7 +87,7 @@ const Layout = () => {
   };
 
   return (
-    <div className="flex flex-col items-center min-h-screen overflow-hidden">
+    <div className="flex flex-col items-center min-h-screen overflow-hidden touch-none">
       <header className="flex flex-row w-full gap-4 px-2 sm:px-8 py-2 sm:py-4 justify-between items-center border-b overflow-x-auto">
         <a href="/">
           <div className="flex flex-row items-center gap-3">
