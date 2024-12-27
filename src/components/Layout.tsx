@@ -27,16 +27,17 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 
 import { BugPlay, ChartColumnIncreasing, CircleHelp, Settings } from "lucide-react";
 import { DifficultyName, TimeRecord, VariantName } from "@/lib/types";
-import { boardConfigLibrary, difficultyMap } from "@/lib/constants";
+import { boardConfigLibrary, difficultyMap, variantMap } from "@/lib/constants";
 
 const Layout = () => {
   const [isTouchscreen, setIsTouchscreen] = useState(false);
   const [variant, setVariant] = useState<VariantName>("classic");
   const [difficulty, setDifficulty] = useState<DifficultyName>("beg");
-  const [scale, setScale] = useState(32);
+  const [zoom, setZoom] = useState(100);
   const [records, setRecords] = useState<TimeRecord[]>([]);
 
   useEffect(() => {
@@ -51,15 +52,15 @@ const Layout = () => {
   }, []);
 
   useEffect(() => {
-    const savedScale = localStorage.getItem("scale");
-    if (savedScale) {
-      setScale(Number(savedScale));
+    const savedZoom = localStorage.getItem("zoom");
+    if (savedZoom) {
+      setZoom(Number(savedZoom));
     }
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("scale", scale.toString());
-  }, [scale]);
+    localStorage.setItem("zoom", zoom.toString());
+  }, [zoom]);
 
   useEffect(() => {
     const savedRecords = localStorage.getItem("gameRecords");
@@ -75,8 +76,8 @@ const Layout = () => {
   return (
     <div className="flex flex-col items-center min-h-screen select-none overflow-hidden">
       <header className="flex flex-row w-full px-4 gap-6 sm:px-8 py-2 sm:py-4 justify-between items-center border-b">
-        <div className="flex flex-row gap-3">
-          <BugPlay />
+        <div className="flex flex-row items-center gap-3">
+          <BugPlay size={28} />
           <h2 className="hidden sm:block">Inesweeper</h2>
         </div>
         <div className="flex flex-row gap-2">
@@ -115,8 +116,8 @@ const Layout = () => {
                 </DialogDescription>
               </DialogHeader>
               <div className="flex flex-col gap-3">
-                <h4>Board Scale: {scale}%</h4>
-                <Slider value={[scale]} onValueChange={(value) => setScale(value[0])} min={20} max={200} step={10} />
+                <p>Board Scale: {zoom}%</p>
+                <Slider value={[zoom]} onValueChange={(value) => setZoom(value[0])} min={60} max={300} step={10} />
               </div>
             </DialogContent>
           </Dialog>
@@ -136,7 +137,7 @@ const Layout = () => {
               <Table>
                 <TableHeader>
                 <TableRow>
-                  <TableHead className="text-center">Mode</TableHead>
+                  <TableHead>Variant</TableHead>
                   {Object.values(difficultyMap).map((difficulty) => (
                     <TableHead key={difficulty} className="text-center">
                       {difficulty}
@@ -147,7 +148,7 @@ const Layout = () => {
               <TableBody>
                 {Object.keys(boardConfigLibrary).map((mode) => (
                   <TableRow key={mode}>
-                    <TableCell className="text-center">{mode.charAt(0).toUpperCase() + mode.slice(1)}</TableCell>
+                    <TableCell>{variantMap[mode]}</TableCell>
                     {Object.keys(difficultyMap).map((difficultyKey) => {
                       const filteredRecords = records.filter(
                         (record) =>
@@ -181,19 +182,32 @@ const Layout = () => {
               <DialogHeader>
                 <DialogTitle>How to Play</DialogTitle>
                 <DialogDescription hidden>
-                  Tutorial
+                  Variant descriptions
                 </DialogDescription>
               </DialogHeader>
-              <p>asdf</p>
+              <Tabs defaultValue="classic">
+                <TabsList>
+                  <TabsTrigger value="classic">Classic</TabsTrigger>
+                  <TabsTrigger value="multimines">Multimines</TabsTrigger>
+                  <TabsTrigger value="liar">Liar</TabsTrigger>
+                  <TabsTrigger value="omega">Omega</TabsTrigger>
+                </TabsList>
+                <TabsContent value="classic">
+                  <p>sd</p>
+                </TabsContent>
+                <TabsContent value="multimines">Cha</TabsContent>
+                <TabsContent value="liar">M</TabsContent>
+                <TabsContent value="omega">M</TabsContent>
+              </Tabs>
             </DialogContent>
           </Dialog>
         </div>
       </header>
-      <ScrollArea className="flex w-full h-[calc(100vh-57px)] sm:h-[calc(100vh-74px)]">
-        <main className="flex flex-col min-h-[calc(100vh-57px)] sm:min-h-[calc(100vh-74px)] gap-4 justify-center items-center px-4 sm:px-8 py-4 sm:py-8">
+      <ScrollArea className="flex w-full h-[calc(100vh-57px)] sm:h-[calc(100vh-73px)]">
+        <main className="flex flex-col min-h-[calc(100vh-57px)] sm:min-h-[calc(100vh-73px)] gap-4 justify-center items-center px-4 sm:px-8 py-4 sm:py-8">
           <div 
             style={{
-              transform: `scale(${scale / 100})`,
+              zoom: zoom / 100,
               backfaceVisibility: "hidden",
             }}
           >

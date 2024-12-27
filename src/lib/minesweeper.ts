@@ -101,12 +101,12 @@ export const handleClick = (board: Board, row: number, col: number, config: Boar
     return;
   }
 
-  if (cellNumber === null) {
+  if (!cell.state.num) {
     for (let dx = -1; dx <= 1; dx++) {
       for (let dy = -1; dy <= 1; dy++) {
         const nx = row + dx;
         const ny = col + dy;
-        if (nx >= 0 && nx < config.height && ny >= 0 && ny < config.width) {
+        if (nx >= 0 && nx < config.height && ny >= 0 && ny < config.width && board[nx][ny].mineNum === 0) {
           handleClick(board, nx, ny, config);
         }
       }
