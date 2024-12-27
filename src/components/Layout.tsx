@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { DifficultyName, TimeRecord, VariantName } from "@/lib/types";
 import { boardConfigLibrary, difficultyMap, variantMap } from "@/lib/constants";
+import { useMediaQuery } from "@/lib/utils";
 
 import GameBoard from "./GameBoard";
 
@@ -37,6 +38,7 @@ import InesweeperLogo from "@/assets/images/inesweeper-logo.svg";
 import { ChartColumnIncreasing, Settings, Info, Github } from "lucide-react";
 
 const Layout = () => {
+  const isDesktop = useMediaQuery("(min-width: 640px)");
   const [isTouchscreen, setIsTouchscreen] = useState(false);
   const [variant, setVariant] = useState<VariantName>("classic");
   const [difficulty, setDifficulty] = useState<DifficultyName>("beg");
@@ -154,8 +156,8 @@ const Layout = () => {
                 <TableRow>
                   <TableHead>Variant</TableHead>
                   {Object.values(difficultyMap).map((difficulty) => (
-                    <TableHead key={difficulty} className="text-center">
-                      {difficulty}
+                    <TableHead key={difficulty.full} className="text-center">
+                      {isDesktop ? difficulty.full : difficulty.short}
                     </TableHead>
                   ))}
                 </TableRow>

@@ -29,7 +29,7 @@ export const variantMap = {
 }
 
 export const difficultyMap = {
-  beg: "Beginner",
-  int: "Intermediate",
-  exp: "Expert",
+  beg: { full: "Beginner", short: "Beg" },
+  int: { full: "Intermediate", short: "Int" },
+  exp: { full: "Expert", short: "Exp" },
 };
