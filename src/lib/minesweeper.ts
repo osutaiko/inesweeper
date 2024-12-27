@@ -102,7 +102,7 @@ export const handleClick = (board: Board, row: number, col: number, config: Boar
     return;
   }
 
-  if (!cell.state.num) {
+  if (cell.state.num === null || (cell.state.num === 0 && !config.lie)) {
     for (let dx = -1; dx <= 1; dx++) {
       for (let dy = -1; dy <= 1; dy++) {
         const nx = row + dx;
