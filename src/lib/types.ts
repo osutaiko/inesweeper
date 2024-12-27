@@ -33,5 +33,5 @@ export type TimeRecord = {
   boardConfig: BoardConfig;
   timeElapsed: number;
   date: number;
-  board: Board;
+  mineArray: number[][];
 }

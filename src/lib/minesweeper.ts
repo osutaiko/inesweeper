@@ -239,3 +239,7 @@ export const countRemainingFlags = (board: Board): { remainingPosFlags: number; 
     remainingNegFlags: remainingNegFlags,
   };
 };
+
+export const extractMinesFromBoard = (board: Board): number[][] => {
+  return board.map(row => row.map(cell => cell.mineNum));
+};
