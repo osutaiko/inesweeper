@@ -92,31 +92,10 @@ const Layout = () => {
         <a href="/">
           <div className="flex flex-row items-center gap-3">
             <img src={InesweeperLogo} alt="Inesweeper Logo" className="w-[40px] h-[40px] min-w-[40px] min-h-[40px]" />
-            <h2 className="hidden sm:block">Inesweeper</h2>
+            <h2 className="text-lg sm:text-2xl">Inesweeper</h2>
           </div>
         </a>
         <div className="flex flex-row gap-2">
-          <Select value={variant} onValueChange={(value) => setVariant(value as VariantName)}>
-            <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="Variant" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="classic">Classic</SelectItem>
-              <SelectItem value="multimines">Multimines</SelectItem>
-              <SelectItem value="liar">Liar</SelectItem>
-              <SelectItem value="omega">Omega</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={difficulty} onValueChange={(value) => setDifficulty(value as DifficultyName)}>
-            <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="Difficulty" />
-            </SelectTrigger>
-            <SelectContent className="w-[160px]">
-              <SelectItem value="beg">Beginner</SelectItem>
-              <SelectItem value="int">Intermediate</SelectItem>
-              <SelectItem value="exp">Expert</SelectItem>
-            </SelectContent>
-          </Select>
           <Dialog>
             <DialogTrigger asChild>
               <Button variant="secondary" size="icon">
@@ -260,6 +239,29 @@ const Layout = () => {
             isTouchscreen={isTouchscreen}
             addRecord={addRecord}
           />
+          <div className="flex flex-row gap-2">
+            <Select value={variant} onValueChange={(value) => setVariant(value as VariantName)}>
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder="Variant" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="classic">Classic</SelectItem>
+                <SelectItem value="multimines">Multimines</SelectItem>
+                <SelectItem value="liar">Liar</SelectItem>
+                <SelectItem value="omega">Omega</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={difficulty} onValueChange={(value) => setDifficulty(value as DifficultyName)}>
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder="Difficulty" />
+              </SelectTrigger>
+              <SelectContent className="w-[160px]">
+                <SelectItem value="beg">Beginner</SelectItem>
+                <SelectItem value="int">Intermediate</SelectItem>
+                <SelectItem value="exp">Expert</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </main>
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
