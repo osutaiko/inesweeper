@@ -19,16 +19,25 @@ import {
   DialogTrigger,
 } from "./ui/dialog";
 import { Slider } from "./ui/slider";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "./ui/table";
 
-import { ChartColumnIncreasing, CircleHelp, Settings } from "lucide-react";
-import { DifficultyName, VariantName } from "@/lib/types";
-import { boardConfigLibrary } from "@/lib/minesweeper";
+import { BugPlay, ChartColumnIncreasing, CircleHelp, Settings } from "lucide-react";
+import { DifficultyName, TimeRecord, VariantName } from "@/lib/types";
+import { boardConfigLibrary, difficultyMap } from "@/lib/constants";
 
 const Layout = () => {
   const [isTouchscreen, setIsTouchscreen] = useState(false);
   const [variant, setVariant] = useState<VariantName>("classic");
   const [difficulty, setDifficulty] = useState<DifficultyName>("beg");
   const [scale, setScale] = useState(32);
+  const [records, setRecords] = useState<TimeRecord[]>([]);
 
   useEffect(() => {
     const checkTouchscreen = () => {
@@ -52,10 +61,24 @@ const Layout = () => {
     localStorage.setItem("scale", scale.toString());
   }, [scale]);
 
+  useEffect(() => {
+    const savedRecords = localStorage.getItem("gameRecords");
+    if (savedRecords) setRecords(JSON.parse(savedRecords));
+  }, []);
+
+  const addRecord = (newRecord: TimeRecord) => {
+    const updatedRecords = [...records, newRecord];
+    setRecords(updatedRecords);
+    localStorage.setItem("gameRecords", JSON.stringify(updatedRecords));
+  };
+
   return (
     <div className="flex flex-col items-center min-h-screen select-none overflow-hidden">
       <header className="flex flex-row w-full px-4 gap-6 sm:px-8 py-2 sm:py-4 justify-between items-center border-b">
-        <h2>Inesweeper</h2>
+        <div className="flex flex-row gap-3">
+          <BugPlay />
+          <h2 className="hidden sm:block">Inesweeper</h2>
+        </div>
         <div className="flex flex-row gap-2">
           <Select value={variant} onValueChange={(value) => setVariant(value)}>
             <SelectTrigger className="w-[140px]">
@@ -110,6 +133,42 @@ const Layout = () => {
                   Stats
                 </DialogDescription>
               </DialogHeader>
+              <Table>
+                <TableHeader>
+                <TableRow>
+                  <TableHead className="text-center">Mode</TableHead>
+                  {Object.values(difficultyMap).map((difficulty) => (
+                    <TableHead key={difficulty} className="text-center">
+                      {difficulty}
+                    </TableHead>
+                  ))}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {Object.keys(boardConfigLibrary).map((mode) => (
+                  <TableRow key={mode}>
+                    <TableCell className="text-center">{mode.charAt(0).toUpperCase() + mode.slice(1)}</TableCell>
+                    {Object.keys(difficultyMap).map((difficultyKey) => {
+                      const filteredRecords = records.filter(
+                        (record) =>
+                          JSON.stringify(record.boardConfig) === JSON.stringify(boardConfigLibrary[mode][difficultyKey])
+                      );
+
+                      const bestTime = filteredRecords.reduce(
+                        (min, record) => (record.timeElapsed < min ? record.timeElapsed : min),
+                        Infinity
+                      );
+
+                      return (
+                        <TableCell key={difficultyKey} className="text-center">
+                          {bestTime === Infinity ? "-" : (bestTime / 1000).toFixed(2)}
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
             </DialogContent>
           </Dialog>
           <Dialog>
@@ -141,6 +200,7 @@ const Layout = () => {
             <GameBoard 
               config={boardConfigLibrary[variant][difficulty]}
               isTouchscreen={isTouchscreen}
+              addRecord={addRecord}
             />
           </div>
         </main>

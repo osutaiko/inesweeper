@@ -28,3 +28,10 @@ export type Cell = {
 };
 
 export type Board = Cell[][];
+
+export type TimeRecord = {
+  boardConfig: BoardConfig;
+  timeElapsed: number;
+  date: number;
+  board: Board;
+}

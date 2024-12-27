@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Board, BoardConfig } from "@/lib/types";
+import { Board, BoardConfig, TimeRecord } from "@/lib/types";
 import { createBoard, handleClick, handleChord, handleFlag, isWin, isLoss, countRemainingFlags } from "@/lib/minesweeper";
 import { Flag, Laugh, Skull, Smile, Sun } from "lucide-react";
 import { Button } from "./ui/button";
@@ -7,7 +7,8 @@ import { Button } from "./ui/button";
 export const GameBoard: React.FC<{
   config: BoardConfig;
   isTouchscreen: boolean;
-}> = ({ config, isTouchscreen }) => {
+  addRecord: (record: TimeRecord) => void;
+}> = ({ config, isTouchscreen, addRecord }) => {
   const [board, setBoard] = useState<Board>(createBoard(config) || []);
   const [isFirstClick, setIsFirstClick] = useState(true);
   const [isLmbDown, setIsLmbDown] = useState(false);
@@ -92,6 +93,13 @@ export const GameBoard: React.FC<{
         })
       );
       setBoard(updatedBoard);
+
+      addRecord({
+        boardConfig: config,
+        timeElapsed: timeElapsed,
+        date: Date.now(),
+        board: board,
+      });
     }
 
     const isLossValue = isLoss(board);
