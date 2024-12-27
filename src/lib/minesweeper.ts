@@ -90,7 +90,8 @@ export const getCellNumber = (board: Board, row: number, col: number, config: Bo
   return cellNumber;
 };
 
-export const handleClick = (board: Board, row: number, col: number, config: BoardConfig) => {
+export const handleClick = (board: Board, row: number, col: number, config: BoardConfig, setBoard: (updatedBoard: Board) => void) => {
+  const updatedBoard = [...board.map(row => [...row])];
   const cell = board[row][col];
   if (cell.state.type !== "hidden") return;
 
@@ -107,15 +108,18 @@ export const handleClick = (board: Board, row: number, col: number, config: Boar
         const nx = row + dx;
         const ny = col + dy;
         if (nx >= 0 && nx < config.height && ny >= 0 && ny < config.width && board[nx][ny].mineNum === 0) {
-          handleClick(board, nx, ny, config);
+          handleClick(board, nx, ny, config, setBoard);
         }
       }
     }
   }
+
+  setBoard(updatedBoard);
 };
 
-export const handleChord = (board: Board, row: number, col: number, config: BoardConfig) => {
-  const cell = board[row][col];
+export const handleChord = (board: Board, row: number, col: number, config: BoardConfig, setBoard: (updatedBoard: Board) => void) => {
+  const updatedBoard = [...board.map(row => [...row])];
+  const cell = updatedBoard[row][col];
 
   if (cell.state.type !== "revealed") return;
 
@@ -144,7 +148,7 @@ export const handleChord = (board: Board, row: number, col: number, config: Boar
         const ny = col + dy;
         if (nx >= 0 && nx < config.height && ny >= 0 && ny < config.width) {
           if (board[nx][ny].state.type === "hidden") {
-            handleClick(board, nx, ny, config);
+            handleClick(board, nx, ny, config, setBoard);
           }
         }
       }
@@ -156,6 +160,7 @@ export const handleChord = (board: Board, row: number, col: number, config: Boar
     if (cell.state.num === surroundingFlags - 1 || (surroundingHiddens === 1 && cell.state.num === surroundingFlags + 1)) {
       revealSurroundingHiddens();
     }
+    setBoard(updatedBoard);
     return;
   }
 
@@ -164,6 +169,7 @@ export const handleChord = (board: Board, row: number, col: number, config: Boar
     if (surroundingHiddens === 1 && surroundingFlags === cell.state.num) {
       revealSurroundingHiddens();
     }
+    setBoard(updatedBoard);
     return;
   }
 
@@ -171,11 +177,14 @@ export const handleChord = (board: Board, row: number, col: number, config: Boar
     revealSurroundingHiddens();
   }
 
+  setBoard(updatedBoard);
   return false;
 };
 
-export const handleFlag = (board: Board, row: number, col: number, config: BoardConfig) => {
-  const cell = board[row][col];
+export const handleFlag = (board: Board, row: number, col: number, config: BoardConfig, setBoard: (updatedBoard: Board) => void) => {
+  const updatedBoard = [...board.map(row => [...row])];
+  const cell = updatedBoard[row][col];
+
   if (cell.state.type === "revealed") return;
 
   if (cell.state.type === "hidden") {
@@ -205,6 +214,8 @@ export const handleFlag = (board: Board, row: number, col: number, config: Board
       }
     }
   }
+
+  setBoard(updatedBoard);
 };
 
 export const countRemainingFlags = (board: Board): { remainingPosFlags: number; remainingNegFlags: number } => {

@@ -121,8 +121,8 @@ export const GameBoard: React.FC<{
           }
           if (cell.mineNum !== 0 && cell.state.type !== "flagged") {
             return {
-              mineNum: cell.mineNum,
               state: { type: "revealed", num: null },
+              mineNum: cell.mineNum,
             } as Cell;
           }
           return cell;
@@ -140,12 +140,12 @@ export const GameBoard: React.FC<{
 
     if (isTouchscreen) {
       if (board[row][col].state.type === "revealed") {
-        handleChord(board, row, col, config);
+        handleChord(board, row, col, config, setBoard);
       } else {
         if (isFlagToggled) {
-          handleFlag(board, row, col, config);
+          handleFlag(board, row, col, config, setBoard);
         } else {
-          handleClick(board, row, col, config);
+          handleClick(board, row, col, config, setBoard);
         }
       }
       return;
@@ -156,7 +156,7 @@ export const GameBoard: React.FC<{
     } else if (e.button === 2) {
       setIsRmbDown(true);
       if (!isLmbDown) {
-        handleFlag(board, row, col, config);
+        handleFlag(board, row, col, config, setBoard);
       }
     }
   };
@@ -169,7 +169,7 @@ export const GameBoard: React.FC<{
     if (e.button === 0) {
       setIsLmbDown(false);
       if (isRmbDown) {
-        handleChord(board, row, col, config);
+        handleChord(board, row, col, config, setBoard);
       } else {
         if (isFirstClick) {
           setIsFirstClick(false);
@@ -193,12 +193,12 @@ export const GameBoard: React.FC<{
             setBoard([...board]);
           }
         }
-        handleClick(board, row, col, config);
+        handleClick(board, row, col, config, setBoard);
       }
     } else if (e.button === 2) {
       setIsRmbDown(false);
       if (isLmbDown) {
-        handleChord(board, row, col, config);
+        handleChord(board, row, col, config, setBoard);
       }
     }
   };
