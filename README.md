@@ -2,8 +2,6 @@
 A Collection of Minesweeper Variants. Challenge yourself with unique Minesweeper variants and enjoy a fresh twist on a classic puzzle game.
 
 ## Supported Variants
-### Supported Variants
-
 | Variant        | Description                                                                  | Inspired By |
 |----------------|------------------------------------------------------------------------------|-------------|
 | **Classic**    | The classic Minesweeper game                                                 | -           |

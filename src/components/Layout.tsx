@@ -31,7 +31,12 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Separator } from "./ui/separator";
 
 import InesweeperLogo from "@/assets/images/inesweeper-logo.svg";
@@ -154,7 +159,7 @@ const Layout = () => {
               <Table>
                 <TableHeader>
                 <TableRow>
-                  <TableHead>Variant</TableHead>
+                  <TableHead className="text-black">Variant</TableHead>
                   {Object.values(difficultyMap).map((difficulty) => (
                     <TableHead key={difficulty.full} className="text-center">
                       {isDesktop ? difficulty.full : difficulty.short}
@@ -165,7 +170,7 @@ const Layout = () => {
               <TableBody>
                 {Object.keys(boardConfigLibrary).map((mode) => (
                   <TableRow key={mode}>
-                    <TableCell>{variantMap[mode as keyof typeof variantMap]}</TableCell>
+                    <TableCell className="font-bold">{variantMap[mode as keyof typeof variantMap]}</TableCell>
                     {Object.keys(difficultyMap).map((difficultyKey) => {
                       const filteredRecords = records.filter(
                         (record) =>
@@ -202,30 +207,38 @@ const Layout = () => {
                   Variant descriptions
                 </DialogDescription>
               </DialogHeader>
-              <Tabs defaultValue={variant} className="flex flex-col gap-2">
-                <TabsList className="w-min">
-                  <TabsTrigger value="classic">Classic</TabsTrigger>
-                  <TabsTrigger value="multimines">Multimines</TabsTrigger>
-                  <TabsTrigger value="liar">Liar</TabsTrigger>
-                  <TabsTrigger value="omega">Omega</TabsTrigger>
-                  <TabsTrigger value="crossed">Crossed</TabsTrigger>
-                </TabsList>
-                <TabsContent value="classic">
-                  <p>The classic Minesweeper experience. To win, reveal all safe tiles without clicking on any mines. Numbered tiles indicate the number of mines hidden in the adjacent eight tiles.</p>
-                </TabsContent>
-                <TabsContent value="multimines">
-                  <p>Minesweeper, but with up to four mines per tile.</p>
-                </TabsContent>
-                <TabsContent value="liar">
-                  <p>Minesweeper, but number tiles "lie" by displaying numbers as one off from the actual value.</p>
-                </TabsContent>
-                <TabsContent value="omega">
-                  <p>Minesweeper, but also with negative mines. All tiles adjacent to 0's are automatically revealed if they contain no mines (either positive or negative). This means all unrevealed tiles adjacent to 0's are guaranteed to contain a mine.</p>
-                </TabsContent>
-                <TabsContent value="crossed">
-                  <p>Minesweeper, but the number on the cell indicates how many mines are in a cross-shaped region within distance 2.</p>
-                </TabsContent>
-              </Tabs>
+              <Accordion type="single" defaultValue={variant} collapsible>
+                <AccordionItem value="classic">
+                  <AccordionTrigger className="text-base font-bold">Classic</AccordionTrigger>
+                  <AccordionContent>
+                    <p>The classic Minesweeper experience. To win, reveal all safe tiles without clicking on any mines. Numbered tiles indicate the number of mines hidden in the adjacent eight tiles.</p>
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="multimines">
+                  <AccordionTrigger className="text-base font-bold">Multimines</AccordionTrigger>
+                  <AccordionContent>
+                    <p>Minesweeper, but with up to four mines per tile.</p>
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="liar">
+                  <AccordionTrigger className="text-base font-bold">Liar</AccordionTrigger>
+                  <AccordionContent>
+                    <p>Minesweeper, but number tiles "lie" by displaying numbers as one off from the actual value.</p>
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="omega">
+                  <AccordionTrigger className="text-base font-bold">Omega</AccordionTrigger>
+                  <AccordionContent>
+                    <p>Minesweeper, but also with negative mines. All tiles adjacent to 0's are automatically revealed if they contain no mines (either positive or negative). This means all unrevealed tiles adjacent to 0's are guaranteed to contain a mine.</p>
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="crossed">
+                  <AccordionTrigger className="text-base font-bold">Crossed</AccordionTrigger>
+                  <AccordionContent>
+                    <p>Minesweeper, but the number on the cell indicates how many mines are in a cross-shaped region within distance 2.</p>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
               <div className="flex justify-end">
                 <a href="https://github.com/osutaiko/inesweeper">
                   <Github />
