@@ -20,6 +20,7 @@ export const GameBoard: React.FC<{
   const [isGameOver, setIsGameOver] = useState<"win" | "loss" | null>(null);
   const [startTime, setStartTime] = useState<number | null>(null);
   const [timeElapsed, setTimeElapsed] = useState(0);
+  const [hoveredCell, setHoveredCell] = useState<{ row: number, col: number } | null>(null);
   const [explodedCell, setExplodedCell] = useState<{ row: number, col: number } | null>(null);
   const [incorrectFlagCells, setIncorrectFlagCells] = useState<{ row: number, col: number }[] | null>(null);
 
@@ -236,6 +237,31 @@ export const GameBoard: React.FC<{
     }
   }
 
+  const getAdjacentCells = (board: Board, row: number, col: number) => {
+    const adjacent: [number, number][] = [];
+    const directions = config.cellNumberDeviant === "cross" ? [
+                        [-2, 0],
+                        [-1, 0],
+      [0, -2], [0, -1],          [0, 1], [0, 2],
+                        [1, 0],
+                        [2, 0],
+    ] : [
+      [-1, -1], [-1, 0], [-1, 1],
+      [0, -1],          [0, 1],
+      [1, -1], [1, 0], [1, 1],
+    ];
+    
+    directions.forEach(([dx, dy]) => {
+      const newRow = row + dx;
+      const newCol = col + dy;
+      if (newRow >= 0 && newRow < board.length && newCol >= 0 && newCol < board[0].length) {
+        adjacent.push([newRow, newCol]);
+      }
+    });
+  
+    return adjacent;
+  };
+
   return (
     <>
       <div
@@ -283,64 +309,86 @@ export const GameBoard: React.FC<{
           onContextMenu={(e) => e.preventDefault()}
         >
           {board.map((row, rowIndex) =>
-            row.map((cell, colIndex) => (
-              <div
-                key={`${rowIndex}-${colIndex}`}
-                className={`flex justify-center items-center border border-gray-400 ${cell.state.type === "revealed" ? "bg-gray-300" : "bg-gray-100"}`}
-                onMouseDown={(e) => handleMouseDown(e, rowIndex, colIndex)}
-                onMouseUp={(e) => handleMouseUp(e, rowIndex, colIndex)}
-              >
-                {cell.state.type === "hidden" && isFlagToggled && (
-                  <Flag className="w-[18px] h-[18px]" stroke="red" fill="red" opacity={0.1} />
-                )}
-                {cell.state.type === "revealed" && (
-                  cell.mineNum ? 
+            row.map((cell, colIndex) => {
+              const getBgClass = () => {
+                const isShaded =
+                  !isGameOver && hoveredCell &&
+                  (
+                    (board[hoveredCell.row][hoveredCell.col].state.type !== "revealed" && hoveredCell.row === rowIndex && hoveredCell.col === colIndex) ||
+                    (board[hoveredCell.row][hoveredCell.col].state.type === "revealed" &&
+                      getAdjacentCells(board, hoveredCell.row, hoveredCell.col).some(
+                        ([adjRow, adjCol]) => adjRow === rowIndex && adjCol === colIndex
+                      ))
+                  );
+              
+                if (cell.state.type === "revealed") {
+                  return "bg-gray-300";
+                } else {
+                  return isShaded ? "bg-gray-200" : "bg-gray-100";
+                }
+              };
+
+              return (
+                <div
+                  key={`${rowIndex}-${colIndex}`}
+                  className={`flex justify-center items-center border border-gray-400 ${getBgClass()}`}
+                  onMouseDown={(e) => handleMouseDown(e, rowIndex, colIndex)}
+                  onMouseUp={(e) => handleMouseUp(e, rowIndex, colIndex)}
+                  onMouseEnter={() => setHoveredCell({ row: rowIndex, col: colIndex })}
+                  onMouseLeave={() => setHoveredCell(null)}
+                >
+                  {cell.state.type === "hidden" && isFlagToggled && (
+                    <Flag className="w-[18px] h-[18px]" stroke="red" fill="red" opacity={0.1} />
+                  )}
+                  {cell.state.type === "revealed" && (
+                    cell.mineNum ? 
+                      <div
+                        className={`flex flex-wrap w-full h-full justify-center items-center ${
+                          isGameOver === "loss" && explodedCell && explodedCell.row === rowIndex && explodedCell.col === colIndex ? "bg-destructive" : "" 
+                        }`}
+                      >
+                        {Array.from({ length: Math.abs(cell.mineNum) }).map((_, idx) => (
+                          <Sun
+                            key={`bomb-${idx}`}
+                            className={`${cell.mineNum < 0 ? "rotate-180" : ""} ${Math.abs(cell.mineNum) > 1 ? "w-[12px] h-[12px]" : "w-[18px] h-[18px]"}`}
+                            stroke={cell.mineNum > 0 ? "black" : "white"}
+                            fill={cell.mineNum > 0 ? "black" : "white"}
+                          />
+                        ))}
+                      </div> : 
+                    <p
+                      className="font-bold text-xl"
+                      style={{ color: getNumberColorClass(cell.state.num) }}
+                    >
+                      {cell.state.num}
+                    </p>
+                  )}
+                  {cell.state.type === "flagged" && (
                     <div
                       className={`flex flex-wrap w-full h-full justify-center items-center ${
-                        isGameOver === "loss" && explodedCell && explodedCell.row === rowIndex && explodedCell.col === colIndex ? "bg-destructive" : "" 
+                        isGameOver === "loss" && incorrectFlagCells!.some(
+                          ({ row: r, col: c }) => r === rowIndex && c === colIndex
+                        ) ? "bg-yellow-300" : ""
                       }`}
                     >
-                      {Array.from({ length: Math.abs(cell.mineNum) }).map((_, idx) => (
-                        <Sun
-                          key={`bomb-${idx}`}
-                          className={`${cell.mineNum < 0 ? "rotate-180" : ""} ${Math.abs(cell.mineNum) > 1 ? "w-[12px] h-[12px]" : "w-[18px] h-[18px]"}`}
-                          stroke={cell.mineNum > 0 ? "black" : "white"}
-                          fill={cell.mineNum > 0 ? "black" : "white"}
-                        />
-                      ))}
-                    </div> : 
-                  <p
-                    className="font-bold text-xl"
-                    style={{ color: getNumberColorClass(cell.state.num) }}
-                  >
-                    {cell.state.num}
-                  </p>
-                )}
-                {cell.state.type === "flagged" && (
-                  <div
-                    className={`flex flex-wrap w-full h-full justify-center items-center ${
-                      isGameOver === "loss" && incorrectFlagCells!.some(
-                        ({ row: r, col: c }) => r === rowIndex && c === colIndex
-                      ) ? "bg-yellow-300" : ""
-                    }`}
-                  >
-                    {(() => {
-                      const flagNum = cell.state.flagNum;
-                      return Array.from({ length: Math.abs(flagNum) }).map((_, idx) => (
-                        <Flag
-                          key={`flag-${idx}`}
-                          className={`${
-                            flagNum < 0 ? "rotate-180" : ""
-                          } ${Math.abs(flagNum) > 1 ? "w-[10px] h-[10px]" : "w-[18px] h-[18px]"}`}
-                          stroke={flagNum > 0 ? "red" : "blue"}
-                          fill={flagNum > 0 ? "red" : "blue"}
-                        />
-                      ));
-                    })()}
-                  </div>
-                )}
-              </div>
-            ))
+                      {(() => {
+                        const flagNum = cell.state.flagNum;
+                        return Array.from({ length: Math.abs(flagNum) }).map((_, idx) => (
+                          <Flag
+                            key={`flag-${idx}`}
+                            className={`${
+                              flagNum < 0 ? "rotate-180" : ""
+                            } ${Math.abs(flagNum) > 1 ? "w-[10px] h-[10px]" : "w-[18px] h-[18px]"}`}
+                            stroke={flagNum > 0 ? "red" : "blue"}
+                            fill={flagNum > 0 ? "red" : "blue"}
+                          />
+                        ));
+                      })()}
+                    </div>
+                  )}
+                </div>
+              );
+            })
           )}
         </div>
       </div>
