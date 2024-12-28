@@ -6,11 +6,11 @@ A Collection of Minesweeper Variants. Challenge yourself with unique Minesweeper
 
 | Variant        | Description                                                                  | Inspired By |
 |----------------|------------------------------------------------------------------------------|-------------|
-| **Classic**    | The classic Minesweeper game                                                 |             |
+| **Classic**    | The classic Minesweeper game                                                 | -           |
 | **Multimines** | Up to four mines in a single tile                                            | [Minesweeper Reborn](https://coding4rtist.itch.io/minesweeper-reborn) by Coding4rtist |
 | **Omega**      | Positive and negative mines                                                  | [omegasweeper](https://duncanacnud.itch.io/omegasweeper) by duncanacnud |
 | **Liar**       | Number tiles "lie" by displaying numbers as one off from the actual value    | [Lying Minesweeper](https://www.reddit.com/r/playmygame/comments/38l2n8/completed_web_lying_minesweeper/) by u/molodec, [14 Minesweeper Variants](https://store.steampowered.com/app/1865060/14_Minesweeper_Variants/) |
-| **Cross**      | The numbers indicate the number of mines in a cross region within distance 2 | [14 Minesweeper Variants](https://store.steampowered.com/app/1865060/14_Minesweeper_Variants/) |
+| **Crossed**    | The numbers indicate the number of mines in a cross-shaped region within distance 2 | [14 Minesweeper Variants](https://store.steampowered.com/app/1865060/14_Minesweeper_Variants/) |
 
 ## Planned Variants
 - Weighted: Mines on every other tile (with a checkerboard pattern) counts as two
