@@ -243,7 +243,7 @@ const Layout = () => {
           />
           <div className="flex flex-row gap-2">
             <Select value={variant} onValueChange={(value) => setVariant(value as VariantName)}>
-              <SelectTrigger className="w-[140px]">
+              <SelectTrigger className="w-[150px]">
                 <SelectValue placeholder="Variant" />
               </SelectTrigger>
               <SelectContent>
@@ -254,10 +254,10 @@ const Layout = () => {
               </SelectContent>
             </Select>
             <Select value={difficulty} onValueChange={(value) => setDifficulty(value as DifficultyName)}>
-              <SelectTrigger className="w-[140px]">
+              <SelectTrigger className="w-[150px]">
                 <SelectValue placeholder="Difficulty" />
               </SelectTrigger>
-              <SelectContent className="w-[160px]">
+              <SelectContent>
                 <SelectItem value="beg">Beginner</SelectItem>
                 <SelectItem value="int">Intermediate</SelectItem>
                 <SelectItem value="exp">Expert</SelectItem>
