@@ -322,8 +322,8 @@ export const GameBoard: React.FC<{
         <div
           className="grid border-[8px] border-gray-400"
           style={{
-            gridTemplateColumns: `repeat(${board[0].length}, 30px)`,
-            gridTemplateRows: `repeat(${board.length}, 30px)`,
+            gridTemplateColumns: `repeat(${config.width}, 30px)`,
+            gridTemplateRows: `repeat(${config.height}, 30px)`,
           }}
           onContextMenu={(e) => e.preventDefault()}
         >
