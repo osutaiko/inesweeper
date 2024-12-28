@@ -65,10 +65,14 @@ export const isLoss = (board: Board): { row: number; col: number } | null => {
 export const getCellNumber = (board: Board, row: number, col: number, config: BoardConfig): number | null => {
   let cellNumber = null;
 
-  for (let dx = -1; dx <= 1; dx++) {
-    for (let dy = -1; dy <= 1; dy++) {
+  for (let dx = -2; dx <= 2; dx++) {
+    for (let dy = -2; dy <= 2; dy++) {
       if (dx === 0 && dy === 0) continue;
-      if (config.cellNumberDeviant === "cross" && (dx * dy === -1 || dx * dy === 1)) continue;
+      if (config.cellNumberDeviant === "cross") {
+        if (dx * dy !== 0) continue;
+      } else {
+        if (Math.max(Math.abs(dx), Math.abs(dy)) > 1) continue;
+      }
 
       const nx = row + dx;
       const ny = col + dy;
@@ -104,9 +108,13 @@ export const handleClick = (board: Board, row: number, col: number, config: Boar
   }
 
   if (cell.state.num === null || (cell.state.num === 0 && config.cellNumberDeviant !== "lie")) {
-    for (let dx = -1; dx <= 1; dx++) {
-      for (let dy = -1; dy <= 1; dy++) {
-        if (config.cellNumberDeviant === "cross" && (dx * dy === -1 || dx * dy === 1)) continue;
+    for (let dx = -2; dx <= 2; dx++) {
+      for (let dy = -2; dy <= 2; dy++) {
+        if (config.cellNumberDeviant === "cross") {
+          if (dx * dy !== 0) continue;
+        } else {
+          if (Math.max(Math.abs(dx), Math.abs(dy)) > 1) continue;
+        }
         
         const nx = row + dx;
         const ny = col + dy;
@@ -129,9 +137,14 @@ export const handleChord = (board: Board, row: number, col: number, config: Boar
   let surroundingFlags = 0;
   let surroundingHiddens = 0;
 
-  for (let dx = -1; dx <= 1; dx++) {
-    for (let dy = -1; dy <= 1; dy++) {
-      if (config.cellNumberDeviant === "cross" && (dx * dy === -1 || dx * dy === 1)) continue;
+  for (let dx = -2; dx <= 2; dx++) {
+    for (let dy = -2; dy <= 2; dy++) {
+      if (config.cellNumberDeviant === "cross") {
+        if (dx * dy !== 0) continue;
+      } else {
+        if (Math.max(Math.abs(dx), Math.abs(dy)) > 1) continue;
+      }
+
       const nx = row + dx;
       const ny = col + dy;
       if (nx >= 0 && nx < config.height && ny >= 0 && ny < config.width) {
@@ -146,9 +159,14 @@ export const handleChord = (board: Board, row: number, col: number, config: Boar
   }
 
   const revealSurroundingHiddens = () => {
-    for (let dx = -1; dx <= 1; dx++) {
-      for (let dy = -1; dy <= 1; dy++) {
-        if (config.cellNumberDeviant === "cross" && (dx * dy === -1 || dx * dy === 1)) continue;
+    for (let dx = -2; dx <= 2; dx++) {
+      for (let dy = -2; dy <= 2; dy++) {
+        if (config.cellNumberDeviant === "cross") {
+          if (dx * dy !== 0) continue;
+        } else {
+          if (Math.max(Math.abs(dx), Math.abs(dy)) > 1) continue;
+        }
+
         const nx = row + dx;
         const ny = col + dy;
         if (nx >= 0 && nx < config.height && ny >= 0 && ny < config.width) {
