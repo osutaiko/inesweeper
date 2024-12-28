@@ -202,12 +202,13 @@ const Layout = () => {
                   Variant descriptions
                 </DialogDescription>
               </DialogHeader>
-              <Tabs defaultValue="classic" className="flex flex-col gap-2">
+              <Tabs defaultValue={variant} className="flex flex-col gap-2">
                 <TabsList className="w-min">
                   <TabsTrigger value="classic">Classic</TabsTrigger>
                   <TabsTrigger value="multimines">Multimines</TabsTrigger>
                   <TabsTrigger value="liar">Liar</TabsTrigger>
                   <TabsTrigger value="omega">Omega</TabsTrigger>
+                  <TabsTrigger value="crossed">Crossed</TabsTrigger>
                 </TabsList>
                 <TabsContent value="classic">
                   <p>The classic Minesweeper experience. To win, reveal all safe tiles without clicking on any mines. Numbered tiles indicate the number of mines hidden in the adjacent eight tiles.</p>
@@ -222,7 +223,7 @@ const Layout = () => {
                   <p>Minesweeper, but also with negative mines. All tiles adjacent to 0's are automatically revealed if they contain no mines (either positive or negative). This means all unrevealed tiles adjacent to 0's are guaranteed to contain a mine.</p>
                 </TabsContent>
                 <TabsContent value="crossed">
-                  <p>Minesweeper, but the number on the cell indicates how many mines are in a cross-shaped region within distance 2</p>
+                  <p>Minesweeper, but the number on the cell indicates how many mines are in a cross-shaped region within distance 2.</p>
                 </TabsContent>
               </Tabs>
               <div className="flex justify-end">

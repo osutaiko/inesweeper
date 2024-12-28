@@ -21,6 +21,7 @@ export const GameBoard: React.FC<{
   const [startTime, setStartTime] = useState<number | null>(null);
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [hoveredCell, setHoveredCell] = useState<{ row: number, col: number } | null>(null);
+  const [shadedCells, setShadedCells] = useState<{ row: number, col: number }[]>([]);
   const [explodedCell, setExplodedCell] = useState<{ row: number, col: number } | null>(null);
   const [incorrectFlagCells, setIncorrectFlagCells] = useState<{ row: number, col: number }[] | null>(null);
 
@@ -36,6 +37,7 @@ export const GameBoard: React.FC<{
     setIsGameOver(null);
     setStartTime(null);
     setTimeElapsed(0);
+    setHoveredCell(null);
     setExplodedCell(null);
     setIncorrectFlagCells(null);
   };
@@ -237,42 +239,53 @@ export const GameBoard: React.FC<{
     }
   }
 
-  const getAdjacentCells = (board: Board, row: number, col: number) => {
-    const adjacent: [number, number][] = [];
-    const directions = config.cellNumberDeviant === "cross" ? [
-                        [-2, 0],
-                        [-1, 0],
-      [0, -2], [0, -1],          [0, 1], [0, 2],
-                        [1, 0],
-                        [2, 0],
-    ] : [
-      [-1, -1], [-1, 0], [-1, 1],
-      [0, -1],          [0, 1],
-      [1, -1], [1, 0], [1, 1],
-    ];
+  useEffect(() => {
+    if (!hoveredCell) {
+      return;
+    }
+
+    const { row, col } = hoveredCell;
+
+    if (board[row][col].state.type === "revealed") {
+      const updatedShadedCells: { row: number, col: number }[] = [];
+      const directions = config.cellNumberDeviant === "cross" ? [
+                          [-2, 0],
+                          [-1, 0],
+        [0, -2], [0, -1],          [0, 1], [0, 2],
+                          [1, 0],
+                          [2, 0],
+      ] : [
+        [-1, -1], [-1, 0], [-1, 1],
+        [0, -1],           [0, 1],
+        [1, -1],  [1, 0],  [1, 1],
+      ];
+
+      directions.forEach(([dx, dy]) => {
+        const newRow = row + dx;
+        const newCol = col + dy;
+        if (newRow >= 0 && newRow < board.length && newCol >= 0 && newCol < board[0].length && board[newRow][newCol].state.type !== "revealed") {
+          updatedShadedCells.push({ row: newRow, col: newCol });
+        }
+      });
     
-    directions.forEach(([dx, dy]) => {
-      const newRow = row + dx;
-      const newCol = col + dy;
-      if (newRow >= 0 && newRow < board.length && newCol >= 0 && newCol < board[0].length) {
-        adjacent.push([newRow, newCol]);
-      }
-    });
-  
-    return adjacent;
-  };
+      setShadedCells(updatedShadedCells);
+    } else {
+      setShadedCells([hoveredCell]);
+    }
+    
+  }, [hoveredCell]);
 
   return (
     <>
       <div
-        className="flex flex-col w-min h-min bg-gray-100 rounded-md overflow-hidden select-none"
+        className="flex flex-col w-min h-min rounded-md overflow-hidden select-none"
         style={{
           zoom: zoom / 100,
           backfaceVisibility: "hidden",
         }}
       >
         <div
-          className="relative h-[64px] flex justify-between p-2 border-t-[9px] border-x-[9px] border-gray-400"
+          className="relative h-[64px] flex justify-between p-2 border-t-[9px] border-x-[9px] bg-gray-50 border-gray-400"
         >
           <div className="flex flex-col justify-center px-3 -space-y-0.5 bg-gray-300 rounded-md overflow-hidden">
             {config.posMineCount > 0 && 
@@ -311,20 +324,10 @@ export const GameBoard: React.FC<{
           {board.map((row, rowIndex) =>
             row.map((cell, colIndex) => {
               const getBgClass = () => {
-                const isShaded =
-                  !isGameOver && hoveredCell &&
-                  (
-                    (board[hoveredCell.row][hoveredCell.col].state.type !== "revealed" && hoveredCell.row === rowIndex && hoveredCell.col === colIndex) ||
-                    (board[hoveredCell.row][hoveredCell.col].state.type === "revealed" &&
-                      getAdjacentCells(board, hoveredCell.row, hoveredCell.col).some(
-                        ([adjRow, adjCol]) => adjRow === rowIndex && adjCol === colIndex
-                      ))
-                  );
-              
                 if (cell.state.type === "revealed") {
                   return "bg-gray-300";
                 } else {
-                  return isShaded ? "bg-gray-200" : "bg-gray-100";
+                  return shadedCells.some(({ row: shadedRow, col: shadedCol }) => shadedRow === rowIndex && shadedCol === colIndex) ? "bg-indigo-100" : "bg-gray-50";
                 }
               };
 
