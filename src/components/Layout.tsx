@@ -221,6 +221,9 @@ const Layout = () => {
                 <TabsContent value="omega">
                   <p>Minesweeper, but also with negative mines. All tiles adjacent to 0's are automatically revealed if they contain no mines (either positive or negative). This means all unrevealed tiles adjacent to 0's are guaranteed to contain a mine.</p>
                 </TabsContent>
+                <TabsContent value="crossed">
+                  <p>Minesweeper, but the number on the cell indicates how many mines are in a cross-shaped region within distance 2</p>
+                </TabsContent>
               </Tabs>
               <div className="flex justify-end">
                 <a href="https://github.com/osutaiko/inesweeper">
@@ -251,6 +254,7 @@ const Layout = () => {
                 <SelectItem value="multimines">Multimines</SelectItem>
                 <SelectItem value="liar">Liar</SelectItem>
                 <SelectItem value="omega">Omega</SelectItem>
+                <SelectItem value="crossed">Crossed</SelectItem>
               </SelectContent>
             </Select>
             <Select value={difficulty} onValueChange={(value) => setDifficulty(value as DifficultyName)}>

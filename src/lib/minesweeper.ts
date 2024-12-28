@@ -68,6 +68,7 @@ export const getCellNumber = (board: Board, row: number, col: number, config: Bo
   for (let dx = -1; dx <= 1; dx++) {
     for (let dy = -1; dy <= 1; dy++) {
       if (dx === 0 && dy === 0) continue;
+      if (config.cellNumberDeviant === "cross" && (dx * dy === -1 || dx * dy === 1)) continue;
 
       const nx = row + dx;
       const ny = col + dy;
@@ -83,7 +84,7 @@ export const getCellNumber = (board: Board, row: number, col: number, config: Bo
     }
   }
 
-  if (config.lie && cellNumber !== null) {
+  if (config.cellNumberDeviant === "lie" && cellNumber !== null) {
     cellNumber = Math.random() < 0.5 ? cellNumber - 1 : cellNumber + 1;
   }
 
@@ -102,9 +103,11 @@ export const handleClick = (board: Board, row: number, col: number, config: Boar
     return;
   }
 
-  if (cell.state.num === null || (cell.state.num === 0 && !config.lie)) {
+  if (cell.state.num === null || (cell.state.num === 0 && config.cellNumberDeviant !== "lie")) {
     for (let dx = -1; dx <= 1; dx++) {
       for (let dy = -1; dy <= 1; dy++) {
+        if (config.cellNumberDeviant === "cross" && (dx * dy === -1 || dx * dy === 1)) continue;
+        
         const nx = row + dx;
         const ny = col + dy;
         if (nx >= 0 && nx < config.height && ny >= 0 && ny < config.width && board[nx][ny].mineNum === 0) {
@@ -128,6 +131,7 @@ export const handleChord = (board: Board, row: number, col: number, config: Boar
 
   for (let dx = -1; dx <= 1; dx++) {
     for (let dy = -1; dy <= 1; dy++) {
+      if (config.cellNumberDeviant === "cross" && (dx * dy === -1 || dx * dy === 1)) continue;
       const nx = row + dx;
       const ny = col + dy;
       if (nx >= 0 && nx < config.height && ny >= 0 && ny < config.width) {
@@ -144,6 +148,7 @@ export const handleChord = (board: Board, row: number, col: number, config: Boar
   const revealSurroundingHiddens = () => {
     for (let dx = -1; dx <= 1; dx++) {
       for (let dy = -1; dy <= 1; dy++) {
+        if (config.cellNumberDeviant === "cross" && (dx * dy === -1 || dx * dy === 1)) continue;
         const nx = row + dx;
         const ny = col + dy;
         if (nx >= 0 && nx < config.height && ny >= 0 && ny < config.width) {
@@ -156,7 +161,7 @@ export const handleChord = (board: Board, row: number, col: number, config: Boar
   }
 
   // Chording rules for Liar
-  if (config.lie) { 
+  if (config.cellNumberDeviant === "lie") { 
     if (cell.state.num === surroundingFlags - 1 || (surroundingHiddens === 1 && cell.state.num === surroundingFlags + 1)) {
       revealSurroundingHiddens();
     }
