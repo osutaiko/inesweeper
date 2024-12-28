@@ -226,7 +226,7 @@ export const GameBoard: React.FC<{
     if (num >= 0) {
       return ["#4600ff", "#008809", "#ff0000", "#1e007c", "#8e0000", "#008483", "#000000", "#808080"][(num - 1) % 8];
     } else {
-      return ["#b9ff00", "#ff77f6", "#00ffff", "#e1ff83", "#71ffff", "#ff7b7c", "#ffffff", "#7f7f7f"][(-num - 1) % 8];
+      return ["#ffff00", "#ff77f6", "#33eeee", "#e1ff83", "#71ffff", "#ff7b7c", "#ffffff", "#7f7f7f"][(-num - 1) % 8];
     }
   };
 
@@ -240,11 +240,16 @@ export const GameBoard: React.FC<{
   }
 
   useEffect(() => {
-    if (!hoveredCell || isGameOver) {
+    if (isTouchscreen || !hoveredCell || isGameOver) {
+      setShadedCells([]);
       return;
     }
 
     const { row, col } = hoveredCell;
+
+    if (!(row >= 0 && row < config.height && col >= 0 && col < config.width)) {
+      return;
+    }
 
     if (board[row][col].state.type === "revealed") {
       const updatedShadedCells: { row: number, col: number }[] = [];
@@ -263,7 +268,7 @@ export const GameBoard: React.FC<{
       directions.forEach(([dx, dy]) => {
         const newRow = row + dx;
         const newCol = col + dy;
-        if (newRow >= 0 && newRow < board.length && newCol >= 0 && newCol < board[0].length && board[newRow][newCol].state.type !== "revealed") {
+        if (newRow >= 0 && newRow < config.height && newCol >= 0 && newCol < config.width && board[newRow][newCol].state.type !== "revealed") {
           updatedShadedCells.push({ row: newRow, col: newCol });
         }
       });
@@ -274,7 +279,7 @@ export const GameBoard: React.FC<{
       setShadedCells([]);
     }
     
-  }, [hoveredCell, board]);
+  }, [hoveredCell]);
 
   return (
     <>
