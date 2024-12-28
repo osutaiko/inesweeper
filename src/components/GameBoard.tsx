@@ -209,6 +209,8 @@ export const GameBoard: React.FC<{
         }
         handleClick(board, row, col, config, setBoard);
       }
+    } else if (e.button === 1) {
+      handleChord(board, row, col, config, setBoard);
     } else if (e.button === 2) {
       setIsRmbDown(false);
       if (isLmbDown) {
