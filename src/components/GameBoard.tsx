@@ -240,7 +240,7 @@ export const GameBoard: React.FC<{
   }
 
   useEffect(() => {
-    if (!hoveredCell) {
+    if (!hoveredCell || isGameOver) {
       return;
     }
 
@@ -270,10 +270,11 @@ export const GameBoard: React.FC<{
     
       setShadedCells(updatedShadedCells);
     } else {
-      setShadedCells([hoveredCell]);
+      // setShadedCells([hoveredCell]);
+      setShadedCells([]);
     }
     
-  }, [hoveredCell]);
+  }, [hoveredCell, board]);
 
   return (
     <>
