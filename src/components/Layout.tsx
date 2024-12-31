@@ -96,7 +96,7 @@ const Layout = () => {
   };
 
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
       <div className="flex flex-col items-center min-h-screen overflow-hidden touch-none">
         <header className="flex flex-row w-full gap-4 px-2 sm:px-8 py-2 sm:py-4 justify-between items-center border-b overflow-x-auto">
           <a href="/">
