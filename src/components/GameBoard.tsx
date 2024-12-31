@@ -335,7 +335,7 @@ export const GameBoard: React.FC<{
                 if (cell.state.type === "revealed") {
                   return "bg-gray-300";
                 } else {
-                  return shadedCells.some(({ row: shadedRow, col: shadedCol }) => shadedRow === rowIndex && shadedCol === colIndex) ? "bg-indigo-100" : "bg-gray-50";
+                  return shadedCells.some(({ row: shadedRow, col: shadedCol }) => shadedRow === rowIndex && shadedCol === colIndex) ? "bg-indigo-50" : "bg-gray-50";
                 }
               };
 

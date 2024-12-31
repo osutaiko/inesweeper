@@ -18,13 +18,13 @@ export const boardConfigLibrary: BoardConfigLibrary = {
   },
   "omega": {
     "beg": { width: 9, height: 9, mineTileCount: 10, posMineCount: 5, negMineCount: 5, maxMinesPerCell: 1, cellNumberDeviant: null },
-    "int": { width: 16, height: 16, mineTileCount: 36, posMineCount: 18, negMineCount: 18, maxMinesPerCell: 1, cellNumberDeviant: null },
+    "int": { width: 16, height: 16, mineTileCount: 40, posMineCount: 20, negMineCount: 20, maxMinesPerCell: 1, cellNumberDeviant: null },
     "exp": { width: 30, height: 16, mineTileCount: 90, posMineCount: 45, negMineCount: 45, maxMinesPerCell: 1, cellNumberDeviant: null },
   },
   "crossed": {
-    "beg": { width: 9, height: 9, mineTileCount: 10, posMineCount: 10, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "cross" },
-    "int": { width: 16, height: 16, mineTileCount: 40, posMineCount: 40, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "cross" },
-    "exp": { width: 30, height: 16, mineTileCount: 99, posMineCount: 99, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "cross" },
+    "beg": { width: 9, height: 9, mineTileCount: 12, posMineCount: 12, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "cross" },
+    "int": { width: 16, height: 16, mineTileCount: 45, posMineCount: 44, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "cross" },
+    "exp": { width: 30, height: 16, mineTileCount: 111, posMineCount: 111, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "cross" },
   },
 };
 
