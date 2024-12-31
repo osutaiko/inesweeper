@@ -47,6 +47,31 @@ body {
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+
+    --game-border: 0 0% 85%;
+    --game-hidden: 0 0% 98%;
+    --game-revealed: 0 0% 89%;
+    --game-hover: 213 60% 95%;
+    --game-explodedmine: 0 84.2% 60.2%;
+    --game-wrongflag: 48 96% 53%;
+    
+    --game-number-1: 256 100% 50%;
+    --game-number-2: 124 100% 27%;
+    --game-number-3: 0 100% 50%;
+    --game-number-4: 255 100% 24%;
+    --game-number-5: 0 100% 28%;
+    --game-number-6: 180 100% 26%;
+    --game-number-7: 0 0% 0%;
+    --game-number-8: 0 0% 50%;
+    --game-number-0: 0 0% 20%;
+    --game-number--1: 60 100% 50%;
+    --game-number--2: 304 100% 73%;
+    --game-number--3: 180 85% 57%;
+    --game-number--4: 75 100% 76%;
+    --game-number--5: 180 100% 72%;
+    --game-number--6: 360 100% 74%;
+    --game-number--7: 0 0% 100%;
+    --game-number--8: 0 0% 50%;
   }
   .dark {
     --background: 0 0% 3.9%;
@@ -73,6 +98,31 @@ body {
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+
+    --game-border: 0 0% 16%;
+    --game-hidden: 0 0% 8%;
+    --game-revealed: 0 0% 14%;
+    --game-hover: 222 40% 12%;
+    --game-explodedmine: 0 84.2% 40%;
+    --game-wrongflag: 48 96% 40%;
+    
+    --game-number-1: 233 100% 70%;
+    --game-number-2: 124 100% 33%;
+    --game-number-3: 0 100% 50%;
+    --game-number-4: 270 100% 45%;
+    --game-number-5: 0 100% 40%;
+    --game-number-6: 180 100% 30%;
+    --game-number-7: 0 0% 40%;
+    --game-number-8: 0 0% 60%;
+    --game-number-0: 0 0% 80%;
+    --game-number--1: 60 80% 50%;
+    --game-number--2: 304 100% 73%;
+    --game-number--3: 180 85% 57%;
+    --game-number--4: 75 100% 76%;
+    --game-number--5: 180 100% 72%;
+    --game-number--6: 360 100% 74%;
+    --game-number--7: 0 0% 100%;
+    --game-number--8: 0 0% 50%;
   }
 }
 

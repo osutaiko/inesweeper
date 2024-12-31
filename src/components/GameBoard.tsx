@@ -222,15 +222,21 @@ export const GameBoard: React.FC<{
   const { remainingPosFlags, remainingNegFlags } = countRemainingFlags(board);
 
   const getNumberColorClass = (num: number | null) => {
-    if (num === null) {
-      return "";
-    }
-    if (num >= 0) {
-      return ["#4600ff", "#008809", "#ff0000", "#1e007c", "#8e0000", "#008483", "#000000", "#808080"][(num - 1) % 8];
-    } else {
-      return ["#ffff00", "#ff77f6", "#33eeee", "#e1ff83", "#71ffff", "#ff7b7c", "#ffffff", "#7f7f7f"][(-num - 1) % 8];
-    }
-  };
+  ["text-game-number-1", "text-game-number-2", "text-game-number-3", "text-game-number-4", "text-game-number-5", "text-game-number-6", "text-game-number-7", "text-game-number-8", "text-game-number-0", "text-game-number--1", "text-game-number--2", "text-game-number--3", "text-game-number--4", "text-game-number--5", "text-game-number--6", "text-game-number--7", "text-game-number--8"];
+  
+  if (num === null) {
+    return "";
+  }
+  if (num === 0) {
+    return "text-game-number-0";
+  }
+
+  if (num > 0) {
+    return `text-game-number-${num % 8 === 0 ? 8 : num % 8}`;
+  } else {
+    return `text-game-number--${(-num % 8 === 0 ? 8 : -num % 8)}`;
+  }
+};
 
   const getFlagButtonClass = () => {
     switch (flagButtonPosition) {
@@ -293,36 +299,40 @@ export const GameBoard: React.FC<{
         }}
       >
         <div
-          className="relative h-[64px] flex justify-between p-2 border-t-[9px] border-x-[9px] bg-gray-50 border-gray-400"
+          className="bg-game-border border-t-[9px] border-x-[9px] border-game-border"
         >
-          <div className="flex flex-col justify-center px-3 -space-y-0.5 bg-gray-300 rounded-md overflow-hidden">
-            {config.posMineCount > 0 && 
-              <div className="flex flex-row items-center gap-2">
-                <Flag stroke="red" fill="red" size={config.negMineCount > 0 ? 15 : 20} />
-                <p className={`font-bold ${config.negMineCount > 0 ? "text-sm" : "text-xl"}`}>{remainingPosFlags}</p>
-              </div>
-            }
-            {config.negMineCount > 0 && 
-              <div className="flex flex-row items-center gap-2">
-                <Flag stroke="blue" fill="blue" size={config.posMineCount > 0 ? 15 : 20} className="rotate-180" />
-                <p className={`font-bold ${config.posMineCount > 0 ? "text-sm" : "text-xl"}`}>{remainingNegFlags}</p>
-              </div>
-            }
+          <div className="relative flex justify-between p-2 bg-game-hidden rounded-sm">
+            <Button className="flex flex-col justify-center px-3 gap-0 -space-y-0.5 rounded-md overflow-hidden [&_svg]:size-auto bg-game-border" variant="secondary">
+              {config.posMineCount > 0 && 
+                <div className="flex flex-row items-center gap-2">
+                  <Flag stroke="red" fill="red" size={config.negMineCount > 0 ? 15 : 20} />
+                  <p className={`font-bold ${config.negMineCount > 0 ? "text-sm" : "text-xl"}`}>{remainingPosFlags}</p>
+                </div>
+              }
+              {config.negMineCount > 0 && 
+                <div className="flex flex-row items-center gap-2">
+                  <Flag stroke="blue" fill="blue" size={config.posMineCount > 0 ? 15 : 20} className="rotate-180" />
+                  <p className={`font-bold ${config.posMineCount > 0 ? "text-sm" : "text-xl"}`}>{remainingNegFlags}</p>
+                </div>
+              }
+            </Button>
+            <Button
+              className="absolute top-0 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-game-border" size="icon" variant="secondary"
+              onClick={handleReset}
+            >
+              {isGameOver === null && (isLmbDown ? <Meh /> : <Smile />)}
+              {isGameOver === "win" && <Laugh />}
+              {isGameOver === "loss" && <Skull />}
+            </Button>
+            <Button className="flex justify-center items-center px-3 rounded-md overflow-hidden bg-game-border" variant="secondary">
+              <p className="font-bold text-xl">{startTime ? (isGameOver ? (timeElapsed / 1000).toFixed(2) : Math.floor(timeElapsed / 1000)) : 0}</p>
+            </Button>
+
           </div>
-          <Button
-            className="absolute top-0 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gray-400" size="icon"
-            onClick={handleReset}
-          >
-            {isGameOver === null && (isLmbDown ? <Meh /> : <Smile />)}
-            {isGameOver === "win" && <Laugh />}
-            {isGameOver === "loss" && <Skull />}
-          </Button>
-          <div className="flex justify-center items-center px-3 bg-gray-300 rounded-md overflow-hidden">
-            <p className="font-bold text-xl">{startTime ? (isGameOver ? (timeElapsed / 1000).toFixed(2) : Math.floor(timeElapsed / 1000)) : 0}</p>
-          </div>
+          
         </div>
         <div
-          className="grid border-[8px] border-gray-400"
+          className="grid border-[8px] border-game-border bg-game-border"
           style={{
             gridTemplateColumns: `repeat(${config.width}, 30px)`,
             gridTemplateRows: `repeat(${config.height}, 30px)`,
@@ -333,16 +343,16 @@ export const GameBoard: React.FC<{
             row.map((cell, colIndex) => {
               const getBgClass = () => {
                 if (cell.state.type === "revealed") {
-                  return "bg-gray-300";
+                  return "bg-game-revealed";
                 } else {
-                  return shadedCells.some(({ row: shadedRow, col: shadedCol }) => shadedRow === rowIndex && shadedCol === colIndex) ? "bg-indigo-50" : "bg-gray-50";
+                  return shadedCells.some(({ row: shadedRow, col: shadedCol }) => shadedRow === rowIndex && shadedCol === colIndex) ? "bg-game-hover" : "bg-game-hidden";
                 }
               };
 
               return (
                 <div
                   key={`${rowIndex}-${colIndex}`}
-                  className={`flex justify-center items-center border border-gray-400 ${getBgClass()}`}
+                  className={`flex justify-center items-center border border-game-border ${getBgClass()} rounded-sm overflow-hidden`}
                   onMouseDown={(e) => handleMouseDown(e, rowIndex, colIndex)}
                   onMouseUp={(e) => handleMouseUp(e, rowIndex, colIndex)}
                   onMouseEnter={() => setHoveredCell({ row: rowIndex, col: colIndex })}
@@ -355,7 +365,7 @@ export const GameBoard: React.FC<{
                     cell.mineNum ? 
                       <div
                         className={`flex flex-wrap w-full h-full justify-center items-center ${
-                          isGameOver === "loss" && explodedCell && explodedCell.row === rowIndex && explodedCell.col === colIndex ? "bg-destructive" : "" 
+                          isGameOver === "loss" && explodedCell && explodedCell.row === rowIndex && explodedCell.col === colIndex ? "bg-game-explodedmine" : "" 
                         }`}
                       >
                         {Array.from({ length: Math.abs(cell.mineNum) }).map((_, idx) => (
@@ -367,19 +377,16 @@ export const GameBoard: React.FC<{
                           />
                         ))}
                       </div> : 
-                    <p
-                      className="font-bold text-xl"
-                      style={{ color: getNumberColorClass(cell.state.num) }}
-                    >
+                    <span className={`font-bold text-xl ${getNumberColorClass(cell.state.num)}`}>
                       {cell.state.num}
-                    </p>
+                    </span>
                   )}
                   {cell.state.type === "flagged" && (
                     <div
                       className={`flex flex-wrap w-full h-full justify-center items-center ${
                         isGameOver === "loss" && incorrectFlagCells!.some(
                           ({ row: r, col: c }) => r === rowIndex && c === colIndex
-                        ) ? "bg-yellow-300" : ""
+                        ) ? "bg-game-wrongflag" : ""
                       }`}
                     >
                       {(() => {

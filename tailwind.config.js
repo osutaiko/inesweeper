@@ -52,7 +52,34 @@ export default {
   				'3': 'hsl(var(--chart-3))',
   				'4': 'hsl(var(--chart-4))',
   				'5': 'hsl(var(--chart-5))'
-  			}
+  			},
+			game: {
+				border: 'hsl(var(--game-border))',
+				hidden: 'hsl(var(--game-hidden))',
+				revealed: 'hsl(var(--game-revealed))',
+				hover: 'hsl(var(--game-hover))',
+				explodedmine: 'hsl(var(--game-explodedmine))',
+				wrongflag: 'hsl(var(--game-wrongflag))',
+				number: {
+					'1': 'hsl(var(--game-number-1))',
+					'2': 'hsl(var(--game-number-2))',
+					'3': 'hsl(var(--game-number-3))',
+					'4': 'hsl(var(--game-number-4))',
+					'5': 'hsl(var(--game-number-5))',
+					'6': 'hsl(var(--game-number-6))',
+					'7': 'hsl(var(--game-number-7))',
+					'8': 'hsl(var(--game-number-8))',
+					'0': 'hsl(var(--game-number-0))',
+					'-1': 'hsl(var(--game-number--1))',
+					'-2': 'hsl(var(--game-number--2))',
+					'-3': 'hsl(var(--game-number--3))',
+					'-4': 'hsl(var(--game-number--4))',
+					'-5': 'hsl(var(--game-number--5))',
+					'-6': 'hsl(var(--game-number--6))',
+					'-7': 'hsl(var(--game-number--7))',
+					'-8': 'hsl(var(--game-number--8))',
+				}
+			}
   		},
   		keyframes: {
   			'accordion-down': {
