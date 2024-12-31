@@ -23,8 +23,8 @@ export const boardConfigLibrary: BoardConfigLibrary = {
   },
   "crossed": {
     "beg": { width: 9, height: 9, mineTileCount: 12, posMineCount: 12, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "cross" },
-    "int": { width: 16, height: 16, mineTileCount: 45, posMineCount: 44, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "cross" },
-    "exp": { width: 30, height: 16, mineTileCount: 111, posMineCount: 111, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "cross" },
+    "int": { width: 16, height: 16, mineTileCount: 50, posMineCount: 50, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "cross" },
+    "exp": { width: 30, height: 16, mineTileCount: 120, posMineCount: 120, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "cross" },
   },
 };
 
