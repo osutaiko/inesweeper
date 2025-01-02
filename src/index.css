@@ -48,9 +48,9 @@ body {
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
 
-    --game-border: 0 0% 85%;
-    --game-hidden: 0 0% 98%;
-    --game-revealed: 0 0% 89%;
+    --game-border: 0 0% 79%;
+    --game-hidden: 0 0% 96%;
+    --game-revealed: 0 0% 83%;
     --game-hover: 213 60% 95%;
     --game-explodedmine: 0 84.2% 60.2%;
     --game-wrongflag: 48 96% 53%;
