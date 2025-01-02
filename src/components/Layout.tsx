@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { ThemeProvider } from "./theme-provider";
 import { DifficultyName, TimeRecord, VariantName } from "@/lib/types";
 import { boardConfigLibrary, difficultyMap, variantMap } from "@/lib/constants";
@@ -260,7 +260,7 @@ const Layout = () => {
           </div>
         </header>
         <ScrollArea className="flex w-full h-[calc(100vh-57px)] sm:h-[calc(100vh-73px)]">
-          <main className="flex flex-col min-h-[calc(100vh-57px)] sm:min-h-[calc(100vh-73px)] gap-4 justify-center items-center px-20 sm:px-8 py-8">
+          <main className="flex flex-col min-h-[calc(100vh-57px)] sm:min-h-[calc(100vh-73px)] gap-4 justify-center items-center px-6 py-4">
             <GameBoard 
               config={boardConfigLibrary[variant][difficulty]}
               zoom={zoom}
@@ -271,7 +271,7 @@ const Layout = () => {
             />
             <div className="flex flex-row gap-2">
               <Select value={variant} onValueChange={(value) => setVariant(value as VariantName)}>
-                <SelectTrigger className="w-[150px]">
+                <SelectTrigger className="w-[140px]">
                   <SelectValue placeholder="Variant" />
                 </SelectTrigger>
                 <SelectContent>
@@ -283,7 +283,7 @@ const Layout = () => {
                 </SelectContent>
               </Select>
               <Select value={difficulty} onValueChange={(value) => setDifficulty(value as DifficultyName)}>
-                <SelectTrigger className="w-[150px]">
+                <SelectTrigger className="w-[140px]">
                   <SelectValue placeholder="Difficulty" />
                 </SelectTrigger>
                 <SelectContent>
