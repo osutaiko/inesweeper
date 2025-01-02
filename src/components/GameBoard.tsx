@@ -343,9 +343,20 @@ export const GameBoard: React.FC<{
             row.map((cell, colIndex) => {
               const getBgClass = () => {
                 if (cell.state.type === "revealed") {
+                  if (isGameOver === "loss" && explodedCell && explodedCell.row === rowIndex && explodedCell.col === colIndex) {
+                    return "bg-game-explodedmine";
+                  }
                   return "bg-game-revealed";
+                } else if (cell.state.type === "flagged") {
+                  if (isGameOver === "loss" && incorrectFlagCells!.some(({ row: r, col: c }) => r === rowIndex && c === colIndex)) {
+                    return "bg-game-wrongflag";
+                  }
+                  return "bg-game-hidden";
                 } else {
-                  return shadedCells.some(({ row: shadedRow, col: shadedCol }) => shadedRow === rowIndex && shadedCol === colIndex) ? "bg-game-hover" : "bg-game-hidden";
+                  if (shadedCells.some(({ row: shadedRow, col: shadedCol }) => shadedRow === rowIndex && shadedCol === colIndex)) {
+                    return "bg-game-hover";
+                  }
+                  return "bg-game-hidden";
                 }
               };
 
@@ -358,15 +369,10 @@ export const GameBoard: React.FC<{
                   onMouseEnter={() => setHoveredCell({ row: rowIndex, col: colIndex })}
                   onMouseLeave={() => setHoveredCell(null)}
                 >
-                  {cell.state.type === "hidden" && isFlagToggled && (
-                    <Flag className="w-[18px] h-[18px]" stroke="red" fill="red" opacity={0.1} />
-                  )}
                   {cell.state.type === "revealed" && (
                     cell.mineNum ? 
                       <div
-                        className={`flex flex-wrap w-full h-full justify-center items-center ${
-                          isGameOver === "loss" && explodedCell && explodedCell.row === rowIndex && explodedCell.col === colIndex ? "bg-game-explodedmine" : "" 
-                        }`}
+                        className="flex flex-wrap justify-center items-center"
                       >
                         {Array.from({ length: Math.abs(cell.mineNum) }).map((_, idx) => (
                           <Sun
@@ -383,11 +389,7 @@ export const GameBoard: React.FC<{
                   )}
                   {cell.state.type === "flagged" && (
                     <div
-                      className={`flex flex-wrap w-full h-full justify-center items-center ${
-                        isGameOver === "loss" && incorrectFlagCells!.some(
-                          ({ row: r, col: c }) => r === rowIndex && c === colIndex
-                        ) ? "bg-game-wrongflag" : ""
-                      }`}
+                      className="flex flex-wrap pt-[1px] gap-y-[1px] justify-center items-center"
                     >
                       {(() => {
                         const flagNum = cell.state.flagNum;
@@ -403,6 +405,9 @@ export const GameBoard: React.FC<{
                         ));
                       })()}
                     </div>
+                  )}
+                  {cell.state.type === "hidden" && isFlagToggled && (
+                    <Flag className="w-[18px] h-[18px]" stroke="red" fill="red" opacity={0.1} />
                   )}
                 </div>
               );
