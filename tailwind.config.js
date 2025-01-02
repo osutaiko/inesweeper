@@ -57,6 +57,7 @@ export default {
 				border: 'hsl(var(--game-border))',
 				hidden: 'hsl(var(--game-hidden))',
 				revealed: 'hsl(var(--game-revealed))',
+				button: 'hsl(var(--game-button))',
 				hover: 'hsl(var(--game-hover))',
 				explodedmine: 'hsl(var(--game-explodedmine))',
 				wrongflag: 'hsl(var(--game-wrongflag))',

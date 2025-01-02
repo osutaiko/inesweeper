@@ -302,7 +302,7 @@ export const GameBoard: React.FC<{
           className="bg-game-border border-t-[9px] border-x-[9px] border-game-border"
         >
           <div className="relative flex justify-between p-2 bg-game-hidden rounded-sm">
-            <Button className="flex flex-col justify-center px-3 gap-0 -space-y-0.5 rounded-md overflow-hidden [&_svg]:size-auto bg-game-border" variant="secondary">
+            <Button className="flex flex-col justify-center px-3 gap-0 -space-y-0.5 rounded-md overflow-hidden [&_svg]:size-auto bg-game-button" variant="secondary">
               {config.posMineCount > 0 && 
                 <div className="flex flex-row items-center gap-2">
                   <Flag stroke="red" fill="red" size={config.negMineCount > 0 ? 15 : 20} />
@@ -317,14 +317,14 @@ export const GameBoard: React.FC<{
               }
             </Button>
             <Button
-              className="absolute top-0 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-game-border" size="icon" variant="secondary"
+              className="absolute top-0 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-game-button" size="icon" variant="secondary"
               onClick={handleReset}
             >
               {isGameOver === null && (isLmbDown ? <Meh /> : <Smile />)}
               {isGameOver === "win" && <Laugh />}
               {isGameOver === "loss" && <Skull />}
             </Button>
-            <Button className="flex justify-center items-center px-3 rounded-md overflow-hidden bg-game-border" variant="secondary">
+            <Button className="flex justify-center items-center px-3 rounded-md overflow-hidden bg-game-button" variant="secondary">
               <p className="font-bold text-xl">{startTime ? (isGameOver ? (timeElapsed / 1000).toFixed(2) : Math.floor(timeElapsed / 1000)) : 0}</p>
             </Button>
 

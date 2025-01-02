@@ -48,9 +48,10 @@ body {
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
 
-    --game-border: 0 0% 79%;
-    --game-hidden: 0 0% 96%;
-    --game-revealed: 0 0% 83%;
+    --game-border: 210 12% 65%;
+    --game-hidden: 210 12% 98%;
+    --game-revealed: 210 12% 72%;
+    --game-button: 210 12% 87%;
     --game-hover: 213 60% 95%;
     --game-explodedmine: 0 84.2% 60.2%;
     --game-wrongflag: 48 96% 53%;
@@ -63,7 +64,7 @@ body {
     --game-number-6: 180 100% 26%;
     --game-number-7: 0 0% 0%;
     --game-number-8: 0 0% 50%;
-    --game-number-0: 0 0% 20%;
+    --game-number-0: 0 0% 90%;
     --game-number--1: 60 100% 50%;
     --game-number--2: 304 100% 73%;
     --game-number--3: 180 85% 57%;
@@ -99,10 +100,11 @@ body {
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
 
-    --game-border: 0 0% 16%;
-    --game-hidden: 0 0% 8%;
-    --game-revealed: 0 0% 14%;
-    --game-hover: 222 40% 12%;
+    --game-border: 210 12% 16%;
+    --game-hidden: 210 12% 8%;
+    --game-revealed: 210 12% 14%;
+    --game-button: 210 12% 16%;
+    --game-hover: 213 60% 10%;
     --game-explodedmine: 0 84.2% 40%;
     --game-wrongflag: 48 96% 40%;
     
