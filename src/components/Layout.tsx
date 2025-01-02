@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ThemeProvider } from "./theme-provider";
 import { DifficultyName, TimeRecord, VariantName } from "@/lib/types";
 import { boardConfigLibrary, difficultyMap, variantMap } from "@/lib/constants";
@@ -98,7 +98,7 @@ const Layout = () => {
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
       <div className="flex flex-col items-center min-h-screen overflow-hidden touch-none">
-        <header className="flex flex-row w-full gap-4 px-2 sm:px-8 py-2 sm:py-4 justify-between items-center border-b overflow-x-auto">
+        <header className="flex flex-row w-full gap-4 px-3 sm:px-8 py-2 sm:py-4 justify-between items-center border-b overflow-x-auto">
           <a href="/">
             <div className="flex flex-row items-center gap-3">
               <img src={InesweeperLogo} alt="Inesweeper Logo" className="w-[40px] h-[40px] min-w-[40px] min-h-[40px]" />
@@ -260,7 +260,7 @@ const Layout = () => {
           </div>
         </header>
         <ScrollArea className="flex w-full h-[calc(100vh-57px)] sm:h-[calc(100vh-73px)]">
-          <main className="flex flex-col min-h-[calc(100vh-57px)] sm:min-h-[calc(100vh-73px)] gap-4 justify-center items-center px-12 py-8">
+          <main className="flex flex-col min-h-[calc(100vh-57px)] sm:min-h-[calc(100vh-73px)] gap-4 justify-center items-center px-20 sm:px-8 py-8">
             <GameBoard 
               config={boardConfigLibrary[variant][difficulty]}
               zoom={zoom}
