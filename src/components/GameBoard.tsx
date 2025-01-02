@@ -238,7 +238,7 @@ export const GameBoard: React.FC<{
   }
 };
 
-  const getFlagButtonClass = () => {
+  const getFlagButtonPositionClass = () => {
     switch (flagButtonPosition) {
       case "bottom-left": return "bottom-0 left-0 rounded-tl-none rounded-tr-md rounded-bl-none rounded-br-none";
       case "center-left": return "top-1/2 left-0 rounded-tl-none rounded-tr-md rounded-bl-none rounded-br-md";
@@ -417,8 +417,7 @@ export const GameBoard: React.FC<{
       </div>
       {isTouchscreen && (
         <Button
-          variant={isFlagToggled ? "destructive" : "default"}
-          className={`absolute p-0 [&_svg]:size-1/2 ${getFlagButtonClass()}`}
+          className={`absolute p-0 [&_svg]:size-1/2 ${getFlagButtonPositionClass()} text-primary ${isFlagToggled ? "bg-destructive hover:bg-destructive/90" : "bg-game-button hover:bg-game-button/90"}`}
           style={{
             width: flagButtonSize,
             height: flagButtonSize,

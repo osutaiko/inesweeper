@@ -137,7 +137,7 @@ const Layout = () => {
                       </div>
                       <div className="flex flex-row justify-between items-center gap-3">
                         <p className="w-1/2">Flag toggle button position</p>
-                        <Select onValueChange={(value) => setFlagButtonPosition(value)}>
+                        <Select value={flagButtonPosition} onValueChange={(value) => setFlagButtonPosition(value)}>
                           <SelectTrigger className="w-[180px] max-w-1/2">
                             <SelectValue placeholder="Bottom Right" />
                           </SelectTrigger>
@@ -260,7 +260,7 @@ const Layout = () => {
           </div>
         </header>
         <ScrollArea className="flex w-full h-[calc(100vh-57px)] sm:h-[calc(100vh-73px)]">
-          <main className="flex flex-col min-h-[calc(100vh-57px)] sm:min-h-[calc(100vh-73px)] gap-4 justify-center items-center px-4 sm:px-8 py-4 sm:py-8">
+          <main className="flex flex-col min-h-[calc(100vh-57px)] sm:min-h-[calc(100vh-73px)] gap-4 justify-center items-center px-12 py-8">
             <GameBoard 
               config={boardConfigLibrary[variant][difficulty]}
               zoom={zoom}
