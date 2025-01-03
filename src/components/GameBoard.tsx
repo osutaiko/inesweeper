@@ -292,130 +292,137 @@ export const GameBoard: React.FC<{
   return (
     <>
       <div
-        className="flex flex-col w-min h-min rounded-md overflow-hidden select-none"
+        className="flex flex-col rounded-md overflow-hidden select-none"
         style={{
-          zoom: zoom / 100,
-          backfaceVisibility: "hidden",
+          width: `${(30 * config.width + 16) * (zoom / 100)}px`,
+          height: `${(30 * config.height + 81) * (zoom / 100)}px`,
         }}
       >
         <div
-          className="bg-game-border border-t-[9px] border-x-[9px] border-game-border"
-        >
-          <div className="relative flex justify-between p-2 bg-game-hidden rounded-sm">
-            <Button className="flex flex-col justify-center px-3 gap-0 -space-y-0.5 rounded-md overflow-hidden [&_svg]:size-auto bg-game-button" variant="secondary">
-              {config.posMineCount > 0 && 
-                <div className="flex flex-row items-center gap-2.5">
-                  <Flag stroke="red" fill="red" size={config.negMineCount > 0 ? 15 : 20} />
-                  <p className={`font-bold ${config.negMineCount > 0 ? "text-sm" : "text-xl"}`}>{remainingPosFlags}</p>
-                </div>
-              }
-              {config.negMineCount > 0 && 
-                <div className="flex flex-row items-center gap-2.5">
-                  <Flag stroke="blue" fill="blue" size={config.posMineCount > 0 ? 15 : 20} className="rotate-180" />
-                  <p className={`font-bold ${config.posMineCount > 0 ? "text-sm" : "text-xl"}`}>{remainingNegFlags}</p>
-                </div>
-              }
-            </Button>
-            <Button
-              className="absolute top-0 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-game-button" size="icon" variant="secondary"
-              onClick={handleReset}
-            >
-              {isGameOver === null && (isLmbDown ? <Meh /> : <Smile />)}
-              {isGameOver === "win" && <Laugh />}
-              {isGameOver === "loss" && <Skull />}
-            </Button>
-            <Button className="flex justify-center items-center px-3 rounded-md overflow-hidden bg-game-button" variant="secondary">
-              <p className="font-bold text-xl">{startTime ? (isGameOver ? (timeElapsed / 1000).toFixed(2) : Math.floor(timeElapsed / 1000)) : 0}</p>
-            </Button>
-
-          </div>
-          
-        </div>
-        <div
-          className="grid border-[8px] border-game-border bg-game-border"
+          className="flex flex-col w-min h-min rounded-md overflow-hidden select-none"
           style={{
-            gridTemplateColumns: `repeat(${config.width}, 30px)`,
-            gridTemplateRows: `repeat(${config.height}, 30px)`,
+            transform: `scale(${zoom / 100})`,
+            transformOrigin: "top left",
           }}
-          onContextMenu={(e) => e.preventDefault()}
         >
-          {board.map((row, rowIndex) =>
-            row.map((cell, colIndex) => {
-              const getBgClass = () => {
-                if (cell.state.type === "revealed") {
-                  if (isGameOver === "loss" && explodedCell && explodedCell.row === rowIndex && explodedCell.col === colIndex) {
-                    return "bg-game-explodedmine";
-                  }
-                  return "bg-game-revealed";
-                } else if (cell.state.type === "flagged") {
-                  if (isGameOver === "loss" && incorrectFlagCells!.some(({ row: r, col: c }) => r === rowIndex && c === colIndex)) {
-                    return "bg-game-wrongflag";
-                  }
-                  return "bg-game-hidden";
-                } else {
-                  if (shadedCells.some(({ row: shadedRow, col: shadedCol }) => shadedRow === rowIndex && shadedCol === colIndex)) {
-                    return "bg-game-hover";
-                  }
-                  return "bg-game-hidden";
+          <div
+            className="bg-game-border border-t-[9px] border-x-[9px] border-game-border"
+          >
+            <div className="relative flex justify-between p-2 bg-game-hidden rounded-sm">
+              <Button className="flex flex-col justify-center px-3 gap-0 -space-y-0.5 rounded-md overflow-hidden [&_svg]:size-auto bg-game-button" variant="secondary">
+                {config.posMineCount > 0 && 
+                  <div className="flex flex-row items-center gap-2.5">
+                    <Flag stroke="red" fill="red" size={config.negMineCount > 0 ? 15 : 20} />
+                    <p className={`font-bold ${config.negMineCount > 0 ? "text-sm" : "text-xl"}`}>{remainingPosFlags}</p>
+                  </div>
                 }
-              };
+                {config.negMineCount > 0 && 
+                  <div className="flex flex-row items-center gap-2.5">
+                    <Flag stroke="blue" fill="blue" size={config.posMineCount > 0 ? 15 : 20} className="rotate-180" />
+                    <p className={`font-bold ${config.posMineCount > 0 ? "text-sm" : "text-xl"}`}>{remainingNegFlags}</p>
+                  </div>
+                }
+              </Button>
+              <Button
+                className="absolute top-0 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-game-button" size="icon" variant="secondary"
+                onClick={handleReset}
+              >
+                {isGameOver === null && (isLmbDown ? <Meh /> : <Smile />)}
+                {isGameOver === "win" && <Laugh />}
+                {isGameOver === "loss" && <Skull />}
+              </Button>
+              <Button className="flex justify-center items-center px-3 rounded-md overflow-hidden bg-game-button" variant="secondary">
+                <p className="font-bold text-xl">{startTime ? (isGameOver ? (timeElapsed / 1000).toFixed(2) : Math.floor(timeElapsed / 1000)) : 0}</p>
+              </Button>
 
-              return (
-                <div
-                  key={`${rowIndex}-${colIndex}`}
-                  className={`flex justify-center items-center border border-game-border ${getBgClass()} rounded-sm overflow-hidden`}
-                  onMouseDown={(e) => handleMouseDown(e, rowIndex, colIndex)}
-                  onMouseUp={(e) => handleMouseUp(e, rowIndex, colIndex)}
-                  onMouseEnter={() => setHoveredCell({ row: rowIndex, col: colIndex })}
-                  onMouseLeave={() => setHoveredCell(null)}
-                >
-                  {cell.state.type === "revealed" && (
-                    cell.mineNum ? 
-                      <div
-                        className="flex flex-wrap justify-center items-center"
+            </div>
+            
+          </div>
+          <div
+            className="grid border-[8px] border-game-border bg-game-border"
+            style={{
+              gridTemplateColumns: `repeat(${config.width}, 30px)`,
+              gridTemplateRows: `repeat(${config.height}, 30px)`,
+            }}
+            onContextMenu={(e) => e.preventDefault()}
+          >
+            {board.map((row, rowIndex) =>
+              row.map((cell, colIndex) => {
+                const getBgClass = () => {
+                  if (cell.state.type === "revealed") {
+                    if (isGameOver === "loss" && explodedCell && explodedCell.row === rowIndex && explodedCell.col === colIndex) {
+                      return "bg-game-explodedmine";
+                    }
+                    return "bg-game-revealed";
+                  } else if (cell.state.type === "flagged") {
+                    if (isGameOver === "loss" && incorrectFlagCells!.some(({ row: r, col: c }) => r === rowIndex && c === colIndex)) {
+                      return "bg-game-wrongflag";
+                    }
+                    return "bg-game-hidden";
+                  } else {
+                    if (shadedCells.some(({ row: shadedRow, col: shadedCol }) => shadedRow === rowIndex && shadedCol === colIndex)) {
+                      return "bg-game-hover";
+                    }
+                    return "bg-game-hidden";
+                  }
+                };
+
+                return (
+                  <div
+                    key={`${rowIndex}-${colIndex}`}
+                    className={`flex justify-center items-center border border-game-border ${getBgClass()} rounded-sm overflow-hidden`}
+                    onMouseDown={(e) => handleMouseDown(e, rowIndex, colIndex)}
+                    onMouseUp={(e) => handleMouseUp(e, rowIndex, colIndex)}
+                    onMouseEnter={() => setHoveredCell({ row: rowIndex, col: colIndex })}
+                    onMouseLeave={() => setHoveredCell(null)}
+                  >
+                    {cell.state.type === "revealed" && (
+                      cell.mineNum ? 
+                        <div
+                          className="flex flex-wrap justify-center items-center"
+                        >
+                          {Array.from({ length: Math.abs(cell.mineNum) }).map((_, idx) => (
+                            <Sun
+                              key={`bomb-${idx}`}
+                              className={`${cell.mineNum < 0 ? "rotate-180" : ""} ${Math.abs(cell.mineNum) > 1 ? "w-[12px] h-[12px]" : "w-[18px] h-[18px]"}`}
+                              stroke={cell.mineNum > 0 ? "black" : "white"}
+                              fill={cell.mineNum > 0 ? "black" : "white"}
+                            />
+                          ))}
+                        </div> : 
+                      <span
+                        className={`font-bold text-xl ${getNumberColorClass(cell.state.num)}`}
                       >
-                        {Array.from({ length: Math.abs(cell.mineNum) }).map((_, idx) => (
-                          <Sun
-                            key={`bomb-${idx}`}
-                            className={`${cell.mineNum < 0 ? "rotate-180" : ""} ${Math.abs(cell.mineNum) > 1 ? "w-[12px] h-[12px]" : "w-[18px] h-[18px]"}`}
-                            stroke={cell.mineNum > 0 ? "black" : "white"}
-                            fill={cell.mineNum > 0 ? "black" : "white"}
-                          />
-                        ))}
-                      </div> : 
-                    <span
-                      className={`font-bold text-xl ${getNumberColorClass(cell.state.num)}`}
-                      style={{ scale: zoom / 100 }}
-                    >
-                      {cell.state.num}
-                    </span>
-                  )}
-                  {cell.state.type === "flagged" && (
-                    <div
-                      className="flex flex-wrap pt-[1px] gap-y-[1px] justify-center items-center"
-                    >
-                      {(() => {
-                        const flagNum = cell.state.flagNum;
-                        return Array.from({ length: Math.abs(flagNum) }).map((_, idx) => (
-                          <Flag
-                            key={`flag-${idx}`}
-                            className={`${
-                              flagNum < 0 ? "rotate-180" : ""
-                            } ${Math.abs(flagNum) > 1 ? "w-[10px] h-[10px]" : "w-[18px] h-[18px]"}`}
-                            stroke={flagNum > 0 ? "red" : "blue"}
-                            fill={flagNum > 0 ? "red" : "blue"}
-                          />
-                        ));
-                      })()}
-                    </div>
-                  )}
-                  {cell.state.type === "hidden" && isFlagToggled && (
-                    <Flag className="w-[18px] h-[18px]" stroke="red" fill="red" opacity={0.1} />
-                  )}
-                </div>
-              );
-            })
-          )}
+                        {cell.state.num}
+                      </span>
+                    )}
+                    {cell.state.type === "flagged" && (
+                      <div
+                        className="flex flex-wrap pt-[1px] gap-y-[1px] justify-center items-center"
+                      >
+                        {(() => {
+                          const flagNum = cell.state.flagNum;
+                          return Array.from({ length: Math.abs(flagNum) }).map((_, idx) => (
+                            <Flag
+                              key={`flag-${idx}`}
+                              className={`${
+                                flagNum < 0 ? "rotate-180" : ""
+                              } ${Math.abs(flagNum) > 1 ? "w-[10px] h-[10px]" : "w-[18px] h-[18px]"}`}
+                              stroke={flagNum > 0 ? "red" : "blue"}
+                              fill={flagNum > 0 ? "red" : "blue"}
+                            />
+                          ));
+                        })()}
+                      </div>
+                    )}
+                    {cell.state.type === "hidden" && isFlagToggled && (
+                      <Flag className="w-[18px] h-[18px]" stroke="red" fill="red" opacity={0.1} />
+                    )}
+                  </div>
+                );
+              })
+            )}
+          </div>
         </div>
       </div>
       {isTouchscreen && (
