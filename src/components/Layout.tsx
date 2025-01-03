@@ -249,6 +249,12 @@ const Layout = () => {
                       <p>Minesweeper, but the number on the cell indicates how many mines are in a cross-shaped region within distance 2.</p>
                     </AccordionContent>
                   </AccordionItem>
+                  <AccordionItem value="knight">
+                    <AccordionTrigger className="text-base font-bold">Knight's Path</AccordionTrigger>
+                    <AccordionContent>
+                      <p>Minesweeper, but the number on the cell indicates how many mines are two cells away in one direction and one cell away in another (i.e. knight's path in chess).</p>
+                    </AccordionContent>
+                  </AccordionItem>
                 </Accordion>
                 <div className="flex justify-end">
                   <a href="https://github.com/osutaiko/inesweeper">
@@ -280,6 +286,7 @@ const Layout = () => {
                   <SelectItem value="liar">Liar</SelectItem>
                   <SelectItem value="omega">Omega</SelectItem>
                   <SelectItem value="crossed">Crossed</SelectItem>
+                  <SelectItem value="knight">Knight's Path</SelectItem>
                 </SelectContent>
               </Select>
               <Select value={difficulty} onValueChange={(value) => setDifficulty(value as DifficultyName)}>

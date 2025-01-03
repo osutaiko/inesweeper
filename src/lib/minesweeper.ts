@@ -70,6 +70,8 @@ export const getCellNumber = (board: Board, row: number, col: number, config: Bo
       if (dx === 0 && dy === 0) continue;
       if (config.cellNumberDeviant === "cross") {
         if (dx * dy !== 0) continue;
+      } else if (config.cellNumberDeviant === "knight") {
+        if (!(dx * dy === -2 || dx * dy === 2)) continue;
       } else {
         if (Math.max(Math.abs(dx), Math.abs(dy)) > 1) continue;
       }
@@ -112,6 +114,8 @@ export const handleClick = (board: Board, row: number, col: number, config: Boar
       for (let dy = -2; dy <= 2; dy++) {
         if (config.cellNumberDeviant === "cross") {
           if (dx * dy !== 0) continue;
+        } else if (config.cellNumberDeviant === "knight") {
+          if (!(dx * dy === -2 || dx * dy === 2)) continue;
         } else {
           if (Math.max(Math.abs(dx), Math.abs(dy)) > 1) continue;
         }
@@ -141,6 +145,8 @@ export const handleChord = (board: Board, row: number, col: number, config: Boar
     for (let dy = -2; dy <= 2; dy++) {
       if (config.cellNumberDeviant === "cross") {
         if (dx * dy !== 0) continue;
+      } else if (config.cellNumberDeviant === "knight") {
+        if (!(dx * dy === -2 || dx * dy === 2)) continue;
       } else {
         if (Math.max(Math.abs(dx), Math.abs(dy)) > 1) continue;
       }
@@ -163,6 +169,8 @@ export const handleChord = (board: Board, row: number, col: number, config: Boar
       for (let dy = -2; dy <= 2; dy++) {
         if (config.cellNumberDeviant === "cross") {
           if (dx * dy !== 0) continue;
+        } else if (config.cellNumberDeviant === "knight") {
+          if (!(dx * dy === -2 || dx * dy === 2)) continue;
         } else {
           if (Math.max(Math.abs(dx), Math.abs(dy)) > 1) continue;
         }
