@@ -195,6 +195,17 @@ export const handleChord = (board: Board, row: number, col: number, config: Boar
     return;
   }
 
+  // Chording rules for Odd or Even
+  if (config.cellNumberDeviant === "parity") {
+    const isCellOdd = cell.state.num === null ? false : !!(cell.state.num % 2);
+    const isFlagCountOdd = !!(surroundingFlags % 2);
+    if (surroundingHiddens === 1 && isCellOdd === isFlagCountOdd) {
+      revealSurroundingHiddens();
+    }
+    setBoard(updatedBoard);
+    return;
+  }
+
   // Chording rules for Omega
   if (config.negMineCount > 0) { 
     if (surroundingHiddens === 1 && surroundingFlags === cell.state.num) {
@@ -207,9 +218,7 @@ export const handleChord = (board: Board, row: number, col: number, config: Boar
   if (surroundingFlags === cell.state.num) {
     revealSurroundingHiddens();
   }
-
   setBoard(updatedBoard);
-  return false;
 };
 
 export const handleFlag = (board: Board, row: number, col: number, config: BoardConfig, setBoard: (updatedBoard: Board) => void) => {

@@ -1,4 +1,4 @@
-export type VariantName = "classic" | "multimines" | "liar" | "omega" | "crossed" | "knight";
+export type VariantName = "classic" | "multimines" | "liar" | "omega" | "parity" | "crossed" | "knight";
 export type DifficultyName = "beg" | "int" | "exp";
 
 export type BoardConfig = {
@@ -8,7 +8,7 @@ export type BoardConfig = {
   mineTileCount: number;
   posMineCount: number;
   negMineCount: number;
-  cellNumberDeviant: "lie" | "cross" | "knight" | null;
+  cellNumberDeviant: "lie" | "parity" | "cross" | "knight" | null;
 };
 
 export type BoardConfigLibrary = {

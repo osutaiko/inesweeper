@@ -21,6 +21,11 @@ export const boardConfigLibrary: BoardConfigLibrary = {
     "int": { width: 16, height: 16, mineTileCount: 40, posMineCount: 20, negMineCount: 20, maxMinesPerCell: 1, cellNumberDeviant: null },
     "exp": { width: 30, height: 16, mineTileCount: 90, posMineCount: 45, negMineCount: 45, maxMinesPerCell: 1, cellNumberDeviant: null },
   },
+  "parity": {
+    "beg": { width: 9, height: 9, mineTileCount: 8, posMineCount: 8, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "parity" },
+    "int": { width: 16, height: 16, mineTileCount: 32, posMineCount: 32, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "parity" },
+    "exp": { width: 30, height: 16, mineTileCount: 80, posMineCount: 80, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "parity" },
+  },
   "crossed": {
     "beg": { width: 9, height: 9, mineTileCount: 12, posMineCount: 12, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "cross" },
     "int": { width: 16, height: 16, mineTileCount: 50, posMineCount: 50, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "cross" },
@@ -38,8 +43,9 @@ export const variantMap = {
   multimines: "Multimines",
   liar: "Liar",
   omega: "Omega",
+  parity: "Odd or Even",
   crossed: "Crossed",
-  knight: "Knight's Path"
+  knight: "Knight's Path",
 }
 
 export const difficultyMap = {
