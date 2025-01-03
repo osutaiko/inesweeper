@@ -383,7 +383,10 @@ export const GameBoard: React.FC<{
                           />
                         ))}
                       </div> : 
-                    <span className={`font-bold text-xl ${getNumberColorClass(cell.state.num)}`}>
+                    <span
+                      className={`font-bold text-xl ${getNumberColorClass(cell.state.num)}`}
+                      style={{ scale: zoom / 100 }}
+                    >
                       {cell.state.num}
                     </span>
                   )}
