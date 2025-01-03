@@ -228,7 +228,7 @@ const Layout = () => {
                   <AccordionItem value="multimines">
                     <AccordionTrigger className="text-base font-bold">Multimines</AccordionTrigger>
                     <AccordionContent>
-                      <p>Minesweeper, but with up to four mines per tile.</p>
+                      <p>Minesweeper, but with up to three mines per tile.</p>
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem value="liar">

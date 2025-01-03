@@ -357,6 +357,9 @@ export const GameBoard: React.FC<{
                     if (isGameOver === "loss" && incorrectFlagCells!.some(({ row: r, col: c }) => r === rowIndex && c === colIndex)) {
                       return "bg-game-wrongflag";
                     }
+                    if (shadedCells.some(({ row: shadedRow, col: shadedCol }) => shadedRow === rowIndex && shadedCol === colIndex)) {
+                      return "bg-game-hover";
+                    }
                     return "bg-game-hidden";
                   } else {
                     if (shadedCells.some(({ row: shadedRow, col: shadedCol }) => shadedRow === rowIndex && shadedCol === colIndex)) {
