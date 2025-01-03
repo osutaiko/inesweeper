@@ -304,13 +304,13 @@ export const GameBoard: React.FC<{
           <div className="relative flex justify-between p-2 bg-game-hidden rounded-sm">
             <Button className="flex flex-col justify-center px-3 gap-0 -space-y-0.5 rounded-md overflow-hidden [&_svg]:size-auto bg-game-button" variant="secondary">
               {config.posMineCount > 0 && 
-                <div className="flex flex-row items-center gap-2">
+                <div className="flex flex-row items-center gap-2.5">
                   <Flag stroke="red" fill="red" size={config.negMineCount > 0 ? 15 : 20} />
                   <p className={`font-bold ${config.negMineCount > 0 ? "text-sm" : "text-xl"}`}>{remainingPosFlags}</p>
                 </div>
               }
               {config.negMineCount > 0 && 
-                <div className="flex flex-row items-center gap-2">
+                <div className="flex flex-row items-center gap-2.5">
                   <Flag stroke="blue" fill="blue" size={config.posMineCount > 0 ? 15 : 20} className="rotate-180" />
                   <p className={`font-bold ${config.posMineCount > 0 ? "text-sm" : "text-xl"}`}>{remainingNegFlags}</p>
                 </div>

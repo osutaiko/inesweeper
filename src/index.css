@@ -100,11 +100,11 @@ body {
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
 
-    --game-border: 210 12% 16%;
-    --game-hidden: 210 12% 8%;
-    --game-revealed: 210 12% 14%;
+    --game-border: 210 12% 26%;
+    --game-hidden: 210 12% 10%;
+    --game-revealed: 210 12% 22%;
     --game-button: 210 12% 16%;
-    --game-hover: 213 60% 10%;
+    --game-hover: 213 60% 13%;
     --game-explodedmine: 0 84.2% 40%;
     --game-wrongflag: 48 96% 40%;
     
