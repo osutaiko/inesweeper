@@ -163,24 +163,27 @@ export const GameBoard: React.FC<{
     }
   }, [JSON.stringify(board)]);
 
-  const handleMouseDown = (e: React.MouseEvent, row: number, col: number) => {
-    if (isGameOver) {
-      return;
+  const handleTouchStart = (row: number, col: number) => {
+    if (isFlagToggled) {
+      handleFlag(board, row, col, config, setBoard);
     }
+    return;
+  };
 
-    if (isTouchscreen) {
-      if (board[row][col].state.type === "revealed") {
-        handleChord(board, row, col, config, setBoard);
-      } else {
-        if (isFlagToggled) {
-          handleFlag(board, row, col, config, setBoard);
-        } else {
-          if (isFirstClick) {
-            handleBeforeFirstClick(row, col);
-          }
-          handleClick(board, row, col, config, setBoard);
-        }
+  const handleTouchEnd = (row: number, col: number) => {
+    if (board[row][col].state.type === "revealed") {
+      handleChord(board, row, col, config, setBoard);
+    } else {
+      if (isFirstClick) {
+        handleBeforeFirstClick(row, col);
       }
+      handleClick(board, row, col, config, setBoard);
+    }
+    return;
+  };
+
+  const handleMouseDown = (e: React.MouseEvent, row: number, col: number) => {
+    if (isGameOver || isTouchscreen) {
       return;
     }
 
@@ -373,6 +376,8 @@ export const GameBoard: React.FC<{
                     className={`flex justify-center items-center border border-game-border ${getBgClass()} rounded-sm overflow-hidden`}
                     onMouseDown={(e) => handleMouseDown(e, rowIndex, colIndex)}
                     onMouseUp={(e) => handleMouseUp(e, rowIndex, colIndex)}
+                    onTouchStart={(e) => handleTouchStart(rowIndex, colIndex)}
+                    onTouchEnd={(e) => handleTouchEnd(rowIndex, colIndex)}
                     onMouseEnter={() => setHoveredCell({ row: rowIndex, col: colIndex })}
                     onMouseLeave={() => setHoveredCell(null)}
                   >
