@@ -243,12 +243,6 @@ const Layout = () => {
                       <p>Minesweeper, but also with negative mines. All tiles adjacent to 0's are automatically revealed if they contain no mines (either positive or negative). This means all unrevealed tiles adjacent to 0's are guaranteed to contain a mine.</p>
                     </AccordionContent>
                   </AccordionItem>
-                  <AccordionItem value="parity">
-                    <AccordionTrigger className="text-base font-bold">Odd or Even</AccordionTrigger>
-                    <AccordionContent>
-                      <p>Minesweeper, but the each cell indicates whether the total number of mines surrounding it is odd or even.</p>
-                    </AccordionContent>
-                  </AccordionItem>
                   <AccordionItem value="crossed">
                     <AccordionTrigger className="text-base font-bold">Crossed</AccordionTrigger>
                     <AccordionContent>

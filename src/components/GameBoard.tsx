@@ -164,6 +164,10 @@ export const GameBoard: React.FC<{
   }, [JSON.stringify(board)]);
 
   const handleTouchStart = (row: number, col: number) => {
+    if (isGameOver) {
+      return;
+    }
+
     if (isFlagToggled) {
       handleFlag(board, row, col, config, setBoard);
     }
@@ -171,6 +175,10 @@ export const GameBoard: React.FC<{
   };
 
   const handleTouchEnd = (row: number, col: number) => {
+    if (isGameOver) {
+      return;
+    }
+    
     if (board[row][col].state.type === "revealed") {
       handleChord(board, row, col, config, setBoard);
     } else {
