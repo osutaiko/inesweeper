@@ -291,14 +291,14 @@ export const GameBoard: React.FC<{
   return (
     <>
       <div
-        className="flex flex-col rounded-md overflow-hidden select-none"
+        className="select-none"
         style={{
           width: `${(30 * config.width + 16) * (zoom / 100)}px`,
           height: `${(30 * config.height + 81) * (zoom / 100)}px`,
         }}
       >
         <div
-          className="flex flex-col w-min h-min rounded-md overflow-hidden select-none"
+          className="flex flex-col w-min h-min rounded-md overflow-hidden"
           style={{
             transform: `scale(${zoom / 100})`,
             transformOrigin: "top left",
