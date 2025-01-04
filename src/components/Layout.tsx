@@ -284,7 +284,6 @@ const Layout = () => {
                   <SelectItem value="classic">Classic</SelectItem>
                   <SelectItem value="multimines">Multimines</SelectItem>
                   <SelectItem value="liar">Liar</SelectItem>
-                  {/* <SelectItem value="parity">Odd or Even</SelectItem> */}
                   <SelectItem value="omega">Omega</SelectItem>
                   <SelectItem value="crossed">Crossed</SelectItem>
                   <SelectItem value="knight">Knight's Path</SelectItem>

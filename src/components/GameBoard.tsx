@@ -178,7 +178,7 @@ export const GameBoard: React.FC<{
     if (isGameOver) {
       return;
     }
-    
+
     if (board[row][col].state.type === "revealed") {
       handleChord(board, row, col, config, setBoard);
     } else {
@@ -402,10 +402,8 @@ export const GameBoard: React.FC<{
                             />
                           ))}
                         </div> : 
-                      <span
-                        className={`font-bold text-xl ${config.cellNumberDeviant === "parity" ? getNumberColorClass(cell.state.num === null ? null : cell.state.num % 2 + 2) : getNumberColorClass(cell.state.num)}`}
-                      >
-                        {cell.state.num === null ? null : config.cellNumberDeviant === "parity" ? (cell.state.num % 2 ? "O" : "E") : cell.state.num}
+                      <span className={`font-bold text-xl ${getNumberColorClass(cell.state.num)}`}>
+                        {cell.state.num}
                       </span>
                     )}
                     {cell.state.type === "flagged" && (
