@@ -158,6 +158,8 @@ export const handleChord = (board: Board, row: number, col: number, config: Boar
 
   let surroundingFlags = 0;
   let surroundingHiddens = 0;
+  let surroundingRedHiddens = 0;
+  let surroundingBlueHiddens = 0;
 
   for (let dx = -2; dx <= 2; dx++) {
     for (let dy = -2; dy <= 2; dy++) {
@@ -191,6 +193,13 @@ export const handleChord = (board: Board, row: number, col: number, config: Boar
           }
         } else if (neighbor.state.type === "hidden") {
           surroundingHiddens++;
+          if (config.cellNumberDeviant === "contrast") {
+            if ((nx + ny) % 2 === 1) {
+              surroundingRedHiddens++;
+            } else {
+              surroundingBlueHiddens++;
+            }
+          }
         }
       }
     }
@@ -242,8 +251,10 @@ export const handleChord = (board: Board, row: number, col: number, config: Boar
 
   // Chording rules for Contrast
   if (config.cellNumberDeviant === "contrast") { 
-    if (surroundingHiddens === 1 && surroundingFlags === cell.state.num) {
-      revealSurroundingHiddens();
+    if (surroundingFlags === cell.state.num) {
+      if (surroundingRedHiddens === 0 || surroundingBlueHiddens === 0) {
+        revealSurroundingHiddens();
+      }
     }
     setBoard(updatedBoard);
     return;
