@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Board, BoardConfig, Cell, TimeRecord } from "@/lib/types";
 import { createBoard, handleClick, handleChord, handleFlag, isWin, isLoss, countRemainingFlags, extractMinesFromBoard } from "@/lib/minesweeper";
-import { Dot, Flag, Laugh, Meh, Shovel, Skull, Smile, Sun } from "lucide-react";
+import { Flag, Laugh, Meh, Shovel, Skull, Smile, Sun } from "lucide-react";
 import { Button } from "./ui/button";
 
 export const GameBoard: React.FC<{

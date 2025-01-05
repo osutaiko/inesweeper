@@ -211,65 +211,67 @@ const Layout = () => {
                   <Info />
                 </Button>
               </DialogTrigger>
-              <DialogContent className="gap-6">
+              <DialogContent className="max-h-screen gap-6">
                 <DialogHeader>
                   <DialogTitle>How to Play</DialogTitle>
                   <DialogDescription hidden>
                     Variant descriptions
                   </DialogDescription>
                 </DialogHeader>
-                <Accordion type="single" defaultValue={variant} collapsible>
-                  <AccordionItem value="classic">
-                    <AccordionTrigger className="text-base font-bold">Classic</AccordionTrigger>
-                    <AccordionContent>
-                      <p>The classic Minesweeper experience. To win, reveal all safe tiles without clicking on any mines. Numbered tiles indicate the number of mines hidden in the adjacent eight tiles.</p>
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="multimines">
-                    <AccordionTrigger className="text-base font-bold">Multimines</AccordionTrigger>
-                    <AccordionContent>
-                      <p>Minesweeper, but with up to three mines per tile.</p>
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="liar">
-                    <AccordionTrigger className="text-base font-bold">Liar</AccordionTrigger>
-                    <AccordionContent>
-                      <p>Minesweeper, but number tiles "lie" by displaying numbers as one off from the actual value.</p>
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="omega">
-                    <AccordionTrigger className="text-base font-bold">Omega</AccordionTrigger>
-                    <AccordionContent>
-                      <p>Minesweeper, but also with negative mines. All tiles adjacent to 0's are automatically revealed if they contain no mines (either positive or negative). This means all unrevealed tiles adjacent to 0's are guaranteed to contain a mine.</p>
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="amplified">
-                    <AccordionTrigger className="text-base font-bold">Amplified</AccordionTrigger>
-                    <AccordionContent>
-                      <p>Minesweeper, but the mines on marked tiles (in a checkerboard pattern) count as two.</p>
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="contrast">
-                    <AccordionTrigger className="text-base font-bold">Contrast</AccordionTrigger>
-                    <AccordionContent>
-                      <p>Minesweeper, but the number on the cell indicates the difference in the number of mines between adjacent colored and uncolored tiles.</p>
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="crossed">
-                    <AccordionTrigger className="text-base font-bold">Crossed</AccordionTrigger>
-                    <AccordionContent>
-                      <p>Minesweeper, but the number on the cell indicates how many mines are in a cross-shaped region within distance 2.</p>
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="knight">
-                    <AccordionTrigger className="text-base font-bold">Knight's Path</AccordionTrigger>
-                    <AccordionContent>
-                      <p>Minesweeper, but the number on the cell indicates how many mines are two cells away in one direction and one cell away in another (i.e. knight's path in chess).</p>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
+                <ScrollArea className="max-h-[calc(100vh-140px)]">
+                  <Accordion type="single" defaultValue={variant} collapsible>
+                    <AccordionItem value="classic">
+                      <AccordionTrigger className="text-base">Classic</AccordionTrigger>
+                      <AccordionContent>
+                        <p>The classic Minesweeper experience. To win, reveal all safe tiles without clicking on any mines. Numbered tiles indicate the number of mines hidden in the adjacent eight tiles.</p>
+                      </AccordionContent>
+                    </AccordionItem>
+                    <AccordionItem value="multimines">
+                      <AccordionTrigger className="text-base">Multimines</AccordionTrigger>
+                      <AccordionContent>
+                        <p>Minesweeper, but with up to three mines per tile.</p>
+                      </AccordionContent>
+                    </AccordionItem>
+                    <AccordionItem value="liar">
+                      <AccordionTrigger className="text-base">Liar</AccordionTrigger>
+                      <AccordionContent>
+                        <p>Minesweeper, but number tiles "lie" by displaying numbers as one off from the actual value.</p>
+                      </AccordionContent>
+                    </AccordionItem>
+                    <AccordionItem value="omega">
+                      <AccordionTrigger className="text-base">Omega</AccordionTrigger>
+                      <AccordionContent>
+                        <p>Minesweeper, but also with negative mines. All tiles adjacent to 0's are automatically revealed if they contain no mines (either positive or negative). This means all unrevealed tiles adjacent to 0's are guaranteed to contain a mine.</p>
+                      </AccordionContent>
+                    </AccordionItem>
+                    <AccordionItem value="amplified">
+                      <AccordionTrigger className="text-base">Amplified</AccordionTrigger>
+                      <AccordionContent>
+                        <p>Minesweeper, but the mines on red tiles count as two.</p>
+                      </AccordionContent>
+                    </AccordionItem>
+                    <AccordionItem value="contrast">
+                      <AccordionTrigger className="text-base">Contrast</AccordionTrigger>
+                      <AccordionContent>
+                        <p>Minesweeper, but the number on the cell indicates the difference (always nonnegative) in the number of mines between adjacent red and blue tiles.</p>
+                      </AccordionContent>
+                    </AccordionItem>
+                    <AccordionItem value="crossed">
+                      <AccordionTrigger className="text-base">Crossed</AccordionTrigger>
+                      <AccordionContent>
+                        <p>Minesweeper, but the number on the cell indicates how many mines are in a cross-shaped region within distance 2.</p>
+                      </AccordionContent>
+                    </AccordionItem>
+                    <AccordionItem value="knight">
+                      <AccordionTrigger className="text-base">Knight's Path</AccordionTrigger>
+                      <AccordionContent>
+                        <p>Minesweeper, but the number on the cell indicates how many mines are two cells away in one direction and one cell away in another (i.e. knight's path in chess).</p>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                </ScrollArea>
                 <div className="flex justify-end">
-                  <a href="https://github.com/osutaiko/inesweeper">
+                  <a href="https://github.com/osutaiko/inesweeper" target="_blank" rel="noopener noreferrer">
                     <Github />
                   </a>
                 </div>
