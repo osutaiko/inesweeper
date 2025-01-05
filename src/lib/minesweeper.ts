@@ -127,7 +127,7 @@ export const handleClick = (board: Board, row: number, col: number, config: Boar
     return;
   }
 
-  if (cell.state.num === null) {
+  if (cell.state.num === null || (cell.state.num === 0 && (config.cellNumberDeviant !== "lie"))) {
     for (let dx = -2; dx <= 2; dx++) {
       for (let dy = -2; dy <= 2; dy++) {
         if (config.cellNumberDeviant === "cross") {

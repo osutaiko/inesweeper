@@ -27,9 +27,9 @@ export const boardConfigLibrary: BoardConfigLibrary = {
     "exp": { width: 30, height: 16, mineTileCount: 120, posMineCount: 120, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "amplified" },
   },
   "contrast": {
-    "beg": { width: 9, height: 9, mineTileCount: 8, posMineCount: 8, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "contrast" },
-    "int": { width: 16, height: 16, mineTileCount: 32, posMineCount: 32, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "contrast" },
-    "exp": { width: 30, height: 16, mineTileCount: 80, posMineCount: 80, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "contrast" },
+    "beg": { width: 9, height: 9, mineTileCount: 10, posMineCount: 10, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "contrast" },
+    "int": { width: 16, height: 16, mineTileCount: 40, posMineCount: 40, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "contrast" },
+    "exp": { width: 30, height: 16, mineTileCount: 90, posMineCount: 90, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "contrast" },
   },
   "crossed": {
     "beg": { width: 9, height: 9, mineTileCount: 12, posMineCount: 12, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "cross" },
