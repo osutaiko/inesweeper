@@ -40,7 +40,6 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Separator } from "./ui/separator";
-import { Badge } from "./ui/badge";
 
 import InesweeperLogo from "@/assets/images/inesweeper-logo.svg";
 import { ChartColumnIncreasing, Settings, Info, Github } from "lucide-react";
