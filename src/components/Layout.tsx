@@ -119,39 +119,41 @@ const Layout = () => {
                     Customize your experience
                   </DialogDescription>
                 </DialogHeader>
-                <div className="flex flex-col gap-3">
-                  <div className="flex flex-row justify-between items-center gap-3">
-                    <p className="w-1/2">Theme</p>
-                    <ThemeToggle />
+                <ScrollArea className="max-h-[calc(100vh-90px)]">
+                  <div className="flex flex-col gap-3">
+                    <div className="flex flex-row justify-between items-center gap-3">
+                      <p className="w-1/2">Theme</p>
+                      <ThemeToggle />
+                    </div>
+                    <div className="flex flex-row justify-between items-center gap-3">
+                      <p className="w-1/2">Board scale: {zoom}%</p>
+                      <Slider className="w-1/2" value={[zoom]} onValueChange={(value) => setZoom(value[0])} min={60} max={200} step={10} />
+                    </div>
+                    {isTouchscreen && 
+                      <>
+                        <Separator className="my-2" />
+                        <div className="flex flex-row justify-between items-center gap-3">
+                          <p className="w-1/2">Flag toggle button size: {flagButtonSize} px</p>
+                          <Slider className="w-1/2" value={[flagButtonSize]} onValueChange={(value) => setFlagButtonSize(value[0])} min={20} max={160} step={4} />
+                        </div>
+                        <div className="flex flex-row justify-between items-center gap-3">
+                          <p className="w-1/2">Flag toggle button position</p>
+                          <Select value={flagButtonPosition} onValueChange={(value) => setFlagButtonPosition(value)}>
+                            <SelectTrigger className="w-[180px] max-w-1/2">
+                              <SelectValue placeholder="Bottom Right" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="bottom-left">Bottom Left</SelectItem>
+                              <SelectItem value="bottom-right">Bottom Right</SelectItem>
+                              <SelectItem value="center-left">Center Left</SelectItem>
+                              <SelectItem value="center-right">Center Right</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </>
+                    }
                   </div>
-                  <div className="flex flex-row justify-between items-center gap-3">
-                    <p className="w-1/2">Board scale: {zoom}%</p>
-                    <Slider className="w-1/2" value={[zoom]} onValueChange={(value) => setZoom(value[0])} min={60} max={200} step={10} />
-                  </div>
-                  {isTouchscreen && 
-                    <>
-                      <Separator className="my-2" />
-                      <div className="flex flex-row justify-between items-center gap-3">
-                        <p className="w-1/2">Flag toggle button size: {flagButtonSize} px</p>
-                        <Slider className="w-1/2" value={[flagButtonSize]} onValueChange={(value) => setFlagButtonSize(value[0])} min={20} max={160} step={4} />
-                      </div>
-                      <div className="flex flex-row justify-between items-center gap-3">
-                        <p className="w-1/2">Flag toggle button position</p>
-                        <Select value={flagButtonPosition} onValueChange={(value) => setFlagButtonPosition(value)}>
-                          <SelectTrigger className="w-[180px] max-w-1/2">
-                            <SelectValue placeholder="Bottom Right" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="bottom-left">Bottom Left</SelectItem>
-                            <SelectItem value="bottom-right">Bottom Right</SelectItem>
-                            <SelectItem value="center-left">Center Left</SelectItem>
-                            <SelectItem value="center-right">Center Right</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </>
-                  }
-                </div>
+                </ScrollArea>
               </DialogContent>
             </Dialog>
             <Dialog>
@@ -167,42 +169,44 @@ const Layout = () => {
                     Stats
                   </DialogDescription>
                 </DialogHeader>
-                <Table>
-                  <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-black">Variant</TableHead>
-                    {Object.values(difficultyMap).map((difficulty) => (
-                      <TableHead key={difficulty.full} className="text-center">
-                        {isDesktop ? difficulty.full : difficulty.short}
-                      </TableHead>
-                    ))}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {Object.keys(boardConfigLibrary).map((mode) => (
-                    <TableRow key={mode}>
-                      <TableCell className="font-bold">{variantMap[mode as keyof typeof variantMap]}</TableCell>
-                      {Object.keys(difficultyMap).map((difficultyKey) => {
-                        const filteredRecords = records.filter(
-                          (record) =>
-                            JSON.stringify(record.boardConfig) === JSON.stringify(boardConfigLibrary[mode as keyof typeof boardConfigLibrary][difficultyKey as keyof typeof difficultyMap])
-                        );
+                <ScrollArea className="max-h-[calc(100vh-90px)]">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="text-black">Variant</TableHead>
+                        {Object.values(difficultyMap).map((difficulty) => (
+                          <TableHead key={difficulty.full} className="text-center">
+                            {isDesktop ? difficulty.full : difficulty.short}
+                          </TableHead>
+                        ))}
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {Object.keys(boardConfigLibrary).map((mode) => (
+                        <TableRow key={mode}>
+                          <TableCell className="font-bold">{variantMap[mode as keyof typeof variantMap]}</TableCell>
+                          {Object.keys(difficultyMap).map((difficultyKey) => {
+                            const filteredRecords = records.filter(
+                              (record) =>
+                                JSON.stringify(record.boardConfig) === JSON.stringify(boardConfigLibrary[mode as keyof typeof boardConfigLibrary][difficultyKey as keyof typeof difficultyMap])
+                            );
 
-                        const bestTime = filteredRecords.reduce(
-                          (min, record) => (record.timeElapsed < min ? record.timeElapsed : min),
-                          Infinity
-                        );
+                            const bestTime = filteredRecords.reduce(
+                              (min, record) => (record.timeElapsed < min ? record.timeElapsed : min),
+                              Infinity
+                            );
 
-                        return (
-                          <TableCell key={difficultyKey} className="text-center">
-                            {bestTime === Infinity ? "-" : (bestTime / 1000).toFixed(2)}
-                          </TableCell>
-                        );
-                      })}
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                            return (
+                              <TableCell key={difficultyKey} className="text-center">
+                                {bestTime === Infinity ? "-" : (bestTime / 1000).toFixed(2)}
+                              </TableCell>
+                            );
+                          })}
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </ScrollArea>
               </DialogContent>
             </Dialog>
             <Dialog>
