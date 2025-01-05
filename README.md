@@ -15,8 +15,7 @@ A Collection of Minesweeper Variants. Challenge yourself with unique Minesweeper
 
 
 ## Planned Variants
-- Weighted: Mines on every other cell (with a checkerboard pattern) counts as two
-- Shift: Mines can be placed between two cells, where each half counts as 0.5 mines
+- Edge: Mines can be placed between two cells, where each half counts as 0.5 mines
 - Multiplayer mode
 
 ## TODO
