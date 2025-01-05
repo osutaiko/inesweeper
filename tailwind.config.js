@@ -61,6 +61,8 @@ export default {
 				hover: 'hsl(var(--game-hover))',
 				explodedmine: 'hsl(var(--game-explodedmine))',
 				wrongflag: 'hsl(var(--game-wrongflag))',
+				redborder: 'hsl(var(--game-redborder))',
+				blueborder: 'hsl(var(--game-blueborder))',
 				number: {
 					'1': 'hsl(var(--game-number-1))',
 					'2': 'hsl(var(--game-number-2))',

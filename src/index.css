@@ -55,6 +55,8 @@ body {
     --game-hover: 213 60% 92%;
     --game-explodedmine: 0 84.2% 60.2%;
     --game-wrongflag: 48 96% 53%;
+    --game-redborder: 0 80% 70%;
+    --game-blueborder: 180 80% 55%;
     
     --game-number-1: 256 100% 50%;
     --game-number-2: 124 100% 27%;
@@ -107,6 +109,8 @@ body {
     --game-hover: 213 60% 13%;
     --game-explodedmine: 0 84.2% 40%;
     --game-wrongflag: 48 96% 40%;
+    --game-redborder: 0 60% 30%;
+    --game-blueborder: 180 80% 25%;
     
     --game-number-1: 233 100% 70%;
     --game-number-2: 124 100% 33%;
