@@ -127,7 +127,7 @@ export const handleClick = (board: Board, row: number, col: number, config: Boar
     return;
   }
 
-  if (cell.state.num === null || (cell.state.num === 0 && config.cellNumberDeviant !== "lie" && config.cellNumberDeviant !== "contrast")) {
+  if (cell.state.num === null) {
     for (let dx = -2; dx <= 2; dx++) {
       for (let dy = -2; dy <= 2; dy++) {
         if (config.cellNumberDeviant === "cross") {
@@ -189,7 +189,7 @@ export const handleChord = (board: Board, row: number, col: number, config: Boar
               surroundingFlags -= neighbor.state.flagNum;
             }
           } else {
-            surroundingFlags++;
+            surroundingFlags += neighbor.state.flagNum;
           }
         } else if (neighbor.state.type === "hidden") {
           surroundingHiddens++;
@@ -241,7 +241,7 @@ export const handleChord = (board: Board, row: number, col: number, config: Boar
   }
 
   // Chording rules for Omega
-  if (config.negMineCount > 0) { 
+  if (config.negMineCount > 0) { console.log(surroundingHiddens, surroundingFlags)
     if (surroundingHiddens === 1 && surroundingFlags === cell.state.num) {
       revealSurroundingHiddens();
     }
