@@ -443,7 +443,7 @@ export const GameBoard: React.FC<{
       </div>
       {isTouchscreen && (
         <Button
-          className={`absolute p-0 [&_svg]:size-1/2 ${getFlagButtonPositionClass()} text-primary ${isFlagToggled ? "bg-destructive hover:bg-destructive/90" : "bg-game-button hover:bg-game-button/90"}`}
+          className={`fixed p-0 [&_svg]:size-1/2 ${getFlagButtonPositionClass()} text-primary ${isFlagToggled ? "bg-destructive hover:bg-destructive/90" : "bg-game-button hover:bg-game-button/90"}`}
           style={{
             width: flagButtonSize,
             height: flagButtonSize,
