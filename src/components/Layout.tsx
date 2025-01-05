@@ -243,6 +243,18 @@ const Layout = () => {
                       <p>Minesweeper, but also with negative mines. All tiles adjacent to 0's are automatically revealed if they contain no mines (either positive or negative). This means all unrevealed tiles adjacent to 0's are guaranteed to contain a mine.</p>
                     </AccordionContent>
                   </AccordionItem>
+                  <AccordionItem value="amplified">
+                    <AccordionTrigger className="text-base font-bold">Amplified</AccordionTrigger>
+                    <AccordionContent>
+                      <p>Minesweeper, but the mines on marked tiles (in a checkerboard pattern) count as two.</p>
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem value="contrast">
+                    <AccordionTrigger className="text-base font-bold">Contrast</AccordionTrigger>
+                    <AccordionContent>
+                      <p>Minesweeper, but the number on the cell indicates the difference in the number of mines between adjacent colored and uncolored tiles.</p>
+                    </AccordionContent>
+                  </AccordionItem>
                   <AccordionItem value="crossed">
                     <AccordionTrigger className="text-base font-bold">Crossed</AccordionTrigger>
                     <AccordionContent>
@@ -281,12 +293,11 @@ const Layout = () => {
                   <SelectValue placeholder="Variant" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="classic">Classic</SelectItem>
-                  <SelectItem value="multimines">Multimines</SelectItem>
-                  <SelectItem value="liar">Liar</SelectItem>
-                  <SelectItem value="omega">Omega</SelectItem>
-                  <SelectItem value="crossed">Crossed</SelectItem>
-                  <SelectItem value="knight">Knight's Path</SelectItem>
+                  {Object.entries(variantMap).map(([key, label]) => (
+                    <SelectItem key={key} value={key}>
+                      {label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <Select value={difficulty} onValueChange={(value) => setDifficulty(value as DifficultyName)}>
@@ -294,9 +305,11 @@ const Layout = () => {
                   <SelectValue placeholder="Difficulty" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="beg">Beginner</SelectItem>
-                  <SelectItem value="int">Intermediate</SelectItem>
-                  <SelectItem value="exp">Expert</SelectItem>
+                  {Object.entries(difficultyMap).map(([key, label]) => (
+                    <SelectItem key={key} value={key}>
+                      {label.full}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

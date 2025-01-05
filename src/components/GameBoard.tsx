@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Board, BoardConfig, Cell, TimeRecord } from "@/lib/types";
 import { createBoard, handleClick, handleChord, handleFlag, isWin, isLoss, countRemainingFlags, extractMinesFromBoard } from "@/lib/minesweeper";
-import { Flag, Laugh, Meh, Shovel, Skull, Smile, Sun } from "lucide-react";
+import { Dot, Flag, Laugh, Meh, Shovel, Skull, Smile, Sun } from "lucide-react";
 import { Button } from "./ui/button";
 
 export const GameBoard: React.FC<{
@@ -380,7 +380,7 @@ export const GameBoard: React.FC<{
                 return (
                   <div
                     key={`${rowIndex}-${colIndex}`}
-                    className={`flex justify-center items-center border border-game-border ${getBgClass()} rounded-sm overflow-hidden`}
+                    className={`relative flex justify-center items-center border border-game-border ${getBgClass()} rounded-sm overflow-hidden`}
                     onMouseDown={(e) => handleMouseDown(e, rowIndex, colIndex)}
                     onMouseUp={(e) => handleMouseUp(e, rowIndex, colIndex)}
                     onTouchStart={() => handleTouchStart(rowIndex, colIndex)}
@@ -388,6 +388,12 @@ export const GameBoard: React.FC<{
                     onMouseEnter={() => setHoveredCell({ row: rowIndex, col: colIndex })}
                     onMouseLeave={() => setHoveredCell(null)}
                   >
+                    {((config.cellNumberDeviant === "amplified" || config.cellNumberDeviant === "contrast") && (!(cell.state.type === "revealed" && cell.mineNum === 0)) && ((rowIndex + colIndex) % 2 === 1)) ?
+                      <div className="absolute w-[calc(100%-2px)] h-[calc(100%-2px)] rounded-sm border-2 border-destructive/70" /> : <></>
+                    }
+                    {((config.cellNumberDeviant === "contrast") && (!(cell.state.type === "revealed" && cell.mineNum === 0)) && ((rowIndex + colIndex) % 2 === 0)) ?
+                      <div className="absolute invert w-[calc(100%-2px)] h-[calc(100%-2px)] rounded-sm border-2 border-destructive/40" /> : <></>
+                    }
                     {cell.state.type === "revealed" && (
                       cell.mineNum ? 
                         <div
