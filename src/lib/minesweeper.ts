@@ -241,7 +241,7 @@ export const handleChord = (board: Board, row: number, col: number, config: Boar
   }
 
   // Chording rules for Omega
-  if (config.negMineCount > 0) { console.log(surroundingHiddens, surroundingFlags)
+  if (config.negMineCount > 0) {
     if (surroundingHiddens === 1 && surroundingFlags === cell.state.num) {
       revealSurroundingHiddens();
     }
