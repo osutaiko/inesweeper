@@ -24,7 +24,9 @@ export const GameBoard: React.FC<{
   const [shadedCells, setShadedCells] = useState<{ row: number, col: number }[]>([]);
   const [explodedCell, setExplodedCell] = useState<{ row: number, col: number } | null>(null);
   const [incorrectFlagCells, setIncorrectFlagCells] = useState<{ row: number, col: number }[] | null>(null);
+  const [touchStartPos, setTouchStartPos] = useState({ x: 0, y: 0 });
 
+  const DRAG_THRESHOLD = 10;
   const animationFrameRef = useRef<number | null>(null);
 
   const handleReset = () => {
@@ -163,10 +165,13 @@ export const GameBoard: React.FC<{
     }
   }, [JSON.stringify(board)]);
 
-  const handleTouchStart = (row: number, col: number) => {
+  const handleTouchStart = (e: React.TouchEvent, row: number, col: number) => {
     if (isGameOver) {
       return;
     }
+
+    const touch = e.touches[0];
+    setTouchStartPos({ x: touch.clientX, y: touch.clientY });
 
     if (isFlagToggled) {
       handleFlag(board, row, col, config, setBoard);
@@ -174,8 +179,15 @@ export const GameBoard: React.FC<{
     return;
   };
 
-  const handleTouchEnd = (row: number, col: number) => {
+  const handleTouchEnd = (e: React.TouchEvent, row: number, col: number) => {
     if (isGameOver) {
+      return;
+    }
+
+    const touch = e.changedTouches[0];
+    const dx = Math.abs(touch.clientX - touchStartPos.x);
+    const dy = Math.abs(touch.clientY - touchStartPos.y);
+    if (dx > DRAG_THRESHOLD || dy > DRAG_THRESHOLD) {
       return;
     }
 
@@ -383,8 +395,8 @@ export const GameBoard: React.FC<{
                     className={`relative flex justify-center items-center border border-game-border ${getBgClass()} rounded-sm overflow-hidden`}
                     onMouseDown={(e) => handleMouseDown(e, rowIndex, colIndex)}
                     onMouseUp={(e) => handleMouseUp(e, rowIndex, colIndex)}
-                    onTouchStart={() => handleTouchStart(rowIndex, colIndex)}
-                    onTouchEnd={() => handleTouchEnd(rowIndex, colIndex)}
+                    onTouchStart={(e) => handleTouchStart(e, rowIndex, colIndex)}
+                    onTouchEnd={(e) => handleTouchEnd(e, rowIndex, colIndex)}
                     onMouseEnter={() => setHoveredCell({ row: rowIndex, col: colIndex })}
                     onMouseLeave={() => setHoveredCell(null)}
                   >

@@ -31,4 +31,4 @@ export type TimeRecord = {
   timeElapsed: number;
   date: number;
   mineArray: number[][];
-}
+};
