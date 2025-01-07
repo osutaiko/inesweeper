@@ -20,3 +20,4 @@ A Collection of Minesweeper Variants. Challenge yourself with unique Minesweeper
 
 ## TODO
 - Board customization (height, width, mine count)
+- No guessing mode: Need universal solver
