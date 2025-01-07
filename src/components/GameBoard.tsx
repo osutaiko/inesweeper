@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Board, BoardConfig, Cell, TimeRecord } from "@/lib/types";
-import { createBoard, handleClick, handleChord, handleFlag, isWin, isLoss, countRemainingFlags, extractMinesFromBoard } from "@/lib/minesweeper";
+import { createBoard, handleClick, handleChord, handleFlag, isWin, isLoss, countRemainingFlags, extractMinesFromBoard, iterateNeighbors } from "@/lib/minesweeper";
 import { Flag, Laugh, Meh, Shovel, Skull, Smile, Sun } from "lucide-react";
 import { Button } from "./ui/button";
 
@@ -284,19 +284,10 @@ export const GameBoard: React.FC<{
 
     if (board[row][col].state.type === "revealed") {
       const updatedShadedCells: { row: number, col: number }[] = [];
-      const directions = config.cellNumberDeviant === "cross" ? [
-        [-2, 0], [-1, 0], [0, -2], [0, -1], [0, 1], [0, 2], [1, 0], [2, 0]
-      ] : config.cellNumberDeviant === "knight" ? [
-        [-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]
-      ] : [
-        [-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]
-      ];
 
-      directions.forEach(([dx, dy]) => {
-        const newRow = row + dx;
-        const newCol = col + dy;
-        if (newRow >= 0 && newRow < config.height && newCol >= 0 && newCol < config.width && board[newRow][newCol].state.type !== "revealed") {
-          updatedShadedCells.push({ row: newRow, col: newCol });
+      iterateNeighbors(board, row, col, config, (nx, ny, neighbor) => {
+        if (neighbor.state.type !== "revealed") {
+          updatedShadedCells.push({ row: nx, col: ny });
         }
       });
     

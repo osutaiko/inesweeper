@@ -62,47 +62,47 @@ export const isLoss = (board: Board): { row: number; col: number } | null => {
   return null;
 };
 
-export const getCellNumber = (board: Board, row: number, col: number, config: BoardConfig): number | null => {
-  let cellNumber = null;
-
+export const iterateNeighbors = (
+  board: Board,
+  row: number,
+  col: number,
+  config: BoardConfig,
+  callback: (nx: number, ny: number, neighbor: Cell) => void
+) => {
   for (let dx = -2; dx <= 2; dx++) {
     for (let dy = -2; dy <= 2; dy++) {
       if (dx === 0 && dy === 0) continue;
-      if (config.cellNumberDeviant === "cross") {
-        if (dx * dy !== 0) continue;
-      } else if (config.cellNumberDeviant === "knight") {
-        if (!(dx * dy === -2 || dx * dy === 2)) continue;
-      } else {
-        if (Math.max(Math.abs(dx), Math.abs(dy)) > 1) continue;
-      }
+      if (config.cellNumberDeviant === "cross" && dx * dy !== 0) continue;
+      if (config.cellNumberDeviant === "knight" && !(dx * dy === -2 || dx * dy === 2)) continue;
+      if (Math.max(Math.abs(dx), Math.abs(dy)) > 1 && config.cellNumberDeviant !== "knight" && config.cellNumberDeviant !== "cross") continue;
 
       const nx = row + dx;
       const ny = col + dy;
 
       if (nx >= 0 && nx < config.height && ny >= 0 && ny < config.width) {
-        if (board[nx][ny].mineNum) {
-          if (cellNumber === null) {
-            cellNumber = 0;
-          }
-          if (config.cellNumberDeviant === "amplified") {
-            if ((nx + ny) % 2 === 1) {
-              cellNumber += board[nx][ny].mineNum * 2;
-            } else {
-              cellNumber += board[nx][ny].mineNum;
-            }
-          } else if (config.cellNumberDeviant === "contrast") {
-            if ((nx + ny) % 2 === 1) {
-              cellNumber += board[nx][ny].mineNum;
-            } else {
-              cellNumber -= board[nx][ny].mineNum;
-            }
-          } else {
-            cellNumber += board[nx][ny].mineNum;
-          }
-        }
+        callback(nx, ny, board[nx][ny]);
       }
     }
   }
+};
+
+export const getCellNumber = (board: Board, row: number, col: number, config: BoardConfig): number | null => {
+  let cellNumber: number | null = null;
+
+  iterateNeighbors(board, row, col, config, (nx, ny, neighbor) => {
+    if (neighbor.mineNum) {
+      if (cellNumber === null) {
+        cellNumber = 0;
+      }
+      if (config.cellNumberDeviant === "amplified") {
+        cellNumber += (nx + ny) % 2 === 1 ? neighbor.mineNum * 2 : neighbor.mineNum;
+      } else if (config.cellNumberDeviant === "contrast") {
+        cellNumber += (nx + ny) % 2 === 1 ? neighbor.mineNum : -neighbor.mineNum;
+      } else {
+        cellNumber += neighbor.mineNum;
+      }
+    }
+  });
 
   if (config.cellNumberDeviant === "lie" && cellNumber !== null) {
     cellNumber = Math.random() < 0.5 ? cellNumber - 1 : cellNumber + 1;
@@ -128,26 +128,56 @@ export const handleClick = (board: Board, row: number, col: number, config: Boar
   }
 
   if (cell.state.num === null || (cell.state.num === 0 && (config.cellNumberDeviant !== "lie"))) {
-    for (let dx = -2; dx <= 2; dx++) {
-      for (let dy = -2; dy <= 2; dy++) {
-        if (config.cellNumberDeviant === "cross") {
-          if (dx * dy !== 0) continue;
-        } else if (config.cellNumberDeviant === "knight") {
-          if (!(dx * dy === -2 || dx * dy === 2)) continue;
-        } else {
-          if (Math.max(Math.abs(dx), Math.abs(dy)) > 1) continue;
-        }
-        
-        const nx = row + dx;
-        const ny = col + dy;
-        if (nx >= 0 && nx < config.height && ny >= 0 && ny < config.width && board[nx][ny].mineNum === 0) {
-          handleClick(board, nx, ny, config, setBoard);
-        }
+    iterateNeighbors(board, row, col, config, (nx, ny, neighbor) => {
+      if (neighbor.mineNum === 0) {
+        handleClick(board, nx, ny, config, setBoard);
       }
-    }
+    });
   }
 
   setBoard(updatedBoard);
+};
+
+export const getNeighborCounts = (board: Board, row: number, col: number, config: BoardConfig) => {
+  let surroundingFlags = 0;
+  let surroundingHiddens = 0;
+  let surroundingRedHiddens = 0;
+  let surroundingBlueHiddens = 0;
+
+  iterateNeighbors(board, row, col, config, (nx, ny, neighbor) => {
+    if (neighbor.state.type === "flagged") {
+      if (config.cellNumberDeviant === "amplified") {
+        if ((nx + ny) % 2 === 1) {
+          surroundingFlags += neighbor.state.flagNum * 2;
+        } else {
+          surroundingFlags += neighbor.state.flagNum;
+        }
+      } else if (config.cellNumberDeviant === "contrast") {
+        if ((nx + ny) % 2 === 1) {
+          surroundingFlags += neighbor.state.flagNum;
+        } else {
+          surroundingFlags -= neighbor.state.flagNum;
+        }
+      } else {
+        surroundingFlags += neighbor.state.flagNum;
+      }
+    } else if (neighbor.state.type === "hidden") {
+      surroundingHiddens++;
+      if (config.cellNumberDeviant === "contrast") {
+        if ((nx + ny) % 2 === 1) {
+          surroundingRedHiddens++;
+        } else {
+          surroundingBlueHiddens++;
+        }
+      }
+    }
+  });
+
+  if (config.cellNumberDeviant === "contrast") {
+    surroundingFlags = Math.abs(surroundingFlags);
+  }
+
+  return { flags: surroundingFlags, hiddens: surroundingHiddens, redHiddens: surroundingRedHiddens, blueHiddens: surroundingBlueHiddens };
 };
 
 export const handleChord = (board: Board, row: number, col: number, config: BoardConfig, setBoard: (updatedBoard: Board) => void) => {
@@ -156,84 +186,19 @@ export const handleChord = (board: Board, row: number, col: number, config: Boar
 
   if (cell.state.type !== "revealed") return;
 
-  let surroundingFlags = 0;
-  let surroundingHiddens = 0;
-  let surroundingRedHiddens = 0;
-  let surroundingBlueHiddens = 0;
-
-  for (let dx = -2; dx <= 2; dx++) {
-    for (let dy = -2; dy <= 2; dy++) {
-      if (config.cellNumberDeviant === "cross") {
-        if (dx * dy !== 0) continue;
-      } else if (config.cellNumberDeviant === "knight") {
-        if (!(dx * dy === -2 || dx * dy === 2)) continue;
-      } else {
-        if (Math.max(Math.abs(dx), Math.abs(dy)) > 1) continue;
-      }
-
-      const nx = row + dx;
-      const ny = col + dy;
-      if (nx >= 0 && nx < config.height && ny >= 0 && ny < config.width) {
-        const neighbor = board[nx][ny];
-        if (neighbor.state.type === "flagged") {
-          if (config.cellNumberDeviant === "amplified") {
-            if ((nx + ny) % 2 === 1) {
-              surroundingFlags += neighbor.state.flagNum * 2;
-            } else {
-              surroundingFlags += neighbor.state.flagNum;
-            }
-          } else if (config.cellNumberDeviant === "contrast") {
-            if ((nx + ny) % 2 === 1) {
-              surroundingFlags += neighbor.state.flagNum;
-            } else {
-              surroundingFlags -= neighbor.state.flagNum;
-            }
-          } else {
-            surroundingFlags += neighbor.state.flagNum;
-          }
-        } else if (neighbor.state.type === "hidden") {
-          surroundingHiddens++;
-          if (config.cellNumberDeviant === "contrast") {
-            if ((nx + ny) % 2 === 1) {
-              surroundingRedHiddens++;
-            } else {
-              surroundingBlueHiddens++;
-            }
-          }
-        }
-      }
-    }
-  }
-
-  if (config.cellNumberDeviant === "contrast") {
-    surroundingFlags = Math.abs(surroundingFlags);
-  }
-
   const revealSurroundingHiddens = () => {
-    for (let dx = -2; dx <= 2; dx++) {
-      for (let dy = -2; dy <= 2; dy++) {
-        if (config.cellNumberDeviant === "cross") {
-          if (dx * dy !== 0) continue;
-        } else if (config.cellNumberDeviant === "knight") {
-          if (!(dx * dy === -2 || dx * dy === 2)) continue;
-        } else {
-          if (Math.max(Math.abs(dx), Math.abs(dy)) > 1) continue;
-        }
-
-        const nx = row + dx;
-        const ny = col + dy;
-        if (nx >= 0 && nx < config.height && ny >= 0 && ny < config.width) {
-          if (board[nx][ny].state.type === "hidden") {
-            handleClick(board, nx, ny, config, setBoard);
-          }
-        }
+    iterateNeighbors(board, row, col, config, (nx, ny, neighbor) => {
+      if (neighbor.state.type === "hidden") {
+        handleClick(board, nx, ny, config, setBoard);
       }
-    }
-  }
+    });
+  };
+
+  const neighborCounts = getNeighborCounts(board, row, col, config);
 
   // Chording rules for Liar
   if (config.cellNumberDeviant === "lie") { 
-    if (cell.state.num === surroundingFlags - 1 || (surroundingHiddens === 1 && cell.state.num === surroundingFlags + 1)) {
+    if (cell.state.num === neighborCounts.flags - 1 || (neighborCounts.hiddens === 1 && cell.state.num === neighborCounts.flags + 1)) {
       revealSurroundingHiddens();
     }
     setBoard(updatedBoard);
@@ -242,7 +207,7 @@ export const handleChord = (board: Board, row: number, col: number, config: Boar
 
   // Chording rules for Omega
   if (config.negMineCount > 0) {
-    if (surroundingHiddens === 1 && surroundingFlags === cell.state.num) {
+    if (neighborCounts.hiddens === 1 && neighborCounts.flags === cell.state.num) {
       revealSurroundingHiddens();
     }
     setBoard(updatedBoard);
@@ -251,8 +216,8 @@ export const handleChord = (board: Board, row: number, col: number, config: Boar
 
   // Chording rules for Contrast
   if (config.cellNumberDeviant === "contrast") { 
-    if (surroundingFlags === cell.state.num) {
-      if (surroundingRedHiddens === 0 || surroundingBlueHiddens === 0) {
+    if (neighborCounts.flags === cell.state.num) {
+      if (neighborCounts.redHiddens === 0 || neighborCounts.blueHiddens === 0) {
         revealSurroundingHiddens();
       }
     }
@@ -260,7 +225,8 @@ export const handleChord = (board: Board, row: number, col: number, config: Boar
     return;
   }
 
-  if (surroundingFlags === cell.state.num) {
+  // General chording rule
+  if (neighborCounts.flags === cell.state.num) {
     revealSurroundingHiddens();
   }
   setBoard(updatedBoard);
