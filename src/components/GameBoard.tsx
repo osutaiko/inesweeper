@@ -166,7 +166,7 @@ export const GameBoard: React.FC<{
   }, [JSON.stringify(board)]);
 
   const handleTouchStart = (e: React.TouchEvent, row: number, col: number) => {
-    if (isGameOver) {
+    if (isGameOver || !isTouchscreen ) {
       return;
     }
 
@@ -180,7 +180,7 @@ export const GameBoard: React.FC<{
   };
 
   const handleTouchEnd = (e: React.TouchEvent, row: number, col: number) => {
-    if (isGameOver) {
+    if (isGameOver || !isTouchscreen) {
       return;
     }
 
@@ -191,13 +191,15 @@ export const GameBoard: React.FC<{
       return;
     }
 
-    if (board[row][col].state.type === "revealed") {
-      handleChord(board, row, col, config, setBoard);
-    } else {
-      if (isFirstClick) {
-        handleBeforeFirstClick(row, col);
+    if (!isFlagToggled) {
+      if (board[row][col].state.type === "revealed") {
+        handleChord(board, row, col, config, setBoard);
+      } else {
+        if (isFirstClick) {
+          handleBeforeFirstClick(row, col);
+        }
+        handleClick(board, row, col, config, setBoard);
       }
-      handleClick(board, row, col, config, setBoard);
     }
     return;
   };
