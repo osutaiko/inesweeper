@@ -20,4 +20,5 @@ A Collection of Minesweeper Variants. Challenge yourself with unique Minesweeper
 
 ## TODO
 - Board customization (height, width, mine count)
-- No guessing mode: Need universal solver
+- UI customization (color, contrast)
+- No guessing mode: need universal solver (wip: solver.ts) or solvable board library (w/ backend)
