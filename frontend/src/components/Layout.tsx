@@ -429,11 +429,9 @@ const Layout = () => {
               </DropdownMenu>
             ) : (
               <Button
-                variant="secondary"
-                size="icon"
                 onClick={() => window.location.assign(getGoogleLoginUrl())}
               >
-                <LogIn />
+                Log In
               </Button>
             )}
           </div>
