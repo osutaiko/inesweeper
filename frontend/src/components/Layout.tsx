@@ -70,7 +70,9 @@ const Layout = () => {
   const [flagButtonSize, setFlagButtonSize] = useState(72);
   const [flagButtonPosition, setFlagButtonPosition] = useState("bottom-right");
   const [records, setRecords] = useState<TimeRecord[]>([]);
+  const [guestBestRecords, setGuestBestRecords] = useState<TimeRecord[]>([]);
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+  const [authLoaded, setAuthLoaded] = useState(false);
 
   useEffect(() => {
     const checkTouchscreen = () => {
@@ -85,11 +87,13 @@ const Layout = () => {
 
   useEffect(() => {
     const savedRecords = localStorage.getItem("gameRecords");
+    const savedGuestBestRecords = localStorage.getItem("guestBestRecords");
     const savedZoom = localStorage.getItem("zoom");
     const savedFlagButtonSize = localStorage.getItem("flagButtonSize");
     const savedFlagButtonPosition = localStorage.getItem("flagButtonPosition");
 
     if (savedRecords) setRecords(JSON.parse(savedRecords));
+    if (savedGuestBestRecords) setGuestBestRecords(JSON.parse(savedGuestBestRecords));
     if (savedZoom) setZoom(Number(savedZoom));
     if (savedFlagButtonSize) setFlagButtonSize(Number(savedFlagButtonSize));
     if (savedFlagButtonPosition) setFlagButtonPosition(savedFlagButtonPosition);
@@ -107,14 +111,17 @@ const Layout = () => {
 
         if (!response.ok) {
           setAuthUser(null);
+          setAuthLoaded(true);
           return;
         }
 
         const data = await response.json();
         setAuthUser(data.user ?? null);
+        setAuthLoaded(true);
       } catch {
         if (!controller.signal.aborted) {
           setAuthUser(null);
+          setAuthLoaded(true);
         }
       }
     };
@@ -137,21 +144,45 @@ const Layout = () => {
   }, [flagButtonPosition]);
 
   const addRecord = (newRecord: TimeRecord) => {
-    const updatedRecords = [...records, newRecord];
-    setRecords(updatedRecords);
-    localStorage.setItem("gameRecords", JSON.stringify(updatedRecords));
+    if (authLoaded && authUser) {
+      const updatedRecords = [...records, newRecord];
+      setRecords(updatedRecords);
+      localStorage.setItem("gameRecords", JSON.stringify(updatedRecords));
 
-    if (!authUser) {
+      void recordLoggedInGameLog({
+        boardConfig: newRecord.boardConfig,
+        variant,
+        difficulty,
+        durationMs: newRecord.timeElapsed,
+      }).catch(() => undefined);
       return;
     }
 
-    void recordLoggedInGameLog({
-      boardConfig: newRecord.boardConfig,
-      variant,
-      difficulty,
-      durationMs: newRecord.timeElapsed,
-    }).catch(() => undefined);
+    const nextGuestBestRecords = [...guestBestRecords];
+    const recordKey = JSON.stringify(newRecord.boardConfig);
+    const existingIndex = nextGuestBestRecords.findIndex(
+      (record) => JSON.stringify(record.boardConfig) === recordKey,
+    );
+    const existingRecord =
+      existingIndex >= 0 ? nextGuestBestRecords[existingIndex] : null;
+
+    if (!existingRecord || newRecord.timeElapsed < existingRecord.timeElapsed) {
+      const updatedGuestBestRecords =
+        existingIndex >= 0
+          ? nextGuestBestRecords.map((record, index) =>
+              index === existingIndex ? newRecord : record,
+            )
+          : [...nextGuestBestRecords, newRecord];
+
+      setGuestBestRecords(updatedGuestBestRecords);
+      localStorage.setItem(
+        "guestBestRecords",
+        JSON.stringify(updatedGuestBestRecords),
+      );
+    }
   };
+
+  const displayedRecords = authLoaded && authUser ? records : guestBestRecords;
 
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
@@ -244,7 +275,7 @@ const Layout = () => {
                         <TableRow key={mode}>
                           <TableCell className="font-bold">{variantMap[mode as keyof typeof variantMap]}</TableCell>
                           {Object.keys(difficultyMap).map((difficultyKey) => {
-                            const filteredRecords = records.filter(
+                            const filteredRecords = displayedRecords.filter(
                               (record) =>
                                 JSON.stringify(record.boardConfig) === JSON.stringify(boardConfigLibrary[mode as keyof typeof boardConfigLibrary][difficultyKey as keyof typeof difficultyMap])
                             );
