@@ -1,7 +1,15 @@
-const DEFAULT_BACKEND_URL = "http://localhost:3001";
-
 export const getBackendUrl = () => {
-  return import.meta.env.VITE_BACKEND_URL ?? DEFAULT_BACKEND_URL;
+  const backendUrl = import.meta.env.VITE_BACKEND_URL?.trim();
+
+  if (backendUrl) {
+    return backendUrl.replace(/\/$/, "");
+  }
+
+  if (import.meta.env.DEV) {
+    return "http://localhost:3001";
+  }
+
+  throw new Error("VITE_BACKEND_URL must be set in production");
 };
 
 export const getGoogleLoginUrl = () => {
