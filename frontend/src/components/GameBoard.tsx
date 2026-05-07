@@ -119,6 +119,10 @@ export const GameBoard: React.FC<{
     if (isWin(board)) {
       setIsGameOver("win");
 
+      // In case UI time drifts from actual ms because of lag
+      const correctedElapsed = startTime !== null ? Date.now() - startTime : timeElapsed;
+      setTimeElapsed(correctedElapsed);
+
       const updatedBoard = board.map(row =>
         row.map(cell => {
           if (cell.mineNum !== 0) {
@@ -134,7 +138,7 @@ export const GameBoard: React.FC<{
 
       addRecord({
         boardConfig: config,
-        timeElapsed: timeElapsed,
+        timeElapsed: correctedElapsed,
         date: Date.now(),
         mineArray: extractMinesFromBoard(board),
       });
