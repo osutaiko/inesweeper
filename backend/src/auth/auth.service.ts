@@ -51,7 +51,19 @@ export class AuthService {
         getAll: () => this.parseCookies(req.headers.cookie),
         setAll: (cookiesToSet) => {
           cookiesToSet.forEach(({ name, value, options }) => {
-            res.cookie(name, value, options as CookieOptions);
+            const cookieOptions: CookieOptions = {
+              ...options,
+              sameSite:
+                process.env.NODE_ENV === 'production'
+                  ? 'none'
+                  : options.sameSite,
+              secure:
+                process.env.NODE_ENV === 'production'
+                  ? true
+                  : options.secure,
+            };
+
+            res.cookie(name, value, cookieOptions);
           });
         },
       },
