@@ -50,8 +50,9 @@ import {
 } from "./ui/dropdown-menu";
 
 import InesweeperLogo from "@/assets/images/inesweeper-logo.svg";
-import { ChartColumnIncreasing, Github, Info, LogIn, LogOut, Settings, UserCircle2 } from "lucide-react";
+import { ChartColumnIncreasing, Github, Info, LogIn, Settings, UserCircle2 } from "lucide-react";
 import { getBackendUrl, getGoogleLoginUrl, getLogoutUrl } from "@/lib/auth";
+import { recordLoggedInGameLog } from "@/lib/game-log";
 
 type AuthUser = {
   id: string;
@@ -139,6 +140,17 @@ const Layout = () => {
     const updatedRecords = [...records, newRecord];
     setRecords(updatedRecords);
     localStorage.setItem("gameRecords", JSON.stringify(updatedRecords));
+
+    if (!authUser) {
+      return;
+    }
+
+    void recordLoggedInGameLog({
+      boardConfig: newRecord.boardConfig,
+      variant,
+      difficulty,
+      durationMs: newRecord.timeElapsed,
+    }).catch(() => undefined);
   };
 
   return (

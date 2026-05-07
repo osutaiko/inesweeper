@@ -34,7 +34,7 @@ export class AuthService {
     });
   }
 
-  private createSupabaseClient(req: Request, res: Response) {
+  createSupabaseClient(req: Request, res: Response) {
     if (!this.supabaseUrl || !this.supabaseAnonKey) {
       throw new BadRequestException(
         'SUPABASE_URL and SUPABASE_ANON_KEY must be set',
