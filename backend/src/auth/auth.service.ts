@@ -8,17 +8,7 @@ type ParsedCookie = { name: string; value: string };
 export class AuthService {
   private readonly supabaseUrl = process.env.SUPABASE_URL;
   private readonly supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
-  private readonly backendUrl = this.getBackendUrl();
   private readonly frontendUrl = this.getFrontendUrl();
-
-  private getBackendUrl() {
-    const backendUrl = process.env.BACKEND_URL?.trim();
-
-    if (backendUrl) return backendUrl.replace(/\/$/, '');
-    if (process.env.NODE_ENV !== 'production') return 'http://localhost:3001';
-
-    throw new BadRequestException('BACKEND_URL must be set in production');
-  }
 
   private getFrontendUrl() {
     const frontendUrl = process.env.FRONTEND_URL?.trim();
@@ -70,7 +60,13 @@ export class AuthService {
 
   async startGoogleLogin(req: Request, res: Response) {
     const supabase = this.createSupabaseClient(req, res);
-    const redirectTo = `${this.backendUrl}/auth/google/callback`;
+    const host = req.get('host');
+
+    if (!host) {
+      throw new BadRequestException('Request host is missing');
+    }
+
+    const redirectTo = `https://${host}/auth/google/callback`;
 
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
