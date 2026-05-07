@@ -116,13 +116,13 @@ export class AuthService {
 
   async getCurrentUser(req: Request, res: Response) {
     const supabase = this.createSupabaseClient(req, res);
-    const { data, error } = await supabase.auth.getSession();
+    const { data, error } = await supabase.auth.getUser();
 
     if (error) {
       return null;
     }
 
-    const user = data.session?.user;
+    const user = data.user;
     if (!user) {
       return null;
     }
