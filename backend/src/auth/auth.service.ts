@@ -91,4 +91,43 @@ export class AuthService {
 
     return this.frontendUrl;
   }
+
+  async logout(req: Request, res: Response) {
+    const supabase = this.createSupabaseClient(req, res);
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      throw new UnauthorizedException(error.message);
+    }
+
+    return this.frontendUrl;
+  }
+
+  async getCurrentUser(req: Request, res: Response) {
+    const supabase = this.createSupabaseClient(req, res);
+    const { data, error } = await supabase.auth.getSession();
+
+    if (error) {
+      return null;
+    }
+
+    const user = data.session?.user;
+    if (!user) {
+      return null;
+    }
+
+    return {
+      id: user.id,
+      email: user.email,
+      name:
+        user.user_metadata?.full_name ??
+        user.user_metadata?.name ??
+        user.email ??
+        'User',
+      avatarUrl:
+        user.user_metadata?.avatar_url ??
+        user.user_metadata?.picture ??
+        null,
+    };
+  }
 }

@@ -25,4 +25,16 @@ export class AuthController {
     );
     return res.redirect(302, redirectUrl);
   }
+
+  @Get('me')
+  async getMe(@Req() req: Request, @Res() res: Response) {
+    const user = await this.authService.getCurrentUser(req, res);
+    return res.json({ user });
+  }
+
+  @Get('logout')
+  async logout(@Req() req: Request, @Res() res: Response) {
+    const redirectUrl = await this.authService.logout(req, res);
+    return res.redirect(302, redirectUrl);
+  }
 }

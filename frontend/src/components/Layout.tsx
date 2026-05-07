@@ -40,9 +40,25 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Separator } from "./ui/separator";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 
 import InesweeperLogo from "@/assets/images/inesweeper-logo.svg";
-import { ChartColumnIncreasing, Settings, Info, Github } from "lucide-react";
+import { ChartColumnIncreasing, Github, Info, LogIn, LogOut, Settings, UserCircle2 } from "lucide-react";
+import { getBackendUrl, getGoogleLoginUrl, getLogoutUrl } from "@/lib/auth";
+
+type AuthUser = {
+  id: string;
+  email: string | null;
+  name: string;
+  avatarUrl: string | null;
+};
 
 const Layout = () => {
   const isDesktop = useMediaQuery("(min-width: 640px)");
@@ -53,6 +69,7 @@ const Layout = () => {
   const [flagButtonSize, setFlagButtonSize] = useState(72);
   const [flagButtonPosition, setFlagButtonPosition] = useState("bottom-right");
   const [records, setRecords] = useState<TimeRecord[]>([]);
+  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
 
   useEffect(() => {
     const checkTouchscreen = () => {
@@ -75,6 +92,35 @@ const Layout = () => {
     if (savedZoom) setZoom(Number(savedZoom));
     if (savedFlagButtonSize) setFlagButtonSize(Number(savedFlagButtonSize));
     if (savedFlagButtonPosition) setFlagButtonPosition(savedFlagButtonPosition);
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const loadAuthUser = async () => {
+      try {
+        const response = await fetch(`${getBackendUrl()}/auth/me`, {
+          credentials: "include",
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          setAuthUser(null);
+          return;
+        }
+
+        const data = await response.json();
+        setAuthUser(data.user ?? null);
+      } catch {
+        if (!controller.signal.aborted) {
+          setAuthUser(null);
+        }
+      }
+    };
+
+    loadAuthUser();
+
+    return () => controller.abort();
   }, []);
 
   useEffect(() => {
@@ -298,6 +344,55 @@ const Layout = () => {
                 </div>
               </DialogContent>
             </Dialog>
+            {authUser ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="secondary"
+                    size="icon"
+                    className="overflow-hidden rounded-full"
+                    title={authUser.name}
+                  >
+                    {authUser.avatarUrl ? (
+                      <img
+                        src={authUser.avatarUrl}
+                        alt={authUser.name}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <UserCircle2 />
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel className="flex flex-col gap-1">
+                    <p className="truncate text-sm font-medium leading-none">
+                      {authUser.name}
+                    </p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {authUser.email ?? "with Google"}
+                    </p>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    className="text-destructive"
+                    onClick={() => {
+                      window.location.assign(getLogoutUrl());
+                    }}
+                  >
+                    Log out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button
+                variant="secondary"
+                size="icon"
+                onClick={() => window.location.assign(getGoogleLoginUrl())}
+              >
+                <LogIn />
+              </Button>
+            )}
           </div>
         </header>
         <ScrollArea className="flex w-full h-[calc(100vh-57px)] sm:h-[calc(100vh-73px)]">
