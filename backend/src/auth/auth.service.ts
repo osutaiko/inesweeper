@@ -4,15 +4,30 @@ import type { Request, Response } from 'express';
 
 type ParsedCookie = { name: string; value: string };
 
-const DEFAULT_BACKEND_URL = 'http://localhost:3001';
-const DEFAULT_FRONTEND_URL = 'http://localhost:3000';
-
 @Injectable()
 export class AuthService {
   private readonly supabaseUrl = process.env.SUPABASE_URL;
   private readonly supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
-  private readonly backendUrl = process.env.BACKEND_URL ?? DEFAULT_BACKEND_URL;
-  private readonly frontendUrl = process.env.FRONTEND_URL ?? DEFAULT_FRONTEND_URL;
+  private readonly backendUrl = this.getBackendUrl();
+  private readonly frontendUrl = this.getFrontendUrl();
+
+  private getBackendUrl() {
+    const backendUrl = process.env.BACKEND_URL?.trim();
+
+    if (backendUrl) return backendUrl.replace(/\/$/, '');
+    if (process.env.NODE_ENV !== 'production') return 'http://localhost:3001';
+
+    throw new BadRequestException('BACKEND_URL must be set in production');
+  }
+
+  private getFrontendUrl() {
+    const frontendUrl = process.env.FRONTEND_URL?.trim();
+
+    if (frontendUrl) return frontendUrl.replace(/\/$/, '');
+    if (process.env.NODE_ENV !== 'production') return 'http://localhost:3000';
+
+    throw new BadRequestException('FRONTEND_URL must be set in production');
+  }
 
   private parseCookies(cookieHeader: string | undefined): ParsedCookie[] {
     if (!cookieHeader) {
