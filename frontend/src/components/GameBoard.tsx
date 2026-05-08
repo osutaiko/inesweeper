@@ -203,15 +203,15 @@ export const GameBoard: React.FC<{
     }
 
     if (board[row][col].state.type === "revealed") {
-      handleChord(board, row, col, config, setBoard);
-      return;
+        handleChord(board, row, col, config, setBoard);
     }
 
-    if (isFirstClick) {
-      handleBeforeFirstClick(row, col);
+    if (!isFlagToggled) {
+      if (isFirstClick) {
+        handleBeforeFirstClick(row, col);
+      }
+      handleClick(board, row, col, config, setBoard);
     }
-    handleClick(board, row, col, config, setBoard);
-
     return;
   };
 
