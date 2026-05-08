@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Board, BoardConfig, Cell, TimeRecord } from "@/lib/types";
 import { createBoard, handleClick, handleChord, handleFlag, isWin, isLoss, countRemainingFlags, extractMinesFromBoard, iterateNeighbors } from "@/lib/minesweeper";
+import { formatTimeMs } from "@/lib/utils";
 import { Flag, Laugh, Meh, Shovel, Skull, Smile, Sun } from "lucide-react";
 import { Button } from "./ui/button";
 
@@ -348,7 +349,7 @@ export const GameBoard: React.FC<{
                 {isGameOver === "loss" && <Skull />}
               </Button>
               <Button className="flex justify-center items-center px-3 rounded-md overflow-hidden bg-game-button" variant="secondary">
-                <p className="font-bold text-xl">{startTime ? (isGameOver ? (timeElapsed / 1000).toFixed(2) : Math.floor(timeElapsed / 1000)) : 0}</p>
+                <p className="font-bold text-xl">{startTime ? (isGameOver ? formatTimeMs(timeElapsed) : Math.floor(timeElapsed / 1000)) : 0}</p>
               </Button>
 
             </div>

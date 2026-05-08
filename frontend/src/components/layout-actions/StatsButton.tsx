@@ -14,6 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ChartColumnIncreasing } from "lucide-react";
 
 import { boardConfigLibrary, difficultyMap, variantMap } from "@/lib/constants";
+import { formatTimeMs } from "@/lib/utils";
 
 type StatsButtonProps = {
   isDesktop: boolean;
@@ -68,7 +69,7 @@ const StatsButton = ({ isDesktop, displayedRecords }: StatsButtonProps) => (
 
                   return (
                     <TableCell key={difficultyKey} className="text-center">
-                      {bestTime === Infinity ? "-" : (bestTime / 1000).toFixed(2)}
+                      {bestTime === Infinity ? "-" : formatTimeMs(bestTime)}
                     </TableCell>
                   );
                 })}
