@@ -36,7 +36,7 @@ const InfoButton = ({ variant }: InfoButtonProps) => (
         <DialogDescription hidden>Variant descriptions</DialogDescription>
       </DialogHeader>
       <ScrollArea className="max-h-[calc(100vh-140px)]">
-        <Accordion type="single" defaultValue={variant} collapsible>
+        <Accordion type="multiple" defaultValue={[variant]}>
           <AccordionItem value="classic">
             <AccordionTrigger className="text-base">Classic</AccordionTrigger>
             <AccordionContent className="flex flex-col gap-2">
