@@ -13,10 +13,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Github, Info } from "lucide-react";
 
 import { VariantName } from "@/lib/types";
+import { TooltipProvider } from "@radix-ui/react-tooltip";
 
 type InfoButtonProps = {
   variant: VariantName;
@@ -132,7 +138,34 @@ const InfoButton = ({ variant }: InfoButtonProps) => (
           </AccordionItem>
         </Accordion>
       </ScrollArea>
-      <div className="flex justify-end">
+      <div className="flex flex-row justify-between items-center">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="link" className="p-0 cursor-help">Privacy Policy</Button>
+            </TooltipTrigger>
+            <TooltipContent className="py-4">
+              <div className="space-y-2">
+                <p>Inesweeper uses Google sign-in with Supabase Auth for its member features.</p>
+                <p>From your Google account we collect and store your:</p>
+                <ul className="list-disc pl-5">
+                  <li>Gmail address</li>
+                  <li>Display name</li>
+                  <li>Profile picture</li>
+                  <li>Inesweeper sign-in date</li>
+                </ul>
+                <p>While you play games in Inesweeper we collect and store your:</p>
+                <ul className="list-disc pl-5">
+                  <li>Individual game results with timestamps</li>
+                  <li>Best times</li>
+                </ul>
+                <p>
+                  You may request (either partial or full) deletion of your account data by contacting <u>henongod@gmail.com</u>.
+                </p>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
         <a href="https://github.com/osutaiko/inesweeper" target="_blank" rel="noopener noreferrer">
           <Github />
         </a>
