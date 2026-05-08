@@ -94,7 +94,7 @@ export const GameBoard: React.FC<{
     if (isGameOver) return;
 
     const updateTime = () => {
-      if (startTime !== null) {
+      if (startTime !== null && !isGameOver) {
         setTimeElapsed(Date.now() - startTime);
       }
       animationFrameRef.current = requestAnimationFrame(updateTime);
@@ -118,6 +118,9 @@ export const GameBoard: React.FC<{
     }
 
     if (isWin(board)) {
+      if (animationFrameRef.current !== null) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
       setIsGameOver("win");
 
       // In case UI time drifts from actual ms because of lag
@@ -147,6 +150,9 @@ export const GameBoard: React.FC<{
 
     const isLossValue = isLoss(board);
     if (isLossValue) {
+      if (animationFrameRef.current !== null) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
       setIsGameOver("loss");
       setExplodedCell(isLossValue);
 
@@ -349,7 +355,9 @@ export const GameBoard: React.FC<{
                 {isGameOver === "loss" && <Skull />}
               </Button>
               <div className="flex h-[40px] justify-center items-center px-3 rounded-md overflow-hidden bg-game-button">
-                <p className="font-bold text-xl">{startTime ? (isGameOver ? formatTimeMs(timeElapsed) : Math.floor(timeElapsed / 1000)) : 0}</p>
+                <p className="font-bold text-xl">
+                  {isGameOver ? formatTimeMs(timeElapsed) : Math.floor(timeElapsed / 1000)}
+                </p>
               </div>
 
             </div>
