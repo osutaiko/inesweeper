@@ -228,6 +228,7 @@ const Layout = () => {
             <StatsButton
               isDesktop={isDesktop}
               displayedRecords={displayedRecords}
+              isAuthed={Boolean(authUser)}
             />
             <InfoButton variant={variant} />
             <AuthButton authUser={authUser} />

@@ -19,9 +19,10 @@ import { formatTimeMs } from "@/lib/utils";
 type StatsButtonProps = {
   isDesktop: boolean;
   displayedRecords: TimeRecord[];
+  isAuthed: boolean;
 };
 
-const StatsButton = ({ isDesktop, displayedRecords }: StatsButtonProps) => (
+const StatsButton = ({ isDesktop, displayedRecords, isAuthed }: StatsButtonProps) => (
   <Dialog>
     <DialogTrigger asChild>
       <Button variant="secondary" size="icon">
@@ -31,7 +32,9 @@ const StatsButton = ({ isDesktop, displayedRecords }: StatsButtonProps) => (
     <DialogContent className="gap-6">
       <DialogHeader>
         <DialogTitle>My Records</DialogTitle>
-        <DialogDescription hidden>Stats</DialogDescription>
+        <DialogDescription hidden={isAuthed}>
+          Sign in to save your times online!
+        </DialogDescription>
       </DialogHeader>
       <ScrollArea className="max-h-[calc(100vh-90px)]">
         <Table>
