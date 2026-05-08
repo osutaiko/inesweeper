@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -7,6 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Spinner } from "@/components/ui/spinner";
 import { getGoogleLoginUrl, getLogoutUrl } from "@/lib/auth";
 import { UserCircle2 } from "lucide-react";
 
@@ -21,8 +23,11 @@ type AuthButtonProps = {
   authUser: AuthUser | null;
 };
 
-const AuthButton = ({ authUser }: AuthButtonProps) =>
-  authUser ? (
+const AuthButton = ({ authUser }: AuthButtonProps) => {
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+
+if (authUser) {
+  return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
@@ -58,12 +63,20 @@ const AuthButton = ({ authUser }: AuthButtonProps) =>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  ) : (
-    <Button
-      onClick={() => window.location.assign(getGoogleLoginUrl())}
-    >
-      Log In
-    </Button>
   );
+}
+
+  return (
+      <Button
+        disabled={isLoggingIn}
+        onClick={() => {
+          setIsLoggingIn(true);
+          window.location.assign(getGoogleLoginUrl());
+        }}
+      >
+        {isLoggingIn ? <Spinner /> : "Log In"}
+      </Button>
+  );
+};
 
 export default AuthButton;
