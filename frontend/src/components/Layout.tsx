@@ -75,6 +75,7 @@ const Layout = () => {
       try {
         const response = await fetch(`${getBackendUrl()}/auth/me`, {
           credentials: "include",
+          cache: "no-store",
           signal: controller.signal,
         });
 

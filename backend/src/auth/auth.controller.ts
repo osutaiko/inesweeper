@@ -28,6 +28,7 @@ export class AuthController {
 
   @Get('me')
   async getMe(@Req() req: Request, @Res() res: Response) {
+    res.setHeader('Cache-Control', 'no-store');
     const user = await this.authService.getCurrentUser(req, res);
     return res.json({ user });
   }
