@@ -43,7 +43,7 @@ const toAuthUser = (user: User): AuthUser => ({
 
 const Layout = () => {
   const isDesktop = useMediaQuery("(min-width: 640px)");
-  const [isTouchscreen, setIsTouchscreen] = useState(false);
+  const isTouchscreen = useMediaQuery("(pointer: coarse) and (hover: none)");
   const [variant, setVariant] = useState<VariantName>("classic");
   const [difficulty, setDifficulty] = useState<DifficultyName>("beg");
   const [zoom, setZoom] = useState(100);
@@ -53,17 +53,6 @@ const Layout = () => {
   const [guestBestRecords, setGuestBestRecords] = useState<TimeRecord[]>([]);
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [authLoaded, setAuthLoaded] = useState(false);
-
-  useEffect(() => {
-    const checkTouchscreen = () => {
-      setIsTouchscreen(window.matchMedia("(pointer: coarse)").matches);
-    };
-
-    checkTouchscreen();
-
-    window.addEventListener("resize", checkTouchscreen);
-    return () => window.removeEventListener("resize", checkTouchscreen);
-  }, []);
 
   useEffect(() => {
     const savedRecords = localStorage.getItem("gameRecords");
