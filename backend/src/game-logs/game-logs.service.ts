@@ -9,6 +9,19 @@ type CompletedGameRunInput = {
   durationMs: number;
 };
 
+type BestTimeInput = {
+  variant: string;
+  difficulty: string;
+  durationMs: number;
+};
+
+type BestTimeRow = {
+  variant: string;
+  difficulty: string;
+  best_time_ms: number;
+  updated_at: string;
+};
+
 @Injectable()
 export class GameLogsService {
   constructor(
@@ -58,10 +71,85 @@ export class GameLogsService {
       throw new BadRequestException(error?.message ?? 'Unable to record game log');
     }
 
+    await this.recordBestTime(req, res, {
+      variant: input.variant,
+      difficulty: input.difficulty,
+      durationMs: input.durationMs,
+    });
+
     return {
       success: true,
       id: data.id,
       completedAt: data.completed_at,
     };
+  }
+
+  private async recordBestTime(req: Request, res: Response, input: BestTimeInput) {
+    const user = await this.authService.getCurrentUser(req, res);
+
+    if (!user) {
+      throw new UnauthorizedException('Login required');
+    }
+
+    const supabase = this.authService.createSupabaseClient(req, res);
+    const bestTimeMs = Math.round(input.durationMs);
+
+    const { data: existing, error: existingError } = await supabase
+      .from('best_times')
+      .select('best_time_ms')
+      .eq('user_id', user.id)
+      .eq('variant', input.variant)
+      .eq('difficulty', input.difficulty)
+      .maybeSingle();
+
+    if (existingError) {
+      throw new BadRequestException(
+        existingError.message ?? 'Unable to read best time',
+      );
+    }
+
+    if (existing && existing.best_time_ms <= bestTimeMs) {
+      return existing;
+    }
+
+    const { data, error } = await supabase
+      .from('best_times')
+      .upsert({
+        user_id: user.id,
+        variant: input.variant,
+        difficulty: input.difficulty,
+        best_time_ms: bestTimeMs,
+        updated_at: new Date().toISOString(),
+      })
+      .select('variant, difficulty, best_time_ms, updated_at')
+      .single();
+
+    if (error || !data) {
+      throw new BadRequestException(error?.message ?? 'Unable to save best time');
+    }
+
+    return data as BestTimeRow;
+  }
+
+  async getBestTimes(req: Request, res: Response) {
+    const user = await this.authService.getCurrentUser(req, res);
+
+    if (!user) {
+      throw new UnauthorizedException('Login required');
+    }
+
+    const supabase = this.authService.createSupabaseClient(req, res);
+
+    const { data, error } = await supabase
+      .from('best_times')
+      .select('variant, difficulty, best_time_ms, updated_at')
+      .eq('user_id', user.id)
+      .order('updated_at', { ascending: false });
+
+    if (error || !data) {
+      throw new BadRequestException(error?.message ?? 'Unable to load best times');
+    }
+
+    return data as BestTimeRow[];
   }
 }

@@ -16,7 +16,7 @@ import { ScrollArea, ScrollBar } from "./ui/scroll-area";
 
 import InesweeperLogo from "@/assets/images/inesweeper-logo.svg";
 import { getBackendUrl } from "@/lib/auth";
-import { recordLoggedInGameLog } from "@/lib/game-log";
+import { loadLoggedInBestTimes, recordLoggedInGameLog } from "@/lib/game-log";
 import AuthButton from "./layout-actions/AuthButton";
 import InfoButton from "./layout-actions/InfoButton";
 import SettingsButton from "./layout-actions/SettingsButton";
@@ -67,6 +67,7 @@ const Layout = () => {
     if (savedFlagButtonPosition) setFlagButtonPosition(savedFlagButtonPosition);
   }, []);
 
+  // On load get Auth user object
   useEffect(() => {
     const controller = new AbortController();
 
@@ -99,6 +100,33 @@ const Layout = () => {
     return () => controller.abort();
   }, []);
 
+  // If logged in load best times
+  useEffect(() => {
+    if (!authLoaded || !authUser) {
+      return;
+    }
+
+    const controller = new AbortController();
+
+    const loadBestTimes = async () => {
+      try {
+        const bestTimes = await loadLoggedInBestTimes();
+        if (!controller.signal.aborted) {
+          setRecords(bestTimes);
+          localStorage.setItem("gameRecords", JSON.stringify(bestTimes));
+        }
+      } catch {
+        if (!controller.signal.aborted) {
+          setRecords([]);
+        }
+      }
+    };
+
+    loadBestTimes();
+
+    return () => controller.abort();
+  }, [authLoaded, authUser]);
+
   useEffect(() => {
     localStorage.setItem("zoom", zoom.toString());
   }, [zoom]);
@@ -113,9 +141,24 @@ const Layout = () => {
 
   const addRecord = (newRecord: TimeRecord) => {
     if (authLoaded && authUser) {
-      const updatedRecords = [...records, newRecord];
-      setRecords(updatedRecords);
-      localStorage.setItem("gameRecords", JSON.stringify(updatedRecords));
+      const existingIndex = records.findIndex(
+        (record) =>
+          JSON.stringify(record.boardConfig) === JSON.stringify(newRecord.boardConfig),
+      );
+      const existingRecord =
+        existingIndex >= 0 ? records[existingIndex] : null;
+
+      if (!existingRecord || newRecord.timeElapsed < existingRecord.timeElapsed) {
+        const updatedRecords =
+          existingIndex >= 0
+            ? records.map((record, index) =>
+                index === existingIndex ? newRecord : record,
+              )
+            : [...records, newRecord];
+
+        setRecords(updatedRecords);
+        localStorage.setItem("gameRecords", JSON.stringify(updatedRecords));
+      }
 
       void recordLoggedInGameLog({
         boardConfig: newRecord.boardConfig,

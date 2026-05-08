@@ -1,10 +1,16 @@
-import { Body, Controller, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, Res } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { GameLogsService } from './game-logs.service';
 
 @Controller('game-logs')
 export class GameLogsController {
   constructor(private readonly gameLogsService: GameLogsService) {}
+
+  @Get('best-times')
+  async getBestTimes(@Req() req: Request, @Res() res: Response) {
+    const result = await this.gameLogsService.getBestTimes(req, res);
+    return res.json(result);
+  }
 
   @Post()
   async recordCompletedGame(
