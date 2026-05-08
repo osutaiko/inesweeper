@@ -468,7 +468,7 @@ export const GameBoard: React.FC<{
           }}
           onClick={() => isGameOver ? handleReset() : setIsFlagToggled(!isFlagToggled)}
         >
-          {isGameOver ? (isGameOver === "win" ? <Smile /> : <Skull />) : (isFlagToggled ? <Flag /> : <Shovel />)}
+          {isGameOver ? (isGameOver === "win" ? <Laugh /> : <Skull />) : (isFlagToggled ? <Flag /> : <Shovel />)}
         </Button>
       )}
     </>
