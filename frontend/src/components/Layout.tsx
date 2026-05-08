@@ -15,12 +15,13 @@ import {
 import { ScrollArea, ScrollBar } from "./ui/scroll-area";
 
 import InesweeperLogo from "@/assets/images/inesweeper-logo.svg";
-import { getBackendUrl } from "@/lib/auth";
 import { loadLoggedInBestTimes, recordLoggedInGameLog } from "@/lib/game-log";
 import AuthButton from "./layout-actions/AuthButton";
 import InfoButton from "./layout-actions/InfoButton";
 import SettingsButton from "./layout-actions/SettingsButton";
 import StatsButton from "./layout-actions/StatsButton";
+import { supabase } from "@/lib/supabase";
+import type { User } from "@supabase/supabase-js";
 
 type AuthUser = {
   id: string;
@@ -28,6 +29,17 @@ type AuthUser = {
   name: string;
   avatarUrl: string | null;
 };
+
+const toAuthUser = (user: User): AuthUser => ({
+  id: user.id,
+  email: user.email,
+  name:
+    user.user_metadata?.full_name ??
+    user.user_metadata?.name ??
+    user.email ??
+    "User",
+  avatarUrl: user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null,
+});
 
 const Layout = () => {
   const isDesktop = useMediaQuery("(min-width: 640px)");
@@ -67,38 +79,35 @@ const Layout = () => {
     if (savedFlagButtonPosition) setFlagButtonPosition(savedFlagButtonPosition);
   }, []);
 
-  // On load get Auth user object
   useEffect(() => {
-    const controller = new AbortController();
+    let isActive = true;
 
     const loadAuthUser = async () => {
-      try {
-        const response = await fetch(`${getBackendUrl()}/auth/me`, {
-          credentials: "include",
-          cache: "no-store",
-          signal: controller.signal,
-        });
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-        if (!response.ok) {
-          setAuthUser(null);
-          setAuthLoaded(true);
-          return;
-        }
-
-        const data = await response.json();
-        setAuthUser(data.user ?? null);
-        setAuthLoaded(true);
-      } catch {
-        if (!controller.signal.aborted) {
-          setAuthUser(null);
-          setAuthLoaded(true);
-        }
+      if (!isActive) {
+        return;
       }
+
+      setAuthUser(user ? toAuthUser(user) : null);
+      setAuthLoaded(true);
     };
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setAuthUser(session?.user ? toAuthUser(session.user) : null);
+      setAuthLoaded(true);
+    });
 
     loadAuthUser();
 
-    return () => controller.abort();
+    return () => {
+      isActive = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   // If logged in load best times

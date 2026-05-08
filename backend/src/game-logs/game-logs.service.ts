@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
-import type { Request, Response } from 'express';
+import type { Request } from 'express';
 import { AuthService } from '../auth/auth.service';
 
 type CompletedGameRunInput = {
@@ -30,10 +30,9 @@ export class GameLogsService {
 
   async recordCompletedGame(
     req: Request,
-    res: Response,
     input: CompletedGameRunInput,
   ) {
-    const user = await this.authService.getCurrentUser(req, res);
+    const user = await this.authService.getCurrentUser(req);
 
     if (!user) {
       throw new UnauthorizedException('Login required');
@@ -52,7 +51,7 @@ export class GameLogsService {
       throw new BadRequestException('durationMs must be a positive number');
     }
 
-    const supabase = this.authService.createSupabaseClient(req, res);
+    const supabase = this.authService.createBearerClient(req);
 
     const { data, error } = await supabase
       .from('game_logs')
@@ -71,7 +70,7 @@ export class GameLogsService {
       throw new BadRequestException(error?.message ?? 'Unable to record game log');
     }
 
-    await this.recordBestTime(req, res, {
+    await this.recordBestTime(req, {
       variant: input.variant,
       difficulty: input.difficulty,
       durationMs: input.durationMs,
@@ -84,14 +83,14 @@ export class GameLogsService {
     };
   }
 
-  private async recordBestTime(req: Request, res: Response, input: BestTimeInput) {
-    const user = await this.authService.getCurrentUser(req, res);
+  private async recordBestTime(req: Request, input: BestTimeInput) {
+    const user = await this.authService.getCurrentUser(req);
 
     if (!user) {
       throw new UnauthorizedException('Login required');
     }
 
-    const supabase = this.authService.createSupabaseClient(req, res);
+    const supabase = this.authService.createBearerClient(req);
     const bestTimeMs = Math.round(input.durationMs);
 
     const { data: existing, error: existingError } = await supabase
@@ -131,14 +130,14 @@ export class GameLogsService {
     return data as BestTimeRow;
   }
 
-  async getBestTimes(req: Request, res: Response) {
-    const user = await this.authService.getCurrentUser(req, res);
+  async getBestTimes(req: Request) {
+    const user = await this.authService.getCurrentUser(req);
 
     if (!user) {
       throw new UnauthorizedException('Login required');
     }
 
-    const supabase = this.authService.createSupabaseClient(req, res);
+    const supabase = this.authService.createBearerClient(req);
 
     const { data, error } = await supabase
       .from('best_times')

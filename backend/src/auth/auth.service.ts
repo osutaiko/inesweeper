@@ -1,133 +1,52 @@
 import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
-import { createServerClient, type CookieOptions } from '@supabase/ssr';
-import type { Request, Response } from 'express';
-
-type ParsedCookie = { name: string; value: string };
+import { createClient } from '@supabase/supabase-js';
+import type { Request } from 'express';
 
 @Injectable()
 export class AuthService {
   private readonly supabaseUrl = process.env.SUPABASE_URL;
   private readonly supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
-  private readonly frontendUrl = this.getFrontendUrl();
 
-  private getFrontendUrl() {
-    const frontendUrl = process.env.FRONTEND_URL?.trim();
+  private getBearerToken(req: Request) {
+    const authorizationHeader = req.headers.authorization;
 
-    if (frontendUrl) return frontendUrl.replace(/\/$/, '');
-    if (process.env.NODE_ENV !== 'production') return 'http://localhost:3000';
-
-    throw new BadRequestException('FRONTEND_URL must be set in production');
-  }
-
-  private parseCookies(cookieHeader: string | undefined): ParsedCookie[] {
-    if (!cookieHeader) {
-      return [];
+    if (!authorizationHeader?.startsWith('Bearer ')) {
+      return null;
     }
 
-    return cookieHeader.split(';').flatMap((cookie) => {
-      const [rawName, ...rawValue] = cookie.trim().split('=');
-      if (!rawName || rawValue.length === 0) {
-        return [];
-      }
-
-      return [
-        {
-          name: rawName,
-          value: rawValue.join('='),
-        },
-      ];
-    });
+    const token = authorizationHeader.slice('Bearer '.length).trim();
+    return token || null;
   }
 
-  createSupabaseClient(req: Request, res: Response) {
+  createBearerClient(req: Request) {
+    const accessToken = this.getBearerToken(req);
+
+    if (!accessToken) {
+      throw new UnauthorizedException('Login required');
+    }
+
     if (!this.supabaseUrl || !this.supabaseAnonKey) {
       throw new BadRequestException(
         'SUPABASE_URL and SUPABASE_ANON_KEY must be set',
       );
     }
 
-    return createServerClient(this.supabaseUrl, this.supabaseAnonKey, {
-      cookies: {
-        getAll: () => this.parseCookies(req.headers.cookie),
-        setAll: (cookiesToSet) => {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            const cookieOptions: CookieOptions = {
-              ...options,
-              sameSite:
-                process.env.NODE_ENV === 'production'
-                  ? 'none'
-                  : options.sameSite,
-              secure:
-                process.env.NODE_ENV === 'production'
-                  ? true
-                  : options.secure,
-            };
-
-            res.cookie(name, value, cookieOptions);
-          });
+    return createClient(this.supabaseUrl, this.supabaseAnonKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+        detectSessionInUrl: false,
+      },
+      global: {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
         },
       },
     });
   };
 
-  async startGoogleLogin(req: Request, res: Response) {
-    const supabase = this.createSupabaseClient(req, res);
-    const host = req.get('host');
-
-    if (!host) {
-      throw new BadRequestException('Request host is missing');
-    }
-
-    const redirectTo = `https://${host}/auth/google/callback`;
-
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo,
-      },
-    });
-
-    if (error || !data.url) {
-      throw new UnauthorizedException(
-        error?.message ?? 'Unable to start Google login',
-      );
-    }
-
-    return data.url;
-  };
-
-  async handleGoogleCallback(
-    req: Request,
-    res: Response,
-    code?: string,
-  ) {
-    if (!code) {
-      throw new BadRequestException('Missing OAuth code');
-    }
-
-    const supabase = this.createSupabaseClient(req, res);
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-
-    if (error) {
-      throw new UnauthorizedException(error.message);
-    }
-
-    return this.frontendUrl;
-  }
-
-  async logout(req: Request, res: Response) {
-    const supabase = this.createSupabaseClient(req, res);
-    const { error } = await supabase.auth.signOut();
-
-    if (error) {
-      throw new UnauthorizedException(error.message);
-    }
-
-    return this.frontendUrl;
-  }
-
-  async getCurrentUser(req: Request, res: Response) {
-    const supabase = this.createSupabaseClient(req, res);
+  async getCurrentUser(req: Request) {
+    const supabase = this.createBearerClient(req);
     const { data, error } = await supabase.auth.getUser();
 
     if (error) {

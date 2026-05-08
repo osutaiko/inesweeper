@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Spinner } from "@/components/ui/spinner";
-import { getGoogleLoginUrl, getLogoutUrl } from "@/lib/auth";
+import { supabase } from "@/lib/supabase";
 import { UserCircle2 } from "lucide-react";
 
 type AuthUser = {
@@ -55,8 +55,8 @@ if (authUser) {
         <DropdownMenuSeparator />
         <DropdownMenuItem
           className="text-destructive"
-          onClick={() => {
-            window.location.assign(getLogoutUrl());
+          onClick={async () => {
+            await supabase.auth.signOut();
           }}
         >
           Log out
@@ -69,9 +69,21 @@ if (authUser) {
   return (
       <Button
         disabled={isLoggingIn}
-        onClick={() => {
+        onClick={async () => {
           setIsLoggingIn(true);
-          window.location.assign(getGoogleLoginUrl());
+          const { data, error } = await supabase.auth.signInWithOAuth({
+            provider: "google",
+            options: {
+              redirectTo: window.location.origin,
+            },
+          });
+
+          if (error || !data.url) {
+            setIsLoggingIn(false);
+            return;
+          }
+
+          window.location.assign(data.url);
         }}
       >
         {isLoggingIn ? <Spinner /> : "Log In"}

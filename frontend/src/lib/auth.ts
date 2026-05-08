@@ -11,11 +11,3 @@ export const getBackendUrl = () => {
 
   throw new Error("VITE_BACKEND_URL must be set in production");
 };
-
-export const getGoogleLoginUrl = () => {
-  return `${getBackendUrl()}/auth/google`;
-};
-
-export const getLogoutUrl = () => {
-  return `${getBackendUrl()}/auth/logout`;
-};

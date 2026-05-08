@@ -18,6 +18,10 @@ A Collection of Interesting Minesweeper Variants.
 ## Philosophy
 All variants featured in this site must have the exact same gameplay loop as Classic Minesweeper. Uncover all safe cells without stepping on a mine, numbers on a cell represent the mines around them in some way, and mines are randomly generated (unless I decide to add NG mode somehow). I don't want to add any game-breaking rulesets that doesn't feel like the original.
 
+## Environment
+- Backend: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `FRONTEND_URL`
+- Frontend: `VITE_BACKEND_URL`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
+
 ## Planned Variants
 - Edge: Mines can be placed between two cells, where each half counts as half a mine
 - ~~Multiplayer mode (territorial expansion)~~

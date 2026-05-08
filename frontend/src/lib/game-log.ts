@@ -1,5 +1,6 @@
 import { getBackendUrl } from "@/lib/auth";
 import { boardConfigLibrary } from "@/lib/constants";
+import { getAuthAccessToken } from "@/lib/supabase";
 import type {
   BoardConfig,
   DifficultyName,
@@ -15,12 +16,14 @@ type LoggedInGameLog = {
 };
 
 export const recordLoggedInGameLog = async (run: LoggedInGameLog) => {
+  const accessToken = await getAuthAccessToken();
+
   const response = await fetch(`${getBackendUrl()}/game-logs`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
     },
-    credentials: "include",
     body: JSON.stringify(run),
   });
 
@@ -37,8 +40,10 @@ type BestTimeRow = {
 };
 
 export const loadLoggedInBestTimes = async () => {
+  const accessToken = await getAuthAccessToken();
+
   const response = await fetch(`${getBackendUrl()}/game-logs/best-times`, {
-    credentials: "include",
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
   });
 
   if (!response.ok) {

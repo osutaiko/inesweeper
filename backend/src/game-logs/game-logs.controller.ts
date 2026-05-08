@@ -8,7 +8,7 @@ export class GameLogsController {
 
   @Get('best-times')
   async getBestTimes(@Req() req: Request, @Res() res: Response) {
-    const result = await this.gameLogsService.getBestTimes(req, res);
+    const result = await this.gameLogsService.getBestTimes(req);
     return res.json(result);
   }
 
@@ -24,7 +24,7 @@ export class GameLogsController {
       durationMs?: number;
     },
   ) {
-    const result = await this.gameLogsService.recordCompletedGame(req, res, {
+    const result = await this.gameLogsService.recordCompletedGame(req, {
       boardConfig: body.boardConfig ?? {},
       variant: body.variant ?? '',
       difficulty: body.difficulty ?? '',
