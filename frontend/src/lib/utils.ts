@@ -48,5 +48,5 @@ export function useMediaQuery(query: string): boolean {
 };
 
 export function formatTimeMs(ms: number): string {
-  return (ms / 1000).toFixed(2);
+  return (Math.floor(ms / 10) / 100).toFixed(2);
 }
