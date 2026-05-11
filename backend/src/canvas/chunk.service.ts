@@ -49,9 +49,21 @@ export class ChunkService {
     };
   }
 
-  private getChunkRecord(chunkX: number, chunkY: number) {
+  private getExistingChunkRecord(chunkX: number, chunkY: number) {
     const key = this.keyFor(chunkX, chunkY);
     const existing = this.chunkStore.get(key);
+
+    if (!existing) {
+      return null;
+    }
+
+    const normalized = this.normalizeChunk(existing);
+    this.chunkStore.set(key, normalized);
+    return normalized;
+  }
+
+  private getOrCreateChunkRecord(chunkX: number, chunkY: number) {
+    const existing = this.getExistingChunkRecord(chunkX, chunkY);
     const nextChunk: Chunk =
       existing ??
       {
@@ -68,7 +80,7 @@ export class ChunkService {
       };
 
     const normalized = this.normalizeChunk(nextChunk);
-    this.chunkStore.set(key, normalized);
+    this.chunkStore.set(this.keyFor(chunkX, chunkY), normalized);
     return normalized;
   }
 
@@ -125,6 +137,21 @@ export class ChunkService {
     return nextAttempt;
   }
 
+  // Can only lock (or solve) next to already solved chunks
+  private hasSolvedCardinalNeighbor(chunkX: number, chunkY: number) {
+    const neighbors = [
+      [chunkX, chunkY - 1],
+      [chunkX + 1, chunkY],
+      [chunkX, chunkY + 1],
+      [chunkX - 1, chunkY],
+    ] as const;
+
+    return neighbors.some(([neighborX, neighborY]) => {
+      const neighbor = this.getExistingChunkRecord(neighborX, neighborY);
+      return neighbor?.state === 'solved';
+    });
+  }
+
   async getChunk(req: Request, chunkX: number, chunkY: number) {
     const user = await this.requireUser(req);
 
@@ -132,7 +159,7 @@ export class ChunkService {
       throw new UnauthorizedException('Login required');
     }
 
-    return this.getChunkRecord(chunkX, chunkY);
+    return this.getOrCreateChunkRecord(chunkX, chunkY);
   }
 
   async lockChunk(req: Request, chunkX: number, chunkY: number) {
@@ -144,7 +171,7 @@ export class ChunkService {
 
     this.lockAttempt(user.id);
 
-    const chunk = this.getChunkRecord(chunkX, chunkY);
+    const chunk = this.getOrCreateChunkRecord(chunkX, chunkY);
     const activeLock = this.getActiveLockForUser(user.id);
 
     // User can only lock 1 chunk at once
@@ -161,6 +188,12 @@ export class ChunkService {
       activeLock.chunkY === chunkY
     ) {
       return activeLock;
+    }
+
+    if (!this.hasSolvedCardinalNeighbor(chunkX, chunkY)) {
+      throw new ConflictException(
+        'Chunk must touch an already solved cardinal neighbor',
+      );
     }
 
     if (chunk.state === 'solved') {
@@ -199,7 +232,7 @@ export class ChunkService {
       throw new UnauthorizedException('Must log in to play');
     }
 
-    const chunk = this.getChunkRecord(chunkX, chunkY);
+    const chunk = this.getOrCreateChunkRecord(chunkX, chunkY);
 
     if (chunk.state !== 'locked' || !chunk.lockedByUserId) {
       throw new ConflictException('Chunk must be locked before solving');
