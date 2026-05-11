@@ -1,8 +1,12 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { ThemeProvider } from "./theme-provider";
+import { supabase } from "@/lib/supabase";
+import type { User } from "@supabase/supabase-js";
 import { DifficultyName, TimeRecord, VariantName } from "@/lib/types";
 import { boardConfigLibrary, difficultyMap, variantMap } from "@/lib/constants";
 import { useMediaQuery } from "@/lib/utils";
+import { loadLoggedInBestTimes, recordLoggedInGameLog } from "@/lib/game-log";
 
 import GameBoard from "./GameBoard";
 import {
@@ -13,15 +17,14 @@ import {
   SelectValue,
 } from "./ui/select";
 import { ScrollArea, ScrollBar } from "./ui/scroll-area";
+import { Button } from "./ui/button";
 
 import InesweeperLogo from "@/assets/images/inesweeper-logo.svg";
-import { loadLoggedInBestTimes, recordLoggedInGameLog } from "@/lib/game-log";
 import AuthButton from "./layout-actions/AuthButton";
 import InfoButton from "./layout-actions/InfoButton";
 import SettingsButton from "./layout-actions/SettingsButton";
 import StatsButton from "./layout-actions/StatsButton";
-import { supabase } from "@/lib/supabase";
-import type { User } from "@supabase/supabase-js";
+import { ArrowRight } from "lucide-react";
 
 type AuthUser = {
   id: string;
@@ -228,13 +231,19 @@ const Layout = () => {
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
       <div className="flex flex-col items-center min-h-screen overflow-hidden touch-none">
         <header className="flex flex-row w-full gap-4 px-3 sm:px-8 py-2 sm:py-4 justify-between items-center border-b overflow-x-auto">
-          <a href="/">
+          <Link to="/">
             <div className="flex flex-row items-center gap-3">
               <img src={InesweeperLogo} alt="Inesweeper Logo" className="w-[40px] h-[40px] min-w-[40px] min-h-[40px]" />
               <h2 className="hidden min-[410px]:block text-lg sm:text-2xl">Inesweeper</h2>
             </div>
-          </a>
-          <div className="flex flex-row gap-2">
+          </Link>
+          <div className="flex flex-row gap-1">
+            <Button asChild variant="secondary" className="pr-3">
+              <Link to="/canvas">
+                Multiplayer
+                <ArrowRight />
+              </Link>
+            </Button>
             <SettingsButton
               isTouchscreen={isTouchscreen}
               zoom={zoom}
