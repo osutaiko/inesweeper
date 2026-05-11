@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import type { AuthUser } from "@/lib/auth";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,13 +12,6 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { supabase } from "@/lib/supabase";
 import { UserCircle2 } from "lucide-react";
-
-type AuthUser = {
-  id: string;
-  email: string | null;
-  name: string;
-  avatarUrl: string | null;
-};
 
 type AuthButtonProps = {
   authUser: AuthUser | null;

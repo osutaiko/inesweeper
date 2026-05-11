@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ThemeProvider } from "./theme-provider";
-import { supabase } from "@/lib/supabase";
-import type { User } from "@supabase/supabase-js";
 import { DifficultyName, TimeRecord, VariantName } from "@/lib/types";
 import { boardConfigLibrary, difficultyMap, variantMap } from "@/lib/constants";
 import { useMediaQuery } from "@/lib/utils";
 import { loadLoggedInBestTimes, recordLoggedInGameLog } from "@/lib/game-log";
+import { loadCurrentAuthUser, subscribeToAuthUser, type AuthUser } from "@/lib/auth";
 
 import GameBoard from "./GameBoard";
 import {
@@ -28,27 +27,9 @@ import ToolsPopover from "./layout-actions/ToolsPopover";
 import StatsButton from "./layout-actions/StatsButton";
 import { ArrowRight } from "lucide-react";
 
-type AuthUser = {
-  id: string;
-  email: string | null;
-  name: string;
-  avatarUrl: string | null;
-};
-
-const toAuthUser = (user: User): AuthUser => ({
-  id: user.id,
-  email: user.email,
-  name:
-    user.user_metadata?.full_name ??
-    user.user_metadata?.name ??
-    user.email ??
-    "User",
-  avatarUrl: user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null,
-});
-
 const Layout = () => {
   const isDesktop = useMediaQuery("(min-width: 640px)");
-  const isLg = useMediaQuery("(min-width: 1024px)");
+  const isMd = useMediaQuery("(min-width: 768px)");
   const isTouchscreen = useMediaQuery("(pointer: coarse) and (hover: none)");
   const [variant, setVariant] = useState<VariantName>("classic");
   const [difficulty, setDifficulty] = useState<DifficultyName>("beg");
@@ -78,22 +59,17 @@ const Layout = () => {
     let isActive = true;
 
     const loadAuthUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
+      const user = await loadCurrentAuthUser();
       if (!isActive) {
         return;
       }
 
-      setAuthUser(user ? toAuthUser(user) : null);
+      setAuthUser(user);
       setAuthLoaded(true);
     };
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setAuthUser(session?.user ? toAuthUser(session.user) : null);
+    const subscription = subscribeToAuthUser((user) => {
+      setAuthUser(user);
       setAuthLoaded(true);
     });
 
@@ -238,7 +214,7 @@ const Layout = () => {
           <Link to="/">
             <div className="flex flex-row items-center gap-3">
               <img src={InesweeperLogo} alt="Inesweeper Logo" className="w-[40px] h-[40px] min-w-[40px] min-h-[40px]" />
-              <h2 className="hidden min-[410px]:block text-lg sm:text-2xl">Inesweeper</h2>
+              <h2 className="hidden min-[430px]:block text-lg sm:text-2xl">Inesweeper</h2>
             </div>
           </Link>
           <div className="flex flex-row gap-2">
@@ -248,7 +224,7 @@ const Layout = () => {
                 <ArrowRight />
               </Link>
             </Button>
-            {isLg ? (
+            {isMd ? (
               <ButtonGroup orientation="horizontal" className="items-center">
                 <SettingsButton
                   isTouchscreen={isTouchscreen}
