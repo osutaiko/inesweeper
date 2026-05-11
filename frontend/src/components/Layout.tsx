@@ -193,6 +193,36 @@ const Layout = () => {
   };
 
   const displayedRecords = authLoaded && authUser ? records : guestBestRecords;
+  const touchSafeInset = flagButtonSize + 12;
+  type FlagButtonPosition = "bottom-left" | "bottom-right" | "center-left" | "center-right";
+
+  const basePaddingStyle = {
+    paddingLeft: "24px",
+    paddingRight: "24px",
+    paddingTop: "16px",
+    paddingBottom: "16px",
+  };
+
+  const positionPaddingMap: Record<FlagButtonPosition, Partial<typeof basePaddingStyle>> = {
+    "bottom-left": {
+      paddingLeft: `${touchSafeInset}px`,
+      paddingBottom: `${touchSafeInset}px`,
+    },
+    "bottom-right": {
+      paddingRight: `${touchSafeInset}px`,
+      paddingBottom: `${touchSafeInset}px`,
+    },
+    "center-left": {
+      paddingLeft: `${touchSafeInset}px`,
+    },
+    "center-right": {
+      paddingRight: `${touchSafeInset}px`,
+    },
+  };
+
+  const mainPaddingStyle = isTouchscreen
+    ? { ...basePaddingStyle, ...positionPaddingMap[flagButtonPosition as FlagButtonPosition] }
+    : basePaddingStyle;
 
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
@@ -224,7 +254,10 @@ const Layout = () => {
           </div>
         </header>
         <ScrollArea className="flex w-full h-[calc(100vh-57px)] sm:h-[calc(100vh-73px)]">
-          <main className="flex flex-col min-h-[calc(100vh-57px)] sm:min-h-[calc(100vh-73px)] gap-4 justify-center items-center px-6 py-4">
+          <main
+            className="flex flex-col min-h-[calc(100vh-57px)] sm:min-h-[calc(100vh-73px)] gap-4 justify-center items-center px-6 py-4"
+            style={mainPaddingStyle}
+          >
             <GameBoard 
               config={boardConfigLibrary[variant][difficulty]}
               zoom={zoom}
