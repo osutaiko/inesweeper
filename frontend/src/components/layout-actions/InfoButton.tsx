@@ -22,12 +22,13 @@ import { VariantName } from "@/lib/types";
 
 type InfoButtonProps = {
   variant: VariantName;
+  className?: string;
 };
 
-const InfoButton = ({ variant }: InfoButtonProps) => (
+const InfoButton = ({ variant, className }: InfoButtonProps) => (
   <Dialog>
     <DialogTrigger asChild>
-      <Button variant="ghost" className={cn("w-full justify-start gap-2")}>
+      <Button variant="link" className={cn("gap-2", className)}>
         Help
       </Button>
     </DialogTrigger>

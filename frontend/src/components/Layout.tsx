@@ -18,10 +18,14 @@ import {
 } from "./ui/select";
 import { ScrollArea, ScrollBar } from "./ui/scroll-area";
 import { Button } from "./ui/button";
+import { ButtonGroup } from "./ui/button-group";
 
 import InesweeperLogo from "@/assets/images/inesweeper-logo.svg";
 import AuthButton from "./layout-actions/AuthButton";
+import InfoButton from "./layout-actions/InfoButton";
+import SettingsButton from "./layout-actions/SettingsButton";
 import ToolsPopover from "./layout-actions/ToolsPopover";
+import StatsButton from "./layout-actions/StatsButton";
 import { ArrowRight } from "lucide-react";
 
 type AuthUser = {
@@ -44,6 +48,7 @@ const toAuthUser = (user: User): AuthUser => ({
 
 const Layout = () => {
   const isDesktop = useMediaQuery("(min-width: 640px)");
+  const isLg = useMediaQuery("(min-width: 1024px)");
   const isTouchscreen = useMediaQuery("(pointer: coarse) and (hover: none)");
   const [variant, setVariant] = useState<VariantName>("classic");
   const [difficulty, setDifficulty] = useState<DifficultyName>("beg");
@@ -243,19 +248,39 @@ const Layout = () => {
                 <ArrowRight />
               </Link>
             </Button>
-            <ToolsPopover
-              isDesktop={isDesktop}
-              isTouchscreen={isTouchscreen}
-              variant={variant}
-              zoom={zoom}
-              setZoom={setZoom}
-              flagButtonSize={flagButtonSize}
-              setFlagButtonSize={setFlagButtonSize}
-              flagButtonPosition={flagButtonPosition}
-              setFlagButtonPosition={setFlagButtonPosition}
-              displayedRecords={displayedRecords}
-              isAuthed={Boolean(authUser)}
-            />
+            {isLg ? (
+              <ButtonGroup orientation="horizontal" className="items-center">
+                <SettingsButton
+                  isTouchscreen={isTouchscreen}
+                  zoom={zoom}
+                  setZoom={setZoom}
+                  flagButtonSize={flagButtonSize}
+                  setFlagButtonSize={setFlagButtonSize}
+                  flagButtonPosition={flagButtonPosition}
+                  setFlagButtonPosition={setFlagButtonPosition}
+                />
+                <StatsButton
+                  isDesktop={isDesktop}
+                  displayedRecords={displayedRecords}
+                  isAuthed={Boolean(authUser)}
+                />
+                <InfoButton variant={variant} />
+              </ButtonGroup>
+            ) : (
+              <ToolsPopover
+                isDesktop={isDesktop}
+                isTouchscreen={isTouchscreen}
+                variant={variant}
+                zoom={zoom}
+                setZoom={setZoom}
+                flagButtonSize={flagButtonSize}
+                setFlagButtonSize={setFlagButtonSize}
+                flagButtonPosition={flagButtonPosition}
+                setFlagButtonPosition={setFlagButtonPosition}
+                displayedRecords={displayedRecords}
+                isAuthed={Boolean(authUser)}
+              />
+            )}
             <AuthButton authUser={authUser} />
           </div>
         </header>

@@ -20,16 +20,18 @@ type StatsButtonProps = {
   isDesktop: boolean;
   displayedRecords: TimeRecord[];
   isAuthed: boolean;
+  className?: string;
 };
 
 const StatsButton = ({
   isDesktop,
   displayedRecords,
   isAuthed,
+  className,
 }: StatsButtonProps) => (
   <Dialog>
     <DialogTrigger asChild>
-      <Button variant="ghost" className={cn("w-full justify-start gap-2")}>
+      <Button variant="link" className={cn("gap-2", className)}>
         My records
       </Button>
     </DialogTrigger>

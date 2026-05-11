@@ -54,15 +54,15 @@ const ToolsPopover = ({
           setFlagButtonSize={setFlagButtonSize}
           flagButtonPosition={flagButtonPosition}
           setFlagButtonPosition={setFlagButtonPosition}
+          className="w-full justify-start"
         />
         <StatsButton
           isDesktop={isDesktop}
           displayedRecords={displayedRecords}
           isAuthed={isAuthed}
+          className="w-full justify-start"
         />
-        <InfoButton
-          variant={variant}
-        />
+        <InfoButton variant={variant} className="w-full justify-start" />
       </ButtonGroup>
     </PopoverContent>
   </Popover>

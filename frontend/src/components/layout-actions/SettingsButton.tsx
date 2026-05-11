@@ -25,6 +25,7 @@ type SettingsButtonProps = {
   setFlagButtonSize: Dispatch<SetStateAction<number>>;
   flagButtonPosition: string;
   setFlagButtonPosition: Dispatch<SetStateAction<string>>;
+  className?: string;
 };
 
 const SettingsButton = ({
@@ -35,10 +36,11 @@ const SettingsButton = ({
   setFlagButtonSize,
   flagButtonPosition,
   setFlagButtonPosition,
+  className,
 }: SettingsButtonProps) => (
     <Dialog>
     <DialogTrigger asChild>
-      <Button variant="ghost" className={cn("w-full justify-start gap-2")}>
+      <Button variant="link" className={cn("gap-2", className)}>
         Settings
       </Button>
     </DialogTrigger>
