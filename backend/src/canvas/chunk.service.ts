@@ -139,6 +139,10 @@ export class ChunkService {
 
   // Can only lock (or solve) next to already solved chunks
   private hasSolvedCardinalNeighbor(chunkX: number, chunkY: number) {
+    if (chunkX === 0 && chunkY === 0) {
+      return true;
+    }
+
     const neighbors = [
       [chunkX, chunkY - 1],
       [chunkX + 1, chunkY],
