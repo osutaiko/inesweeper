@@ -1,6 +1,7 @@
 import type { TimeRecord } from "@/lib/types";
 
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -11,7 +12,6 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ChartColumnIncreasing } from "lucide-react";
 
 import { boardConfigLibrary, difficultyMap, variantMap } from "@/lib/constants";
 import { formatTimeMs } from "@/lib/utils";
@@ -22,11 +22,15 @@ type StatsButtonProps = {
   isAuthed: boolean;
 };
 
-const StatsButton = ({ isDesktop, displayedRecords, isAuthed }: StatsButtonProps) => (
+const StatsButton = ({
+  isDesktop,
+  displayedRecords,
+  isAuthed,
+}: StatsButtonProps) => (
   <Dialog>
     <DialogTrigger asChild>
-      <Button variant="secondary" size="icon">
-        <ChartColumnIncreasing />
+      <Button variant="ghost" className={cn("w-full justify-start gap-2")}>
+        My records
       </Button>
     </DialogTrigger>
     <DialogContent className="gap-6">

@@ -21,9 +21,7 @@ import { Button } from "./ui/button";
 
 import InesweeperLogo from "@/assets/images/inesweeper-logo.svg";
 import AuthButton from "./layout-actions/AuthButton";
-import InfoButton from "./layout-actions/InfoButton";
-import SettingsButton from "./layout-actions/SettingsButton";
-import StatsButton from "./layout-actions/StatsButton";
+import ToolsPopover from "./layout-actions/ToolsPopover";
 import { ArrowRight } from "lucide-react";
 
 type AuthUser = {
@@ -229,7 +227,8 @@ const Layout = () => {
 
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-      <div className="flex flex-col items-center min-h-screen overflow-hidden touch-none">
+    <div className="flex min-h-screen w-full overflow-hidden touch-none">
+      <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex flex-row w-full gap-4 px-3 sm:px-8 py-2 sm:py-4 justify-between items-center border-b overflow-x-auto">
           <Link to="/">
             <div className="flex flex-row items-center gap-3">
@@ -237,28 +236,26 @@ const Layout = () => {
               <h2 className="hidden min-[410px]:block text-lg sm:text-2xl">Inesweeper</h2>
             </div>
           </Link>
-          <div className="flex flex-row gap-1">
+          <div className="flex flex-row gap-2">
             <Button asChild variant="secondary" className="pr-3">
               <Link to="/canvas">
                 Multiplayer
                 <ArrowRight />
               </Link>
             </Button>
-            <SettingsButton
+            <ToolsPopover
+              isDesktop={isDesktop}
               isTouchscreen={isTouchscreen}
+              variant={variant}
               zoom={zoom}
               setZoom={setZoom}
               flagButtonSize={flagButtonSize}
               setFlagButtonSize={setFlagButtonSize}
               flagButtonPosition={flagButtonPosition}
               setFlagButtonPosition={setFlagButtonPosition}
-            />
-            <StatsButton
-              isDesktop={isDesktop}
               displayedRecords={displayedRecords}
               isAuthed={Boolean(authUser)}
             />
-            <InfoButton variant={variant} />
             <AuthButton authUser={authUser} />
           </div>
         </header>
@@ -304,6 +301,7 @@ const Layout = () => {
           </main>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
+      </div>
       </div>
     </ThemeProvider>
   );

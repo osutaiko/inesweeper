@@ -1,6 +1,7 @@
 import type { Dispatch, SetStateAction } from "react";
 
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -13,7 +14,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Settings } from "lucide-react";
 
 import { ThemeToggle } from "../ui/theme-toggle";
 
@@ -36,10 +36,10 @@ const SettingsButton = ({
   flagButtonPosition,
   setFlagButtonPosition,
 }: SettingsButtonProps) => (
-  <Dialog>
+    <Dialog>
     <DialogTrigger asChild>
-      <Button variant="secondary" size="icon">
-        <Settings />
+      <Button variant="ghost" className={cn("w-full justify-start gap-2")}>
+        Settings
       </Button>
     </DialogTrigger>
     <DialogContent className="gap-10">

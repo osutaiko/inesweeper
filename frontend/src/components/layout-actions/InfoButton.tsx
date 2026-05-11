@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   Accordion,
   AccordionContent,
@@ -15,7 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Github, Info } from "lucide-react";
+import { Github } from "lucide-react";
 
 import { VariantName } from "@/lib/types";
 
@@ -26,8 +27,8 @@ type InfoButtonProps = {
 const InfoButton = ({ variant }: InfoButtonProps) => (
   <Dialog>
     <DialogTrigger asChild>
-      <Button variant="secondary" size="icon">
-        <Info />
+      <Button variant="ghost" className={cn("w-full justify-start gap-2")}>
+        Help
       </Button>
     </DialogTrigger>
     <DialogContent className="max-h-screen gap-6">
