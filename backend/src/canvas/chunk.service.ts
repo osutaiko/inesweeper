@@ -9,35 +9,151 @@ import type { Request } from 'express';
 import { AuthService } from '../auth/auth.service';
 import type { Chunk, DailyAttemptState } from './chunk.types';
 
+type ChunkRow = {
+  chunk_x: number;
+  chunk_y: number;
+  state: Chunk['state'];
+  locked_by_user_id: string | null;
+  locked_by_name: string | null;
+  locked_at: string | null;
+  locked_until: string | null;
+  solver_user_id: string | null;
+  solver_name: string | null;
+  solved_at: string | null;
+};
+
 @Injectable()
 export class ChunkService {
   private readonly claimDurationMs = 5 * 60 * 1000; // 5 minutes
   private readonly attemptLimit = 5;
-  private readonly chunkStore = new Map<string, Chunk>();
+  private readonly chunkTable = 'canvas_chunks';
   private readonly attemptStore = new Map<string, DailyAttemptState>();
 
   constructor(private readonly authService: AuthService) {}
-
-  private keyFor(chunkX: number, chunkY: number) {
-    return `${chunkX}:${chunkY}`;
-  }
 
   private dateKey(now = new Date()) {
     return now.toISOString().slice(0, 10);
   }
 
-  // Lazy update chunk by checking lockedUntil
-  private normalizeChunk(chunk: Chunk, now = new Date()): Chunk {
-    if (chunk.state !== 'locked' || !chunk.lockedUntil) {
-      return chunk;
+  private requireUser(req: Request) {
+    return this.authService.getCurrentUser(req);
+  }
+
+  private rowToChunk(row: ChunkRow): Chunk {
+    return {
+      chunkX: row.chunk_x,
+      chunkY: row.chunk_y,
+      state: row.state,
+      lockedByUserId: row.locked_by_user_id,
+      lockedByName: row.locked_by_name,
+      lockedAt: row.locked_at,
+      lockedUntil: row.locked_until,
+      solverUserId: row.solver_user_id,
+      solverName: row.solver_name,
+      solvedAt: row.solved_at,
+    };
+  }
+
+  private async getChunkRow(
+    client: ReturnType<AuthService['createBearerClient']>,
+    chunkX: number,
+    chunkY: number,
+  ) {
+    const { data, error } = await client
+      .from(this.chunkTable)
+      .select('*')
+      .eq('chunk_x', chunkX)
+      .eq('chunk_y', chunkY)
+      .maybeSingle();
+
+    if (error) {
+      throw new BadRequestException(error.message ?? 'Unable to read chunk');
     }
 
-    if (new Date(chunk.lockedUntil).getTime() > now.getTime()) {
-      return chunk;
+    return (data as ChunkRow | null) ?? null;
+  }
+
+  private async setChunkRecord(
+    client: ReturnType<AuthService['createBearerClient']>,
+    chunk: Chunk,
+  ) {
+    const { data, error } = await client
+      .from(this.chunkTable)
+      .upsert(
+        {
+          chunk_x: chunk.chunkX,
+          chunk_y: chunk.chunkY,
+          state: chunk.state,
+          locked_by_user_id: chunk.lockedByUserId,
+          locked_by_name: chunk.lockedByName,
+          locked_at: chunk.lockedAt,
+          locked_until: chunk.lockedUntil,
+          solver_user_id: chunk.solverUserId,
+          solver_name: chunk.solverName,
+          solved_at: chunk.solvedAt,
+        },
+        {
+          onConflict: 'chunk_x,chunk_y',
+        },
+      )
+      .select('*')
+      .single();
+
+    if (error || !data) {
+      throw new BadRequestException(error?.message ?? 'Unable to save chunk');
+    }
+
+    return this.rowToChunk(data as ChunkRow);
+  }
+
+  private async getExistingChunkRecord(
+    client: ReturnType<AuthService['createBearerClient']>,
+    chunkX: number,
+    chunkY: number,
+  ) {
+    const row = await this.getChunkRow(client, chunkX, chunkY);
+
+    if (!row) {
+      return null;
+    }
+
+    if (
+      row.state === 'locked' &&
+      row.locked_until &&
+      new Date(row.locked_until).getTime() <= Date.now()
+    ) {
+      const { error } = await client
+        .from(this.chunkTable)
+        .delete()
+        .eq('chunk_x', chunkX)
+        .eq('chunk_y', chunkY);
+
+      if (error) {
+        throw new BadRequestException(
+          error.message ?? 'Unable to delete chunk',
+        );
+      }
+
+      return null;
+    }
+
+    return this.rowToChunk(row);
+  }
+
+  private async getOrCreateChunkRecord(
+    client: ReturnType<AuthService['createBearerClient']>,
+    chunkX: number,
+    chunkY: number,
+  ) {
+    const existing = await this.getExistingChunkRecord(client, chunkX, chunkY);
+
+    if (existing) {
+      return existing;
     }
 
     return {
-      ...chunk,
+      chunkX,
+      chunkY,
       state: 'open',
       lockedByUserId: null,
       lockedByName: null,
@@ -49,70 +165,30 @@ export class ChunkService {
     };
   }
 
-  private getExistingChunkRecord(chunkX: number, chunkY: number) {
-    const key = this.keyFor(chunkX, chunkY);
-    const existing = this.chunkStore.get(key);
+  private async getActiveLockForUser(
+    client: ReturnType<AuthService['createBearerClient']>,
+    userId: string,
+  ) {
+    const nowIso = new Date().toISOString();
+    const { data, error } = await client
+      .from(this.chunkTable)
+      .select('*')
+      .eq('locked_by_user_id', userId)
+      .eq('state', 'locked')
+      .gt('locked_until', nowIso)
+      .maybeSingle();
 
-    if (!existing) {
+    if (error) {
+      throw new BadRequestException(
+        error.message ?? 'Unable to read active lock',
+      );
+    }
+
+    if (!data) {
       return null;
     }
 
-    const normalized = this.normalizeChunk(existing);
-    this.chunkStore.set(key, normalized);
-    return normalized;
-  }
-
-  private getOrCreateChunkRecord(chunkX: number, chunkY: number) {
-    const existing = this.getExistingChunkRecord(chunkX, chunkY);
-    const nextChunk: Chunk =
-      existing ??
-      {
-        chunkX,
-        chunkY,
-        state: 'open',
-        lockedByUserId: null,
-        lockedByName: null,
-        lockedAt: null,
-        solverUserId: null,
-        solverName: null,
-        solvedAt: null,
-        lockedUntil: null,
-      };
-
-    const normalized = this.normalizeChunk(nextChunk);
-    this.chunkStore.set(this.keyFor(chunkX, chunkY), normalized);
-    return normalized;
-  }
-
-  private setChunkRecord(chunk: Chunk) {
-    this.chunkStore.set(this.keyFor(chunk.chunkX, chunk.chunkY), chunk);
-    return chunk;
-  }
-
-  private getActiveLockForUser(userId: string) {
-    for (const [key, chunk] of this.chunkStore.entries()) {
-      const [chunkX, chunkY] = key.split(':').map(Number);
-      const normalized = this.normalizeChunk(
-        chunk,
-      );
-
-      this.chunkStore.set(this.keyFor(chunkX, chunkY), normalized);
-
-      if (
-        normalized.state === 'locked' &&
-        normalized.lockedByUserId === userId &&
-        normalized.lockedUntil &&
-        new Date(normalized.lockedUntil).getTime() > Date.now()
-      ) {
-        return normalized;
-      }
-    }
-
-    return null;
-  }
-
-  private requireUser(req: Request) {
-    return this.authService.getCurrentUser(req);
+    return this.rowToChunk(data as ChunkRow);
   }
 
   private lockAttempt(userId: string) {
@@ -138,7 +214,11 @@ export class ChunkService {
   }
 
   // Can only lock (or solve) next to already solved chunks
-  private hasSolvedCardinalNeighbor(chunkX: number, chunkY: number) {
+  private async hasSolvedCardinalNeighbor(
+    client: ReturnType<AuthService['createBearerClient']>,
+    chunkX: number,
+    chunkY: number,
+  ) {
     if (chunkX === 0 && chunkY === 0) {
       return true;
     }
@@ -150,10 +230,19 @@ export class ChunkService {
       [chunkX - 1, chunkY],
     ] as const;
 
-    return neighbors.some(([neighborX, neighborY]) => {
-      const neighbor = this.getExistingChunkRecord(neighborX, neighborY);
-      return neighbor?.state === 'solved';
-    });
+    for (const [neighborX, neighborY] of neighbors) {
+      const neighbor = await this.getExistingChunkRecord(
+        client,
+        neighborX,
+        neighborY,
+      );
+
+      if (neighbor?.state === 'solved') {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   async getChunk(req: Request, chunkX: number, chunkY: number) {
@@ -163,7 +252,8 @@ export class ChunkService {
       throw new UnauthorizedException('Login required');
     }
 
-    return this.getOrCreateChunkRecord(chunkX, chunkY);
+    const client = this.authService.createBearerClient(req);
+    return this.getOrCreateChunkRecord(client, chunkX, chunkY);
   }
 
   async lockChunk(req: Request, chunkX: number, chunkY: number) {
@@ -173,10 +263,11 @@ export class ChunkService {
       throw new UnauthorizedException('Login required');
     }
 
+    const client = this.authService.createBearerClient(req);
     this.lockAttempt(user.id);
 
-    const chunk = this.getOrCreateChunkRecord(chunkX, chunkY);
-    const activeLock = this.getActiveLockForUser(user.id);
+    const chunk = await this.getOrCreateChunkRecord(client, chunkX, chunkY);
+    const activeLock = await this.getActiveLockForUser(client, user.id);
 
     // User can only lock 1 chunk at once
     if (
@@ -194,7 +285,7 @@ export class ChunkService {
       return activeLock;
     }
 
-    if (!this.hasSolvedCardinalNeighbor(chunkX, chunkY)) {
+    if (!(await this.hasSolvedCardinalNeighbor(client, chunkX, chunkY))) {
       throw new ConflictException(
         'Chunk must touch an already solved cardinal neighbor',
       );
@@ -216,7 +307,7 @@ export class ChunkService {
     const lockedAt = new Date();
     const lockedUntil = new Date(lockedAt.getTime() + this.claimDurationMs);
 
-    return this.setChunkRecord({
+    const saved = await this.setChunkRecord(client, {
       ...chunk,
       state: 'locked',
       lockedByUserId: user.id,
@@ -227,6 +318,8 @@ export class ChunkService {
       solvedAt: null,
       lockedUntil: lockedUntil.toISOString(),
     });
+
+    return saved;
   }
 
   async solveChunk(req: Request, chunkX: number, chunkY: number) {
@@ -236,7 +329,8 @@ export class ChunkService {
       throw new UnauthorizedException('Must log in to play');
     }
 
-    const chunk = this.getOrCreateChunkRecord(chunkX, chunkY);
+    const client = this.authService.createBearerClient(req);
+    const chunk = await this.getOrCreateChunkRecord(client, chunkX, chunkY);
 
     if (chunk.state !== 'locked' || !chunk.lockedByUserId) {
       throw new ConflictException('Chunk must be locked before solving');
@@ -247,8 +341,7 @@ export class ChunkService {
     }
 
     const solvedAt = new Date();
-
-    return this.setChunkRecord({
+    const saved = await this.setChunkRecord(client, {
       ...chunk,
       state: 'solved',
       solverUserId: user.id,
@@ -256,5 +349,7 @@ export class ChunkService {
       solvedAt: solvedAt.toISOString(),
       lockedUntil: null,
     });
+
+    return saved;
   }
 }
