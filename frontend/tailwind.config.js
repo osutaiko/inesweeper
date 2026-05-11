@@ -53,7 +53,7 @@ export default {
   				'4': 'hsl(var(--chart-4))',
   				'5': 'hsl(var(--chart-5))'
   			},
-			game: {
+  			game: {
 				border: 'hsl(var(--game-border))',
 				hidden: 'hsl(var(--game-hidden))',
 				revealed: 'hsl(var(--game-revealed))',
@@ -82,7 +82,17 @@ export default {
 					'-7': 'hsl(var(--game-number--7))',
 					'-8': 'hsl(var(--game-number--8))',
 				}
-			}
+			},
+  			sidebar: {
+  				DEFAULT: 'hsl(var(--sidebar-background))',
+  				foreground: 'hsl(var(--sidebar-foreground))',
+  				primary: 'hsl(var(--sidebar-primary))',
+  				'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
+  				accent: 'hsl(var(--sidebar-accent))',
+  				'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
+  				border: 'hsl(var(--sidebar-border))',
+  				ring: 'hsl(var(--sidebar-ring))'
+  			}
   		},
   		keyframes: {
   			'accordion-down': {
