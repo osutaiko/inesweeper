@@ -76,7 +76,7 @@ export const getCanvasChunkArea = async (
   }
 
   const chunks: CanvasChunk[] = [];
-  for (let chunkY = startY; chunkY <= endY; chunkY += 1) {
+  for (let chunkY = endY; chunkY >= startY; chunkY -= 1) {
     for (let chunkX = startX; chunkX <= endX; chunkX += 1) {
       const key = `${chunkX}:${chunkY}`;
       chunks.push(
