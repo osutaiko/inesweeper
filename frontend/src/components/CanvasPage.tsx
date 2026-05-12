@@ -1,16 +1,30 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 
 import { Button } from "./ui/button";
 
 import { ThemeProvider } from "./theme-provider";
+import StatusToast from "./StatusToast";
 import InesweeperLogo from "@/assets/images/inesweeper-logo.svg";
-import { ArrowLeft } from "lucide-react";
 import { loadCurrentAuthUser, subscribeToAuthUser, type AuthUser } from "@/lib/auth";
+import { getCanvasChunkArea, type CanvasChunkAreaResponse } from "@/lib/canvas";
 import AuthButton from "./layout-actions/AuthButton";
 
 const CanvasPage = () => {
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+  const [viewCenterChunkX] = useState(0);
+  const [viewCenterChunkY] = useState(0);
+  const [chunkArea, setChunkArea] = useState<CanvasChunkAreaResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const { fromChunkX, fromChunkY, toChunkX, toChunkY } = {
+    fromChunkX: viewCenterChunkX - 2,
+    fromChunkY: viewCenterChunkY - 2,
+    toChunkX: viewCenterChunkX + 2,
+    toChunkY: viewCenterChunkY + 2,
+  };
 
   useEffect(() => {
     let isActive = true;
@@ -36,6 +50,49 @@ const CanvasPage = () => {
     };
   }, []);
 
+  useEffect(() => {
+    let isActive = true;
+
+    const loadArea = async () => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const nextArea = await getCanvasChunkArea(
+          fromChunkX,
+          fromChunkY,
+          toChunkX,
+          toChunkY,
+        );
+
+        if (!isActive) {
+          return;
+        }
+
+        setChunkArea(nextArea);
+      } catch (error) {
+        if (!isActive) {
+          return;
+        }
+
+        setError(error instanceof Error ? error.message : "Failed to load canvas");
+      } finally {
+        if (isActive) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadArea();
+
+    return () => {
+      isActive = false;
+    };
+  }, [fromChunkX, fromChunkY, toChunkX, toChunkY]);
+
+  const areaWidth = 5;
+  const areaHeight = 5;
+
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
       <div className="flex flex-col items-center min-h-screen overflow-hidden touch-none">
@@ -56,12 +113,35 @@ const CanvasPage = () => {
             <AuthButton authUser={authUser} />
           </div>
         </header>
-          <main
-            className="flex flex-col min-h-[calc(100vh-57px)] sm:min-h-[calc(100vh-73px)] gap-4 justify-center items-center px-6 py-4"
-            /* style={mainPaddingStyle} */
-          >
-            main
-          </main>
+
+        <main className="relative flex w-full flex-1 overflow-hidden">
+          <div className="relative flex flex-1 items-start justify-start overflow-auto">
+            {error && (
+              <StatusToast variant="error" message={error} className="absolute left-4 top-4 z-10" />
+            )}
+
+            {isLoading && (
+              <StatusToast variant="loading" message="Loading..." className="absolute right-4 top-4 z-10" />
+            )}
+
+            <div
+              className="grid w-full"
+              style={{
+                gridTemplateColumns: `repeat(${areaWidth}, 50px)`,
+                gridTemplateRows: `repeat(${areaHeight}, 50px)`,
+              }}
+            >
+              {chunkArea?.chunks.map((chunk) => (
+                <div
+                  key={`${chunk.chunkX}:${chunk.chunkY}`}
+                  className="flex h-[50px] w-[50px] border text-[10px]"
+                >
+                  {chunk.state}
+                </div>
+              ))}
+            </div>
+          </div>
+        </main>
       </div>
     </ThemeProvider>
   );
