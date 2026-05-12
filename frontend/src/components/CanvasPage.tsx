@@ -6,6 +6,7 @@ import { Button } from "./ui/button";
 
 import { ThemeProvider } from "./theme-provider";
 import StatusToast from "./StatusToast";
+import CanvasChunk from "./CanvasChunk";
 import InesweeperLogo from "@/assets/images/inesweeper-logo.svg";
 import { loadCurrentAuthUser, subscribeToAuthUser, type AuthUser } from "@/lib/auth";
 import { getCanvasChunkArea, type CanvasChunkAreaResponse } from "@/lib/canvas";
@@ -20,10 +21,10 @@ const CanvasPage = () => {
   const [error, setError] = useState<string | null>(null);
 
   const { fromChunkX, fromChunkY, toChunkX, toChunkY } = {
-    fromChunkX: viewCenterChunkX - 2,
-    fromChunkY: viewCenterChunkY - 2,
-    toChunkX: viewCenterChunkX + 2,
-    toChunkY: viewCenterChunkY + 2,
+    fromChunkX: viewCenterChunkX - 1,
+    fromChunkY: viewCenterChunkY - 1,
+    toChunkX: viewCenterChunkX + 1,
+    toChunkY: viewCenterChunkY + 1,
   };
 
   useEffect(() => {
@@ -90,9 +91,6 @@ const CanvasPage = () => {
     };
   }, [fromChunkX, fromChunkY, toChunkX, toChunkY]);
 
-  const areaWidth = 5;
-  const areaHeight = 5;
-
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
       <div className="flex flex-col items-center min-h-screen overflow-hidden touch-none">
@@ -125,19 +123,19 @@ const CanvasPage = () => {
             )}
 
             <div
-              className="grid w-full"
+              className="grid w-max"
               style={{
-                gridTemplateColumns: `repeat(${areaWidth}, 50px)`,
-                gridTemplateRows: `repeat(${areaHeight}, 50px)`,
+                gridTemplateColumns: `repeat(3, max-content)`,
+                gridTemplateRows: `repeat(3, max-content)`,
               }}
             >
               {chunkArea?.chunks.map((chunk) => (
-                <div
+                <CanvasChunk
                   key={`${chunk.chunkX}:${chunk.chunkY}`}
-                  className="flex h-[50px] w-[50px] border text-[10px]"
-                >
-                  {chunk.state}
-                </div>
+                  chunkX={chunk.chunkX}
+                  chunkY={chunk.chunkY}
+                  state={chunk.state}
+                />
               ))}
             </div>
           </div>
