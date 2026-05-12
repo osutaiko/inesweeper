@@ -4,6 +4,7 @@ type CanvasChunkProps = {
   chunkX: number;
   chunkY: number;
   state: "open" | "locked" | "solved";
+  showCells: boolean;
 };
 
 const getTintClass = (state: CanvasChunkProps["state"]) => {
@@ -22,6 +23,7 @@ const CanvasChunk = ({
   chunkX,
   chunkY,
   state,
+  showCells,
 }: CanvasChunkProps) => {
   const chunkId = `${chunkX}:${chunkY}`;
   const originWorldX = chunkX * CHUNK_SIZE;
@@ -39,16 +41,17 @@ const CanvasChunk = ({
         className={`pointer-events-none absolute inset-0 ${getTintClass(state)}`}
         style={{ zIndex: 100 }}
       />
-      {Array.from({ length: CHUNK_SIZE }).flatMap((_, displayRow) => {
-        const localY = CHUNK_SIZE - 1 - displayRow;
+      {showCells &&
+        Array.from({ length: CHUNK_SIZE }).flatMap((_, displayRow) => {
+          const localY = CHUNK_SIZE - 1 - displayRow;
 
-        return Array.from({ length: CHUNK_SIZE }).map((__, localX) => (
-          <div
-            key={`${chunkId}:${originWorldX + localX}:${originWorldY + localY}`}
-            className="relative z-10 flex justify-center items-center border border-game-border bg-game-hidden rounded-sm overflow-hidden"
-          />
-        ));
-      })}
+          return Array.from({ length: CHUNK_SIZE }).map((__, localX) => (
+            <div
+              key={`${chunkId}:${originWorldX + localX}:${originWorldY + localY}`}
+              className="relative z-10 flex justify-center items-center border border-game-border bg-game-hidden rounded-sm overflow-hidden"
+            />
+          ));
+        })}
       <div
         className="pointer-events-none absolute inset-0 border border-red-500"
         style={{ zIndex: 100 }}

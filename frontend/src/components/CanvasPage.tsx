@@ -3,7 +3,10 @@ import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 
 import { Button } from "./ui/button";
-import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
+import {
+  TransformComponent,
+  TransformWrapper,
+} from "react-zoom-pan-pinch";
 
 import { ThemeProvider } from "./theme-provider";
 import StatusToast from "./StatusToast";
@@ -14,7 +17,9 @@ import { getCanvasChunkArea, type CanvasChunkAreaResponse } from "@/lib/canvas";
 import AuthButton from "./layout-actions/AuthButton";
 
 const CanvasPage = () => {
+  const CELL_RENDER_SCALE_THRESHOLD = 0.1;
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+  const [zoomScale, setZoomScale] = useState(1);
   const [viewCenterChunkX] = useState(0);
   const [viewCenterChunkY] = useState(0);
   const [chunkArea, setChunkArea] = useState<CanvasChunkAreaResponse | null>(null);
@@ -30,6 +35,32 @@ const CanvasPage = () => {
   };
   const areaWidth = toChunkX - fromChunkX + 1;
   const areaHeight = toChunkY - fromChunkY + 1;
+
+  const CanvasViewport = ({ scale }: { scale: number }) => {
+    const showCells = scale >= CELL_RENDER_SCALE_THRESHOLD;
+
+    return (
+      <div className="relative w-max bg-background">
+        <div
+          className="grid w-max"
+          style={{
+            gridTemplateColumns: `repeat(${areaWidth}, max-content)`,
+            gridTemplateRows: `repeat(${areaHeight}, max-content)`,
+          }}
+        >
+          {chunkArea?.chunks.map((chunk) => (
+            <CanvasChunk
+              key={`${chunk.chunkX}:${chunk.chunkY}`}
+              chunkX={chunk.chunkX}
+              chunkY={chunk.chunkY}
+              state={chunk.state}
+              showCells={showCells}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  };
 
   useEffect(() => {
     let isActive = true;
@@ -134,36 +165,22 @@ const CanvasPage = () => {
           )}
 
           <TransformWrapper
-            initialScale={1}
-            minScale={0.2}
-            maxScale={4}
+            initialScale={0.4}
+            minScale={0.05}
+            maxScale={2.0}
             centerOnInit
             limitToBounds={false}
-            wheel={{ step: 0.002 }}
+            wheel={{ step: 0.004 }}
             panning={{ velocityDisabled: true }}
+            onTransform={(_, state) => {
+              setZoomScale(state.scale);
+            }}
           >
             <TransformComponent
               wrapperClass="w-full h-full overflow-hidden bg-background"
               contentClass="w-full h-full overflow-hidden bg-background"
             >
-              <div className="relative w-max bg-background">
-                <div
-                  className="grid w-max"
-                  style={{
-                    gridTemplateColumns: `repeat(${areaWidth}, max-content)`,
-                    gridTemplateRows: `repeat(${areaHeight}, max-content)`,
-                  }}
-                >
-                  {chunkArea?.chunks.map((chunk) => (
-                    <CanvasChunk
-                      key={`${chunk.chunkX}:${chunk.chunkY}`}
-                      chunkX={chunk.chunkX}
-                      chunkY={chunk.chunkY}
-                      state={chunk.state}
-                    />
-                  ))}
-                </div>
-              </div>
+              <CanvasViewport scale={zoomScale} />
             </TransformComponent>
           </TransformWrapper>
         </main>
