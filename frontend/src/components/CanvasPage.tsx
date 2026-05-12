@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 
 import { Button } from "./ui/button";
+import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 
 import { ThemeProvider } from "./theme-provider";
 import StatusToast from "./StatusToast";
@@ -19,13 +20,16 @@ const CanvasPage = () => {
   const [chunkArea, setChunkArea] = useState<CanvasChunkAreaResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const viewRadius = 2;
 
   const { fromChunkX, fromChunkY, toChunkX, toChunkY } = {
-    fromChunkX: viewCenterChunkX - 1,
-    fromChunkY: viewCenterChunkY - 1,
-    toChunkX: viewCenterChunkX + 1,
-    toChunkY: viewCenterChunkY + 1,
+    fromChunkX: viewCenterChunkX - viewRadius,
+    fromChunkY: viewCenterChunkY - viewRadius,
+    toChunkX: viewCenterChunkX + viewRadius,
+    toChunkY: viewCenterChunkY + viewRadius,
   };
+  const areaWidth = toChunkX - fromChunkX + 1;
+  const areaHeight = toChunkY - fromChunkY + 1;
 
   useEffect(() => {
     let isActive = true;
@@ -94,7 +98,9 @@ const CanvasPage = () => {
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
       <div className="flex flex-col items-center min-h-screen overflow-hidden touch-none">
-        <header className="flex flex-row w-full gap-4 px-3 sm:px-8 py-2 sm:py-4 justify-between items-center border-b overflow-x-auto">
+        <header
+          className="flex flex-row w-full gap-4 px-3 sm:px-8 py-2 sm:py-4 justify-between items-center border-b overflow-x-auto"
+        >
           <Link to="/">
             <div className="flex flex-row items-center gap-3">
               <img src={InesweeperLogo} alt="Inesweeper Logo" className="w-[40px] h-[40px] min-w-[40px] min-h-[40px]" />
@@ -112,33 +118,54 @@ const CanvasPage = () => {
           </div>
         </header>
 
-        <main className="relative flex w-full flex-1 overflow-hidden">
-          <div className="relative flex flex-1 items-start justify-start overflow-auto">
-            {error && (
-              <StatusToast variant="error" message={error} className="absolute left-4 top-4 z-10" />
-            )}
+        <main
+          className="relative flex w-full overflow-hidden bg-background h-[calc(100vh-57px)] sm:h-[calc(100vh-73px)]"
+        >
+          {(error || isLoading) && (
+            <div className="pointer-events-none absolute inset-0 z-50">
+              {error && (
+                <StatusToast variant="error" message={error} className="absolute left-4 top-4" />
+              )}
 
-            {isLoading && (
-              <StatusToast variant="loading" message="Loading..." className="absolute right-4 top-4 z-10" />
-            )}
-
-            <div
-              className="grid w-max"
-              style={{
-                gridTemplateColumns: `repeat(3, max-content)`,
-                gridTemplateRows: `repeat(3, max-content)`,
-              }}
-            >
-              {chunkArea?.chunks.map((chunk) => (
-                <CanvasChunk
-                  key={`${chunk.chunkX}:${chunk.chunkY}`}
-                  chunkX={chunk.chunkX}
-                  chunkY={chunk.chunkY}
-                  state={chunk.state}
-                />
-              ))}
+              {isLoading && (
+                <StatusToast variant="loading" message="Loading..." className="absolute right-4 top-4" />
+              )}
             </div>
-          </div>
+          )}
+
+          <TransformWrapper
+            initialScale={1}
+            minScale={0.2}
+            maxScale={4}
+            centerOnInit
+            limitToBounds={false}
+            wheel={{ step: 0.002 }}
+            panning={{ velocityDisabled: true }}
+          >
+            <TransformComponent
+              wrapperClass="w-full h-full overflow-hidden bg-background"
+              contentClass="w-full h-full overflow-hidden bg-background"
+            >
+              <div className="relative w-max bg-background">
+                <div
+                  className="grid w-max"
+                  style={{
+                    gridTemplateColumns: `repeat(${areaWidth}, max-content)`,
+                    gridTemplateRows: `repeat(${areaHeight}, max-content)`,
+                  }}
+                >
+                  {chunkArea?.chunks.map((chunk) => (
+                    <CanvasChunk
+                      key={`${chunk.chunkX}:${chunk.chunkY}`}
+                      chunkX={chunk.chunkX}
+                      chunkY={chunk.chunkY}
+                      state={chunk.state}
+                    />
+                  ))}
+                </div>
+              </div>
+            </TransformComponent>
+          </TransformWrapper>
         </main>
       </div>
     </ThemeProvider>
