@@ -13,19 +13,89 @@ import StatusToast from "./StatusToast";
 import CanvasChunk from "./CanvasChunk";
 import InesweeperLogo from "@/assets/images/inesweeper-logo.svg";
 import { loadCurrentAuthUser, subscribeToAuthUser, type AuthUser } from "@/lib/auth";
-import { getCanvasChunkArea, type CanvasChunkAreaResponse } from "@/lib/canvas";
+import {
+  buildCanvasMineLookup,
+  getCanvasChunkArea,
+  type CanvasChunkAreaResponse,
+  type CanvasChunkMineLookup,
+} from "@/lib/canvas";
 import AuthButton from "./layout-actions/AuthButton";
 
+type CanvasViewportProps = {
+  fromChunkX: number;
+  fromChunkY: number;
+  toChunkX: number;
+  toChunkY: number;
+  neighborMineLookup: CanvasChunkMineLookup | null;
+  chunkArea: CanvasChunkAreaResponse | null;
+};
+
+const CanvasViewport = ({
+  fromChunkX,
+  fromChunkY,
+  toChunkX,
+  toChunkY,
+  neighborMineLookup,
+  chunkArea,
+}: CanvasViewportProps) => {
+  const chunkByCoord = new Map(
+    (chunkArea?.chunks ?? []).map((chunk) => [
+      `${chunk.chunkX}:${chunk.chunkY}`,
+      chunk,
+    ]),
+  );
+
+  return (
+    <div className="relative w-max bg-background">
+      <div
+        className="grid w-max"
+        style={{
+          gridTemplateColumns: `repeat(${toChunkX - fromChunkX + 1}, max-content)`,
+          gridTemplateRows: `repeat(${toChunkY - fromChunkY + 1}, max-content)`,
+        }}
+      >
+        {Array.from({ length: toChunkY - fromChunkY + 1 }).flatMap((_, row) => {
+          const chunkY = toChunkY - row;
+
+          return Array.from({ length: toChunkX - fromChunkX + 1 }).map((__, col) => {
+            const chunkX = fromChunkX + col;
+            const chunk = chunkByCoord.get(`${chunkX}:${chunkY}`);
+
+            if (!chunk) {
+              return (
+                <div
+                  key={`${chunkX}:${chunkY}`}
+                  className="w-[480px] h-[480px] bg-game-border"
+                />
+              );
+            }
+
+            return (
+              <CanvasChunk
+                key={`${chunk.chunkX}:${chunk.chunkY}`}
+                chunkX={chunk.chunkX}
+                chunkY={chunk.chunkY}
+                state={chunk.state}
+                mineBitmap={chunk.mineBitmap}
+                neighborMineLookup={neighborMineLookup}
+              />
+            );
+          });
+        })}
+      </div>
+    </div>
+  );
+};
+
 const CanvasPage = () => {
-  const CELL_RENDER_SCALE_THRESHOLD = 0.1;
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
-  const [zoomScale, setZoomScale] = useState(1);
   const [viewCenterChunkX] = useState(0);
   const [viewCenterChunkY] = useState(0);
   const [chunkArea, setChunkArea] = useState<CanvasChunkAreaResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const viewRadius = 2;
+  const viewRadius = 6;
+  const neighborChunkBuffer = 1;
 
   const { fromChunkX, fromChunkY, toChunkX, toChunkY } = {
     fromChunkX: viewCenterChunkX - viewRadius,
@@ -33,34 +103,10 @@ const CanvasPage = () => {
     toChunkX: viewCenterChunkX + viewRadius,
     toChunkY: viewCenterChunkY + viewRadius,
   };
-  const areaWidth = toChunkX - fromChunkX + 1;
-  const areaHeight = toChunkY - fromChunkY + 1;
-
-  const CanvasViewport = ({ scale }: { scale: number }) => {
-    const showCells = scale >= CELL_RENDER_SCALE_THRESHOLD;
-
-    return (
-      <div className="relative w-max bg-background">
-        <div
-          className="grid w-max"
-          style={{
-            gridTemplateColumns: `repeat(${areaWidth}, max-content)`,
-            gridTemplateRows: `repeat(${areaHeight}, max-content)`,
-          }}
-        >
-          {chunkArea?.chunks.map((chunk) => (
-            <CanvasChunk
-              key={`${chunk.chunkX}:${chunk.chunkY}`}
-              chunkX={chunk.chunkX}
-              chunkY={chunk.chunkY}
-              state={chunk.state}
-              showCells={showCells}
-            />
-          ))}
-        </div>
-      </div>
-    );
-  };
+  const loadFromChunkX = fromChunkX - neighborChunkBuffer;
+  const loadFromChunkY = fromChunkY - neighborChunkBuffer;
+  const loadToChunkX = toChunkX + neighborChunkBuffer;
+  const loadToChunkY = toChunkY + neighborChunkBuffer;
 
   useEffect(() => {
     let isActive = true;
@@ -90,15 +136,22 @@ const CanvasPage = () => {
     let isActive = true;
 
     const loadArea = async () => {
+      if (!authUser) {
+        setChunkArea(null);
+        setIsLoading(false);
+        setError(null);
+        return;
+      }
+
       setIsLoading(true);
       setError(null);
 
       try {
         const nextArea = await getCanvasChunkArea(
-          fromChunkX,
-          fromChunkY,
-          toChunkX,
-          toChunkY,
+          loadFromChunkX,
+          loadFromChunkY,
+          loadToChunkX,
+          loadToChunkY,
         );
 
         if (!isActive) {
@@ -124,7 +177,17 @@ const CanvasPage = () => {
     return () => {
       isActive = false;
     };
-  }, [fromChunkX, fromChunkY, toChunkX, toChunkY]);
+  }, [
+    authUser?.id,
+    loadFromChunkX,
+    loadFromChunkY,
+    loadToChunkX,
+    loadToChunkY,
+  ]);
+
+  const neighborMineLookup = chunkArea
+    ? buildCanvasMineLookup(chunkArea.chunks)
+    : null;
 
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
@@ -164,25 +227,32 @@ const CanvasPage = () => {
             </div>
           )}
 
+          {chunkArea ? (
           <TransformWrapper
             initialScale={0.4}
             minScale={0.05}
             maxScale={2.0}
             centerOnInit
             limitToBounds={false}
-            wheel={{ step: 0.004 }}
+            smooth={false}
+            wheel={{ step: 0.05 }}
             panning={{ velocityDisabled: true }}
-            onTransform={(_, state) => {
-              setZoomScale(state.scale);
-            }}
           >
             <TransformComponent
               wrapperClass="w-full h-full overflow-hidden bg-background"
-              contentClass="w-full h-full overflow-hidden bg-background"
+              contentClass="bg-background"
             >
-              <CanvasViewport scale={zoomScale} />
+              <CanvasViewport
+                fromChunkX={fromChunkX}
+                fromChunkY={fromChunkY}
+                toChunkX={toChunkX}
+                toChunkY={toChunkY}
+                neighborMineLookup={neighborMineLookup}
+                chunkArea={chunkArea}
+              />
             </TransformComponent>
           </TransformWrapper>
+          ) : null}
         </main>
       </div>
     </ThemeProvider>

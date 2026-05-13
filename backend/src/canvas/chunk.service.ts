@@ -341,7 +341,11 @@ export class ChunkService {
             solverName: null,
             solvedAt: null,
           } satisfies ChunkRecord);
-        chunks.push(this.withChunkMineBitmap(chunk, user.id));
+        chunks.push({
+          ...chunk,
+          mineBitmap: this.getChunkMineBitmap(chunk.chunkX, chunk.chunkY)
+            .mineBitmap,
+        });
       }
     }
 
