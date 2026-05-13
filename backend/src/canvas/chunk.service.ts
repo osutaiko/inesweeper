@@ -7,12 +7,17 @@ import {
 import type { Request } from 'express';
 
 import { AuthService } from '../auth/auth.service';
-import type { Chunk, DailyAttemptState } from './chunk.types';
+import { buildChunkMineBitmap } from './chunk-board';
+import type {
+  Chunk,
+  DailyAttemptState,
+  ChunkRecord,
+} from './chunk.types';
 
 type ChunkRow = {
   chunk_x: number;
   chunk_y: number;
-  state: Chunk['state'];
+  state: ChunkRecord['state'];
   locked_by_user_id: string | null;
   locked_by_name: string | null;
   locked_at: string | null;
@@ -39,7 +44,7 @@ export class ChunkService {
     return this.authService.getCurrentUser(req);
   }
 
-  private rowToChunk(row: ChunkRow): Chunk {
+  private rowToChunk(row: ChunkRow): ChunkRecord {
     return {
       chunkX: row.chunk_x,
       chunkY: row.chunk_y,
@@ -75,7 +80,7 @@ export class ChunkService {
 
   private async setChunkRecord(
     client: ReturnType<AuthService['createBearerClient']>,
-    chunk: Chunk,
+    chunk: ChunkRecord,
   ) {
     const { data, error } = await client
       .from(this.chunkTable)
@@ -162,6 +167,33 @@ export class ChunkService {
       solverUserId: null,
       solverName: null,
       solvedAt: null,
+    } satisfies ChunkRecord;
+  }
+
+  private getChunkMineBitmap(chunkX: number, chunkY: number) {
+    return buildChunkMineBitmap(chunkX, chunkY);
+  }
+
+  private withChunkMineBitmap(
+    chunk: ChunkRecord,
+    userId: string | null,
+  ): Chunk {
+    const canRevealBoard =
+      chunk.state === 'solved' ||
+      (chunk.state === 'locked' && chunk.lockedByUserId === userId);
+
+    if (!canRevealBoard) {
+      return {
+        ...chunk,
+        mineBitmap: null,
+      };
+    }
+
+    const mineBitmap = this.getChunkMineBitmap(chunk.chunkX, chunk.chunkY);
+
+    return {
+      ...chunk,
+      mineBitmap: mineBitmap.mineBitmap,
     };
   }
 
@@ -245,15 +277,81 @@ export class ChunkService {
     return false;
   }
 
-  async getChunk(req: Request, chunkX: number, chunkY: number) {
+  async getChunkArea(
+    req: Request,
+    fromChunkX: number,
+    fromChunkY: number,
+    toChunkX: number,
+    toChunkY: number,
+  ) {
+    const client = this.authService.createBearerClient(req);
     const user = await this.requireUser(req);
 
     if (!user) {
       throw new UnauthorizedException('Login required');
     }
 
-    const client = this.authService.createBearerClient(req);
-    return this.getOrCreateChunkRecord(client, chunkX, chunkY);
+    const startX = Math.min(fromChunkX, toChunkX);
+    const endX = Math.max(fromChunkX, toChunkX);
+    const startY = Math.min(fromChunkY, toChunkY);
+    const endY = Math.max(fromChunkY, toChunkY);
+    const now = Date.now();
+    const { data, error } = await client
+      .from(this.chunkTable)
+      .select('*')
+      .gte('chunk_x', startX)
+      .lte('chunk_x', endX)
+      .gte('chunk_y', startY)
+      .lte('chunk_y', endY);
+
+    if (error) {
+      throw new BadRequestException(error.message ?? 'Unable to read chunks');
+    }
+
+    const chunkMap = new Map<string, ChunkRecord>();
+
+    for (const row of (data ?? []) as ChunkRow[]) {
+      if (
+        row.state === 'locked' &&
+        row.locked_until &&
+        new Date(row.locked_until).getTime() <= now
+      ) {
+        continue;
+      }
+
+      const chunk = this.rowToChunk(row);
+      chunkMap.set(`${chunk.chunkX}:${chunk.chunkY}`, chunk);
+    }
+
+    const chunks: Chunk[] = [];
+
+    for (let chunkY = endY; chunkY >= startY; chunkY -= 1) {
+      for (let chunkX = startX; chunkX <= endX; chunkX += 1) {
+        const chunk =
+          chunkMap.get(`${chunkX}:${chunkY}`) ??
+          ({
+            chunkX,
+            chunkY,
+            state: 'open',
+            lockedByUserId: null,
+            lockedByName: null,
+            lockedAt: null,
+            lockedUntil: null,
+            solverUserId: null,
+            solverName: null,
+            solvedAt: null,
+          } satisfies ChunkRecord);
+        chunks.push(this.withChunkMineBitmap(chunk, user.id));
+      }
+    }
+
+    return {
+      fromChunkX: startX,
+      fromChunkY: startY,
+      toChunkX: endX,
+      toChunkY: endY,
+      chunks,
+    };
   }
 
   async lockChunk(req: Request, chunkX: number, chunkY: number) {
@@ -319,7 +417,7 @@ export class ChunkService {
       lockedUntil: lockedUntil.toISOString(),
     });
 
-    return saved;
+    return this.withChunkMineBitmap(saved, user.id);
   }
 
   async solveChunk(req: Request, chunkX: number, chunkY: number) {
@@ -350,6 +448,6 @@ export class ChunkService {
       lockedUntil: null,
     });
 
-    return saved;
+    return this.withChunkMineBitmap(saved, user.id);
   }
 }

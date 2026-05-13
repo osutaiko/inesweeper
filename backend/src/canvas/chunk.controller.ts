@@ -7,13 +7,21 @@ import { ChunkService } from './chunk.service';
 export class ChunkController {
   constructor(private readonly chunkService: ChunkService) {}
 
-  @Get(':chunkX/:chunkY')
-  async getChunk(
+  @Get('area/:fromChunkX/:fromChunkY/:toChunkX/:toChunkY')
+  async getChunkArea(
     @Req() req: Request,
-    @Param('chunkX', ParseIntPipe) chunkX: number,
-    @Param('chunkY', ParseIntPipe) chunkY: number,
+    @Param('fromChunkX', ParseIntPipe) fromChunkX: number,
+    @Param('fromChunkY', ParseIntPipe) fromChunkY: number,
+    @Param('toChunkX', ParseIntPipe) toChunkX: number,
+    @Param('toChunkY', ParseIntPipe) toChunkY: number,
   ) {
-    return this.chunkService.getChunk(req, chunkX, chunkY);
+    return this.chunkService.getChunkArea(
+      req,
+      fromChunkX,
+      fromChunkY,
+      toChunkX,
+      toChunkY,
+    );
   }
 
   @Post(':chunkX/:chunkY/lock')
