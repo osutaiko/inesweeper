@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 
@@ -28,6 +28,10 @@ type CanvasViewportProps = {
   toChunkY: number;
   neighborMineLookup: CanvasChunkMineLookup | null;
   chunkArea: CanvasChunkAreaResponse | null;
+  hoveredChunkId: string | null;
+  onChunkHover: (chunkId: string) => void;
+  onChunkUnhover: () => void;
+  onChunkClick: (chunkId: string) => void;
 };
 
 const CanvasViewport = ({
@@ -37,6 +41,10 @@ const CanvasViewport = ({
   toChunkY,
   neighborMineLookup,
   chunkArea,
+  hoveredChunkId,
+  onChunkHover,
+  onChunkUnhover,
+  onChunkClick,
 }: CanvasViewportProps) => {
   const chunkByCoord = new Map(
     (chunkArea?.chunks ?? []).map((chunk) => [
@@ -96,6 +104,10 @@ const CanvasViewport = ({
                 }
                 mineBitmap={chunk.mineBitmap}
                 neighborMineLookup={neighborMineLookup}
+                isHovered={hoveredChunkId === `${chunk.chunkX}:${chunk.chunkY}`}
+                onClick={() => onChunkClick(`${chunk.chunkX}:${chunk.chunkY}`)}
+                onMouseEnter={() => onChunkHover(`${chunk.chunkX}:${chunk.chunkY}`)}
+                onMouseLeave={onChunkUnhover}
               />
             );
           });
@@ -110,8 +122,14 @@ const CanvasPage = () => {
   const [viewCenterChunkX] = useState(0);
   const [viewCenterChunkY] = useState(0);
   const [chunkArea, setChunkArea] = useState<CanvasChunkAreaResponse | null>(null);
+  const [hoveredChunkId, setHoveredChunkId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const gestureRef = useRef({
+    startX: 0,
+    startY: 0,
+    dragged: false,
+  });
   const viewRadius = 6;
   const neighborChunkBuffer = 1;
 
@@ -256,19 +274,63 @@ const CanvasPage = () => {
             wheel={{ step: 0.05 }}
             panning={{ velocityDisabled: true }}
           >
-            <TransformComponent
-              wrapperClass="w-full h-full overflow-hidden bg-background"
-              contentClass="bg-background"
-            >
-              <CanvasViewport
-                fromChunkX={fromChunkX}
-                fromChunkY={fromChunkY}
-                toChunkX={toChunkX}
-                toChunkY={toChunkY}
-                neighborMineLookup={neighborMineLookup}
-                chunkArea={chunkArea}
-              />
-            </TransformComponent>
+            {({ state, zoomToElement }) => (
+              <TransformComponent
+                wrapperClass="bg-background"
+                wrapperStyle={{
+                  position: "absolute",
+                  inset: 0,
+                  width: "100%",
+                  height: "100%",
+                  overflow: "hidden",
+                }}
+                contentClass="bg-background"
+                wrapperProps={{
+                  onPointerDown: (event) => {
+                    gestureRef.current = {
+                      startX: event.clientX,
+                      startY: event.clientY,
+                      dragged: false,
+                    };
+                  },
+                  onPointerMove: (event) => {
+                    const deltaX = Math.abs(event.clientX - gestureRef.current.startX);
+                    const deltaY = Math.abs(event.clientY - gestureRef.current.startY);
+
+                    if (deltaX > 6 || deltaY > 6) {
+                      gestureRef.current.dragged = true;
+                    }
+                  },
+                  onPointerUp: () => {
+                    gestureRef.current.startX = 0;
+                    gestureRef.current.startY = 0;
+                  },
+                  onPointerCancel: () => {
+                    gestureRef.current.dragged = false;
+                  },
+                }}
+              >
+                <CanvasViewport
+                  fromChunkX={fromChunkX}
+                  fromChunkY={fromChunkY}
+                  toChunkX={toChunkX}
+                  toChunkY={toChunkY}
+                  neighborMineLookup={neighborMineLookup}
+                  chunkArea={chunkArea}
+                  hoveredChunkId={hoveredChunkId}
+                  onChunkHover={setHoveredChunkId}
+                  onChunkUnhover={() => setHoveredChunkId(null)}
+                  onChunkClick={(chunkId) => {
+                    if (gestureRef.current.dragged) {
+                      gestureRef.current.dragged = false;
+                      return;
+                    }
+
+                    zoomToElement(`chunk-${chunkId}`, state.scale, 240, "easeOut");
+                  }}
+                />
+              </TransformComponent>
+            )}
           </TransformWrapper>
           ) : null}
         </main>

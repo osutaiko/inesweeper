@@ -14,6 +14,10 @@ type CanvasChunkProps = {
   colorClassName: string;
   mineBitmap: string | null;
   neighborMineLookup: CanvasChunkMineLookup | null;
+  isHovered: boolean;
+  onClick: () => void;
+  onMouseEnter: () => void;
+  onMouseLeave: () => void;
 };
 
 const getNumberColorClass = (num: number) => {
@@ -53,6 +57,10 @@ const CanvasChunk = ({
   colorClassName,
   mineBitmap,
   neighborMineLookup,
+  isHovered,
+  onClick,
+  onMouseEnter,
+  onMouseLeave,
 }: CanvasChunkProps) => {
   const chunkId = `${chunkX}:${chunkY}`;
   const renderCells = state === "solved";
@@ -60,12 +68,21 @@ const CanvasChunk = ({
 
   return (
     <div
-      className={`relative grid border-game-border ${colorClassName}`}
+      id={`chunk-${chunkId}`}
+      className={`relative grid ${colorClassName}`}
+      onClick={onClick}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
       style={{
         gridTemplateColumns: `repeat(${CHUNK_SIZE}, 30px)`,
         gridTemplateRows: `repeat(${CHUNK_SIZE}, 30px)`,
       }}
     >
+      <div
+        className={`pointer-events-none absolute inset-0 z-20 transition-colors ${
+          isHovered ? "bg-game-hover/50" : "bg-transparent"
+        }`}
+      />
       {renderCells &&
         Array.from({ length: CHUNK_SIZE }).flatMap((_, displayRow) => {
           const localY = CHUNK_SIZE - 1 - displayRow;
@@ -109,11 +126,6 @@ const CanvasChunk = ({
             );
           });
         })}
-      <div
-        className={`pointer-events-none absolute inset-0 border border-destructive ${
-          "z-10"
-        }`}
-      />
     </div>
   );
 };
