@@ -63,6 +63,8 @@ export default {
 				wrongflag: 'hsl(var(--game-wrongflag))',
 				redborder: 'hsl(var(--game-redborder))',
 				blueborder: 'hsl(var(--game-blueborder))',
+				chunkopen: 'hsl(var(--game-chunkopen))',
+				chunklocked: 'hsl(var(--game-chunklocked))',
 				number: {
 					'1': 'hsl(var(--game-number-1))',
 					'2': 'hsl(var(--game-number-2))',

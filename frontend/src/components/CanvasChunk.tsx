@@ -11,6 +11,7 @@ type CanvasChunkProps = {
   chunkX: number;
   chunkY: number;
   state: "open" | "locked" | "solved";
+  colorClassName: string;
   mineBitmap: string | null;
   neighborMineLookup: CanvasChunkMineLookup | null;
 };
@@ -49,6 +50,7 @@ const CanvasChunk = ({
   chunkX,
   chunkY,
   state,
+  colorClassName,
   mineBitmap,
   neighborMineLookup,
 }: CanvasChunkProps) => {
@@ -58,7 +60,7 @@ const CanvasChunk = ({
 
   return (
     <div
-      className="relative grid border-game-border bg-game-border"
+      className={`relative grid border-game-border ${colorClassName}`}
       style={{
         gridTemplateColumns: `repeat(${CHUNK_SIZE}, 30px)`,
         gridTemplateRows: `repeat(${CHUNK_SIZE}, 30px)`,
@@ -108,7 +110,7 @@ const CanvasChunk = ({
           });
         })}
       <div
-        className={`pointer-events-none absolute inset-0 border border-red-500 ${
+        className={`pointer-events-none absolute inset-0 border border-destructive ${
           "z-10"
         }`}
       />

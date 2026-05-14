@@ -65,6 +65,9 @@ body {
     --game-wrongflag: 48 96% 53%;
     --game-redborder: 0 80% 70%;
     --game-blueborder: 180 80% 55%;
+
+    --game-chunkopen: 120 35% 92%;
+    --game-chunklocked: 0 55% 93%;
     
     --game-number-1: 256 100% 50%;
     --game-number-2: 124 100% 27%;
@@ -127,6 +130,9 @@ body {
     --game-wrongflag: 48 96% 40%;
     --game-redborder: 0 60% 30%;
     --game-blueborder: 180 80% 20%;
+
+    --game-chunkopen: 120 20% 16%;
+    --game-chunklocked: 0 35% 18%;
     
     --game-number-1: 233 100% 70%;
     --game-number-2: 124 100% 33%;

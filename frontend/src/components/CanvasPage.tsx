@@ -45,6 +45,15 @@ const CanvasViewport = ({
     ]),
   );
 
+  const hasSolvedNeighbor = (chunkX: number, chunkY: number) => {
+    return (
+      chunkByCoord.get(`${chunkX}:${chunkY + 1}`)?.state === "solved" ||
+      chunkByCoord.get(`${chunkX}:${chunkY - 1}`)?.state === "solved" ||
+      chunkByCoord.get(`${chunkX + 1}:${chunkY}`)?.state === "solved" ||
+      chunkByCoord.get(`${chunkX - 1}:${chunkY}`)?.state === "solved"
+    );
+  };
+
   return (
     <div className="relative w-max bg-background">
       <div
@@ -76,6 +85,15 @@ const CanvasViewport = ({
                 chunkX={chunk.chunkX}
                 chunkY={chunk.chunkY}
                 state={chunk.state}
+                colorClassName={
+                  chunk.state === "solved"
+                    ? "bg-game-border"
+                    : hasSolvedNeighbor(chunk.chunkX, chunk.chunkY)
+                      ? chunk.state === "locked"
+                        ? "bg-game-chunklocked"
+                        : "bg-game-chunkopen"
+                      : ""
+                }
                 mineBitmap={chunk.mineBitmap}
                 neighborMineLookup={neighborMineLookup}
               />
