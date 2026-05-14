@@ -15,6 +15,7 @@ type CanvasChunkProps = {
   mineBitmap: string | null;
   neighborMineLookup: CanvasChunkMineLookup | null;
   isHovered: boolean;
+  isSelected: boolean;
   onClick: () => void;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
@@ -58,6 +59,7 @@ const CanvasChunk = ({
   mineBitmap,
   neighborMineLookup,
   isHovered,
+  isSelected,
   onClick,
   onMouseEnter,
   onMouseLeave,
@@ -79,8 +81,8 @@ const CanvasChunk = ({
       }}
     >
       <div
-        className={`pointer-events-none absolute inset-0 z-20 transition-colors ${
-          isHovered ? "bg-game-hover/50" : "bg-transparent"
+        className={`pointer-events-none absolute inset-0 z-20 ${
+          (isHovered || isSelected) ? "bg-gray-500/20" : "bg-transparent"
         }`}
       />
       {renderCells &&

@@ -258,8 +258,8 @@ const CanvasPage = () => {
     }
 
     return new Intl.DateTimeFormat("en-US", {
-      dateStyle: "medium",
-      timeStyle: "short",
+      dateStyle: "short",
+      timeStyle: "medium",
     }).format(date);
   };
 
