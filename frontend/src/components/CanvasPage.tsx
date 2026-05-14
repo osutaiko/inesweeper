@@ -332,7 +332,6 @@ const CanvasPage = () => {
             minScale={0.05}
             maxScale={2.0}
             centerOnInit
-            limitToBounds={false}
             smooth={false}
             wheel={{ step: 0.05 }}
             panning={{ velocityDisabled: true }}
