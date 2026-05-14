@@ -23,18 +23,6 @@ const getNumberColorClass = (num: number) => {
   return `text-game-number-${num % 8 === 0 ? 8 : num % 8}`;
 };
 
-const getTintClass = (state: CanvasChunkProps["state"]) => {
-  if (state === "solved") {
-    return "bg-green-500/20";
-  }
-
-  if (state === "locked") {
-    return "bg-red-500/20";
-  }
-
-  return "";
-};
-
 const getNeighborCount = (
   neighborMineLookup: CanvasChunkMineLookup,
   worldX: number,
@@ -65,15 +53,12 @@ const CanvasChunk = ({
   neighborMineLookup,
 }: CanvasChunkProps) => {
   const chunkId = `${chunkX}:${chunkY}`;
-  const tintClass = getTintClass(state);
   const renderCells = state === "solved";
   const mineBitmapBytes = renderCells ? decodeMineBitmap(mineBitmap) : null;
 
   return (
     <div
-      className={`relative grid border-game-border ${
-        tintClass || "bg-game-border"
-      }`}
+      className="relative grid border-game-border bg-game-border"
       style={{
         gridTemplateColumns: `repeat(${CHUNK_SIZE}, 30px)`,
         gridTemplateRows: `repeat(${CHUNK_SIZE}, 30px)`,
@@ -97,7 +82,9 @@ const CanvasChunk = ({
             return (
               <div
                 key={`${chunkId}:${localX}:${localY}`}
-                className="relative z-10 flex justify-center items-center border border-game-border bg-game-hidden rounded-sm overflow-hidden"
+                className={`relative z-10 flex justify-center items-center border border-game-border ${
+                  isMine ? "bg-game-hidden" : "bg-game-revealed"
+                } rounded-sm overflow-hidden`}
               >
                 {isMine ? (
                   <div className="flex flex-wrap pt-[1px] gap-y-[1px] justify-center items-center">
