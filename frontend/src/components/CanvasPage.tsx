@@ -337,7 +337,7 @@ const CanvasPage = () => {
             wheel={{ step: 0.05 }}
             panning={{ velocityDisabled: true }}
           >
-            {({ state, zoomToElement }) => (
+            {({ zoomToElement }) => (
               <TransformComponent
                 wrapperClass="bg-background"
                 wrapperStyle={{
@@ -395,7 +395,7 @@ const CanvasPage = () => {
                     }
 
                     setSelectedChunkId(chunkId);
-                    zoomToElement(`chunk-${chunkId}`, state.scale, 240, "easeOut");
+                    zoomToElement(`chunk-${chunkId}`, 0.6, 500, "easeOut");
                   }}
                 />
               </TransformComponent>
