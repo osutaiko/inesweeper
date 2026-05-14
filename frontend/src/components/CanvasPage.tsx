@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 
 import { Button } from "./ui/button";
+import { Card } from "./ui/card";
 import {
   TransformComponent,
   TransformWrapper,
@@ -29,6 +30,7 @@ type CanvasViewportProps = {
   neighborMineLookup: CanvasChunkMineLookup | null;
   chunkArea: CanvasChunkAreaResponse | null;
   hoveredChunkId: string | null;
+  selectedChunkId: string | null;
   onChunkHover: (chunkId: string) => void;
   onChunkUnhover: () => void;
   onChunkClick: (chunkId: string) => void;
@@ -42,6 +44,7 @@ const CanvasViewport = ({
   neighborMineLookup,
   chunkArea,
   hoveredChunkId,
+  selectedChunkId,
   onChunkHover,
   onChunkUnhover,
   onChunkClick,
@@ -105,6 +108,7 @@ const CanvasViewport = ({
                 mineBitmap={chunk.mineBitmap}
                 neighborMineLookup={neighborMineLookup}
                 isHovered={hoveredChunkId === `${chunk.chunkX}:${chunk.chunkY}`}
+                isSelected={selectedChunkId === `${chunk.chunkX}:${chunk.chunkY}`}
                 onClick={() => onChunkClick(`${chunk.chunkX}:${chunk.chunkY}`)}
                 onMouseEnter={() => onChunkHover(`${chunk.chunkX}:${chunk.chunkY}`)}
                 onMouseLeave={onChunkUnhover}
@@ -123,6 +127,7 @@ const CanvasPage = () => {
   const [viewCenterChunkY] = useState(0);
   const [chunkArea, setChunkArea] = useState<CanvasChunkAreaResponse | null>(null);
   const [hoveredChunkId, setHoveredChunkId] = useState<string | null>(null);
+  const [selectedChunkId, setSelectedChunkId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const gestureRef = useRef({
@@ -224,6 +229,39 @@ const CanvasPage = () => {
   const neighborMineLookup = chunkArea
     ? buildCanvasMineLookup(chunkArea.chunks)
     : null;
+  const selectedChunk = selectedChunkId
+    ? chunkArea?.chunks.find(
+        (chunk) => `${chunk.chunkX}:${chunk.chunkY}` === selectedChunkId,
+      ) ?? null
+    : null;
+  const selectedChunkOwner =
+    selectedChunk?.state === "locked"
+      ? selectedChunk.lockedByName
+      : selectedChunk?.state === "solved"
+        ? selectedChunk.solverName
+        : null;
+  const selectedChunkAt =
+    selectedChunk?.state === "locked"
+      ? selectedChunk.lockedUntil
+      : selectedChunk?.state === "solved"
+        ? selectedChunk.solvedAt
+        : null;
+
+  const formatChunkDate = (value: string | null) => {
+    if (!value) {
+      return "Not available";
+    }
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return value;
+    }
+
+    return new Intl.DateTimeFormat("en-US", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    }).format(date);
+  };
 
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
@@ -251,6 +289,31 @@ const CanvasPage = () => {
         <main
           className="relative flex w-full overflow-hidden bg-background h-[calc(100vh-57px)] sm:h-[calc(100vh-73px)]"
         >
+          {selectedChunk ? (
+            <Card className="px-4 py-3 absolute left-4 top-4 z-50 shadow-lg backdrop-blur">
+              <div className="flex flex-col gap-1 text-sm">
+                <h3 className="font-semibold text-foreground font-mono mb-1">
+                  Chunk ({selectedChunk.chunkX}, {selectedChunk.chunkY})
+                </h3>
+                {selectedChunk.state === 'solved' && 
+                  <>
+                    <span className="text-muted-foreground">
+                      Owner: {selectedChunkOwner ?? "None"}
+                    </span>
+                    <span className="text-muted-foreground">
+                      Claimed: {formatChunkDate(selectedChunkAt)}
+                    </span>
+                  </>
+                }
+                {selectedChunk.state === 'locked' && 
+                  <span className="text-muted-foreground">
+                    Locked until: {formatChunkDate(selectedChunkAt)}
+                  </span>
+                }
+              </div>
+            </Card>
+          ) : null}
+
           {(error || isLoading) && (
             <div className="pointer-events-none absolute inset-0 z-50">
               {error && (
@@ -287,6 +350,7 @@ const CanvasPage = () => {
                 contentClass="bg-background"
                 wrapperProps={{
                   onPointerDown: (event) => {
+                    setSelectedChunkId(null);
                     gestureRef.current = {
                       startX: event.clientX,
                       startY: event.clientY,
@@ -308,6 +372,9 @@ const CanvasPage = () => {
                   onPointerCancel: () => {
                     gestureRef.current.dragged = false;
                   },
+                  onWheel: () => {
+                    setSelectedChunkId(null);
+                  },
                 }}
               >
                 <CanvasViewport
@@ -318,6 +385,7 @@ const CanvasPage = () => {
                   neighborMineLookup={neighborMineLookup}
                   chunkArea={chunkArea}
                   hoveredChunkId={hoveredChunkId}
+                  selectedChunkId={selectedChunkId}
                   onChunkHover={setHoveredChunkId}
                   onChunkUnhover={() => setHoveredChunkId(null)}
                   onChunkClick={(chunkId) => {
@@ -326,6 +394,7 @@ const CanvasPage = () => {
                       return;
                     }
 
+                    setSelectedChunkId(chunkId);
                     zoomToElement(`chunk-${chunkId}`, state.scale, 240, "easeOut");
                   }}
                 />
