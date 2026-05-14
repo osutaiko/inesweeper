@@ -13,11 +13,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Github, Info } from "lucide-react";
 
 import { VariantName } from "@/lib/types";
+import { Link } from "react-router-dom";
 
 type InfoButtonProps = {
   variant: VariantName;
@@ -134,33 +134,11 @@ const InfoButton = ({ variant }: InfoButtonProps) => (
         </Accordion>
       </ScrollArea>
       <div className="flex flex-row justify-between items-center">
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="link" className="p-0">
-              Privacy Policy
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="py-4">
-            <div className="space-y-2">
-              <p>Inesweeper uses Google sign-in with Supabase Auth for its member features.</p>
-              <p>From your Google account we collect and store your:</p>
-              <ul className="list-disc pl-5">
-                <li>Gmail address</li>
-                <li>Display name</li>
-                <li>Profile picture</li>
-                <li>Inesweeper sign-in date</li>
-              </ul>
-              <p>While you play games in Inesweeper we collect and store your:</p>
-              <ul className="list-disc pl-5">
-                <li>Individual game results with timestamps</li>
-                <li>Best times</li>
-              </ul>
-              <p>
-                You may request (either partial or full) deletion of your account data by contacting <u>henongod@gmail.com</u>.
-              </p>
-            </div>
-          </PopoverContent>
-        </Popover>
+        <Link to="/privacy">
+          <Button variant="link" className="p-0">
+            Privacy Policy
+          </Button>
+        </Link>
         <a href="https://github.com/osutaiko/inesweeper" target="_blank" rel="noopener noreferrer">
           <Github />
         </a>
