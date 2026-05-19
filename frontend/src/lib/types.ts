@@ -1,4 +1,5 @@
 export type VariantName = "classic" | "multimines" | "liar" | "omega" | "amplified" | "contrast" | "crossed" | "knight";
+export type VariantGroupName = "none" | "mine-types" | "number-scheme" | "mine-generation";
 export type DifficultyName = "beg" | "int" | "exp";
 
 export type BoardConfig = {

@@ -1,4 +1,15 @@
-import { BoardConfigLibrary } from "./types";
+import { BoardConfigLibrary, VariantGroupName, VariantName } from "./types";
+
+export type VariantOption = {
+  value: VariantName;
+  label: string;
+};
+
+export type VariantGroup = {
+  group: VariantGroupName;
+  label: string;
+  items: VariantOption[];
+};
 
 export const boardConfigLibrary: BoardConfigLibrary = {
   "classic": {
@@ -43,7 +54,7 @@ export const boardConfigLibrary: BoardConfigLibrary = {
   },
 };
 
-export const variantMap = {
+export const variantMap: Record<VariantName, string> = {
   classic: "Classic",
   multimines: "Multimines",
   liar: "Liar",
@@ -53,6 +64,38 @@ export const variantMap = {
   crossed: "Crossed",
   knight: "Knight's Path",
 };
+
+export const variantGroups: VariantGroup[] = [
+  {
+    group: "none",
+    label: "Classic",
+    items: [{ value: "classic", label: variantMap.classic }],
+  },
+  {
+    group: "mine-types",
+    label: "Different mine types",
+    items: [
+      { value: "multimines", label: variantMap.multimines },
+      { value: "omega", label: variantMap.omega },
+    ],
+  },
+  {
+    group: "number-scheme",
+    label: "Different number scheme",
+    items: [
+      { value: "liar", label: variantMap.liar },
+      { value: "amplified", label: variantMap.amplified },
+      { value: "contrast", label: variantMap.contrast },
+      { value: "crossed", label: variantMap.crossed },
+      { value: "knight", label: variantMap.knight },
+    ],
+  },
+  {
+    group: "mine-generation",
+    label: "Different mine generation",
+    items: [],
+  },
+];
 
 export const difficultyMap = {
   beg: { full: "Beginner", short: "Beg" },
