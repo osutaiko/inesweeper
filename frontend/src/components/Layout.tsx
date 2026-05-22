@@ -252,7 +252,7 @@ const Layout = () => {
               displayedRecords={displayedRecords}
               isAuthed={Boolean(authUser)}
             />
-            <InfoButton variant={variant} />
+            <InfoButton />
             <AuthButton authUser={authUser} />
           </div>
         </header>
@@ -262,6 +262,7 @@ const Layout = () => {
             style={mainPaddingStyle}
           >
             <GameBoard 
+              key={`${variant}-${difficulty}`}
               config={boardConfigLibrary[variant][difficulty]}
               zoom={zoom}
               flagButtonSize={flagButtonSize}
