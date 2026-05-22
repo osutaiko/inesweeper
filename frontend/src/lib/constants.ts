@@ -58,9 +58,9 @@ export const boardConfigLibrary: BoardConfigLibrary = {
     "exp": { width: 30, height: 16, mineTileCount: 120, posMineCount: 120, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: null, mineGenDeviant: "domino" },
   },
   "scattered": {
-    "beg": { width: 9, height: 9, mineTileCount: 18, posMineCount: 18, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: null, mineGenDeviant: "scattered" },
-    "int": { width: 16, height: 16, mineTileCount: 64, posMineCount: 64, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: null, mineGenDeviant: "scattered" },
-    "exp": { width: 30, height: 16, mineTileCount: 130, posMineCount: 130, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: null, mineGenDeviant: "scattered" },
+    "beg": { width: 9, height: 9, mineTileCount: 12, posMineCount: 12, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: null, mineGenDeviant: "scattered" },
+    "int": { width: 16, height: 16, mineTileCount: 50, posMineCount: 50, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: null, mineGenDeviant: "scattered" },
+    "exp": { width: 30, height: 16, mineTileCount: 120, posMineCount: 120, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: null, mineGenDeviant: "scattered" },
   },
 };
 
