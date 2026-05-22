@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
@@ -16,14 +16,9 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Github, Info } from "lucide-react";
 
-import { VariantName } from "@/lib/types";
 import { Link } from "react-router-dom";
 
-type InfoButtonProps = {
-  variant: VariantName;
-};
-
-const InfoButton = ({ variant }: InfoButtonProps) => (
+const InfoButton = () => (
   <Dialog>
     <DialogTrigger asChild>
       <Button variant="secondary" size="icon">
@@ -36,102 +31,66 @@ const InfoButton = ({ variant }: InfoButtonProps) => (
         <DialogDescription hidden>Variant descriptions</DialogDescription>
       </DialogHeader>
       <ScrollArea className="max-h-[calc(100vh-140px)]">
-        <Accordion type="multiple" defaultValue={[variant]}>
-          <AccordionItem value="classic">
-            <AccordionTrigger className="text-base">Classic</AccordionTrigger>
-            <AccordionContent className="flex flex-col gap-2">
-              <p>The classic Minesweeper experience.</p>
-              <small>
-                To win, reveal all safe cells without stepping on any mines. Numbered cells
-                indicate the number of mines hidden in the neighboring eight cells.
-              </small>
-            </AccordionContent>
-          </AccordionItem>
-          <AccordionItem value="multimines">
-            <AccordionTrigger className="text-base">Multimines</AccordionTrigger>
-            <AccordionContent className="flex flex-col gap-2">
-              <p>Minesweeper with multiple mines per cell.</p>
-              <small>There can be either one, two, or three mines per cell.</small>
-            </AccordionContent>
-          </AccordionItem>
-          <AccordionItem value="liar">
-            <AccordionTrigger className="text-base">Liar</AccordionTrigger>
-            <AccordionContent className="flex flex-col gap-2">
-              <p>Minesweeper with lying numbers.</p>
-              <small>
-                The number on each cell is incorrect, displaying a value that is off by one from
-                the actual number of neighboring mines.
-              </small>
-            </AccordionContent>
-          </AccordionItem>
-          <AccordionItem value="omega">
-            <AccordionTrigger className="text-base">Omega</AccordionTrigger>
-            <AccordionContent className="flex flex-col gap-2">
-              <p>Minesweeper with negative mines.</p>
+        <p className="mb-6">To win, reveal all safe cells without clicking on any mines.</p>
+        <Tabs defaultValue={"mine-types"} className="w-full">
+          <span className="mr-3 text-sm">Different...</span>
+          <TabsList>
+            <TabsTrigger value="mine-types">Mines</TabsTrigger>
+            <TabsTrigger value="number-scheme">Numbers</TabsTrigger>
+            <TabsTrigger value="mine-calculation">Generation</TabsTrigger>
+          </TabsList>
+          <TabsContent value="mine-types" className="mt-4">
+            <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-1">
-                <small>
-                  There can be either a positive mine (red flag), or a negative mine (blue flag)
-                  on a cell.
-                </small>
-                <small>
-                  All cells neighboring 0&apos;s are automatically revealed if they contain no
-                  mines. This means all unrevealed cells neighboring a 0 cell are guaranteed to
-                  contain mines.
-                </small>
+                <h4 className="font-medium">Multimines</h4>
+                <p>Minesweeper with multiple mines per cell. There can be either one, two, or three mines per cell.</p>
               </div>
-            </AccordionContent>
-          </AccordionItem>
-          <AccordionItem value="amplified">
-            <AccordionTrigger className="text-base">Amplified</AccordionTrigger>
-            <AccordionContent className="flex flex-col gap-2">
-              <p>Minesweeper on a checkerboard.</p>
               <div className="flex flex-col gap-1">
-                <small>Each mine on a red cell counts as two mines.</small>
-                <small>
-                  The total number of mines displayed on the top left corner remains unaffected by
-                  this rule.
-                </small>
+                <h4 className="font-medium">Omega</h4>
+                <p>There can be either a positive mine (red flag), or a negative mine (blue flag) on a cell.</p>
+                <small>Note: As a special rule, all cells neighboring 0&apos;s are automatically revealed if they contain no mines. This means each unrevealed cell neighboring an explicit 0 is guaranteed to contain a mine (either positive or negative).</small>
               </div>
-            </AccordionContent>
-          </AccordionItem>
-          <AccordionItem value="contrast">
-            <AccordionTrigger className="text-base">Contrast</AccordionTrigger>
-            <AccordionContent className="flex flex-col gap-2">
-              <p>Minesweeper on a checkerboard (again).</p>
+            </div>
+          </TabsContent>
+          <TabsContent value="number-scheme" className="mt-4">
+            <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-1">
-                <small>
-                  The number on a cell indicates the difference in the number of mines between
-                  neighboring red and blue cells.
-                </small>
-                <small>
-                  All cells neighboring 0&apos;s are automatically revealed if they contain no
-                  mines. This means all unrevealed cells neighboring a 0 cell are guaranteed to
-                  contain mines.
-                </small>
+                <h4 className="font-medium">Liar</h4>
+                <p>The number on each cell is incorrect, displaying a value that is off by one from the actual number of neighboring mines.</p>
               </div>
-            </AccordionContent>
-          </AccordionItem>
-          <AccordionItem value="crossed">
-            <AccordionTrigger className="text-base">Crossed</AccordionTrigger>
-            <AccordionContent className="flex flex-col gap-2">
-              <p>Minesweeper with a cross-shaped mine count.</p>
-              <small>
-                The number on a cell indicates how many mines are in a cross-shaped region within
-                distance 2.
-              </small>
-            </AccordionContent>
-          </AccordionItem>
-          <AccordionItem value="knight">
-            <AccordionTrigger className="text-base">Knight&apos;s Path</AccordionTrigger>
-            <AccordionContent className="flex flex-col gap-2">
-              <p>Minesweeper with a knight&apos;s-path-shaped mine count.</p>
-              <small>
-                The number on a cell indicates how many mines are two cells away in one direction
-                and one cell away in another (i.e., knight&apos;s path in chess).
-              </small>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+              <div className="flex flex-col gap-1">
+                <h4 className="font-medium">Amplified</h4>
+                <p>Each mine on a red cell counts as two mines.</p>
+                <small>Note: The total number of mines displayed on the top left corner remains unaffected by this rule.</small>
+              </div>
+              <div className="flex flex-col gap-1">
+                <h4 className="font-medium">Contrast</h4>
+                <p>The number on a cell indicates the difference in the number of mines between neighboring red and blue cells.</p>
+                <small>Note: As a special rule, all cells neighboring 0&apos;s are automatically revealed if they contain no mines. This means each unrevealed cell neighboring an explicit 0 is guaranteed to contain a mine.</small>
+              </div>
+              <div className="flex flex-col gap-1">
+                <h4 className="font-medium">Crossed</h4>
+                <p>The number on a cell indicates how many mines are in a cross-shaped region within distance 2.</p>
+              </div>
+              <div className="flex flex-col gap-1">
+                <h4 className="font-medium">Knight&apos;s Path</h4>
+                <p>The number on a cell indicates how many mines are two cells away in one direction and one cell away in another (i.e., knight&apos;s path in chess).</p>
+              </div>
+            </div>
+          </TabsContent>
+          <TabsContent value="mine-calculation" className="mt-4">
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1">
+                <h4 className="font-medium">Domino</h4>
+                <p>Mines are placed as orthogonally connected pairs (hence, dominoes). No two dominoes touch each other, both orthogonally and diagonally.</p>
+              </div>
+              <div className="flex flex-col gap-1">
+                <h4 className="font-medium">Scattered</h4>
+                <p>No two mines touch orthogonally.</p>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
       </ScrollArea>
       <div className="flex flex-row justify-between items-center">
         <Link to="/privacy">

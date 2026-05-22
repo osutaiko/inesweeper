@@ -383,13 +383,13 @@ export const GameBoard: React.FC<{
                 {config.posMineCount > 0 && 
                   <div className="flex flex-row items-center gap-2.5">
                     <Flag stroke="red" fill="red" size={config.negMineCount > 0 ? 15 : 20} />
-                    <p className={`font-bold ${config.negMineCount > 0 ? "text-sm" : "text-xl"}`}>{remainingPosFlags}</p>
+                    <span className={`font-bold ${config.negMineCount > 0 ? "text-sm" : "text-xl"}`}>{remainingPosFlags}</span>
                   </div>
                 }
                 {config.negMineCount > 0 && 
                   <div className="flex flex-row items-center gap-2.5">
                     <Flag stroke="blue" fill="blue" size={config.posMineCount > 0 ? 15 : 20} className="rotate-180" />
-                    <p className={`font-bold ${config.posMineCount > 0 ? "text-sm" : "text-xl"}`}>{remainingNegFlags}</p>
+                    <span className={`font-bold ${config.posMineCount > 0 ? "text-sm" : "text-xl"}`}>{remainingNegFlags}</span>
                   </div>
                 }
               </div>
@@ -402,9 +402,9 @@ export const GameBoard: React.FC<{
                 {isGameOver === "loss" && <Skull />}
               </Button>
               <div className="flex h-[40px] justify-center items-center px-3 rounded-md overflow-hidden bg-game-button">
-                <p className="font-bold text-xl">
+                <span className="font-bold text-xl">
                   {isGameOver ? formatTimeMs(timeElapsed) : Math.floor(timeElapsed / 1000)}
-                </p>
+                </span>
               </div>
 
             </div>

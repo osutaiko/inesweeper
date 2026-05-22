@@ -52,22 +52,22 @@ const SettingsButton = ({
       <ScrollArea className="max-h-[calc(100vh-90px)]">
         <div className="flex flex-col gap-3">
           <div className="flex flex-row justify-between items-center gap-3">
-            <p className="w-1/2">Theme</p>
+            <span className="w-1/2">Theme</span>
             <ThemeToggle />
           </div>
           <div className="flex flex-row justify-between items-center gap-3">
-            <p className="w-1/2">Board scale: {zoom}%</p>
+            <span className="w-1/2">Board scale: {zoom}%</span>
             <Slider className="w-1/2" value={[zoom]} onValueChange={(value) => setZoom(value[0])} min={60} max={200} step={10} />
           </div>
           {isTouchscreen && (
             <>
               <Separator className="my-2" />
               <div className="flex flex-row justify-between items-center gap-3">
-                <p className="w-1/2">Flag toggle button size: {flagButtonSize} px</p>
+                <span className="w-1/2">Flag toggle button size: {flagButtonSize} px</span>
                 <Slider className="w-1/2" value={[flagButtonSize]} onValueChange={(value) => setFlagButtonSize(value[0])} min={20} max={160} step={4} />
               </div>
               <div className="flex flex-row justify-between items-center gap-3">
-                <p className="w-1/2">Flag toggle button position</p>
+                <span className="w-1/2">Flag toggle button position</span>
                 <Select value={flagButtonPosition} onValueChange={(value) => setFlagButtonPosition(value)}>
                   <SelectTrigger className="w-[180px] max-w-1/2">
                     <SelectValue placeholder="Bottom Right" />
