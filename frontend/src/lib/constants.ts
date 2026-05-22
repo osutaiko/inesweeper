@@ -1,4 +1,15 @@
-import { BoardConfigLibrary } from "./types";
+import { BoardConfigLibrary, VariantGroupName, VariantName } from "./types";
+
+export type VariantOption = {
+  value: VariantName;
+  label: string;
+};
+
+export type VariantGroup = {
+  group: VariantGroupName;
+  label: string;
+  items: VariantOption[];
+};
 
 export const boardConfigLibrary: BoardConfigLibrary = {
   "classic": {
@@ -23,8 +34,8 @@ export const boardConfigLibrary: BoardConfigLibrary = {
   },
   "amplified": {
     "beg": { width: 9, height: 9, mineTileCount: 12, posMineCount: 12, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "amplified" },
-    "int": { width: 16, height: 16, mineTileCount: 50, posMineCount: 50, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "amplified" },
-    "exp": { width: 30, height: 16, mineTileCount: 120, posMineCount: 120, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "amplified" },
+    "int": { width: 16, height: 16, mineTileCount: 55, posMineCount: 55, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "amplified" },
+    "exp": { width: 30, height: 16, mineTileCount: 130, posMineCount: 130, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "amplified" },
   },
   "contrast": {
     "beg": { width: 9, height: 9, mineTileCount: 10, posMineCount: 10, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "contrast" },
@@ -41,9 +52,19 @@ export const boardConfigLibrary: BoardConfigLibrary = {
     "int": { width: 16, height: 16, mineTileCount: 45, posMineCount: 45, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "knight" },
     "exp": { width: 30, height: 16, mineTileCount: 99, posMineCount: 99, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "knight" },
   },
+  "domino": {
+    "beg": { width: 9, height: 9, mineTileCount: 14, posMineCount: 14, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: null, mineGenDeviant: "domino" },
+    "int": { width: 16, height: 16, mineTileCount: 60, posMineCount: 60, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: null, mineGenDeviant: "domino" },
+    "exp": { width: 30, height: 16, mineTileCount: 120, posMineCount: 120, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: null, mineGenDeviant: "domino" },
+  },
+  "scattered": {
+    "beg": { width: 9, height: 9, mineTileCount: 18, posMineCount: 18, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: null, mineGenDeviant: "scattered" },
+    "int": { width: 16, height: 16, mineTileCount: 64, posMineCount: 64, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: null, mineGenDeviant: "scattered" },
+    "exp": { width: 30, height: 16, mineTileCount: 130, posMineCount: 130, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: null, mineGenDeviant: "scattered" },
+  },
 };
 
-export const variantMap = {
+export const variantMap: Record<VariantName, string> = {
   classic: "Classic",
   multimines: "Multimines",
   liar: "Liar",
@@ -52,7 +73,44 @@ export const variantMap = {
   contrast: "Contrast",
   crossed: "Crossed",
   knight: "Knight's Path",
+  domino: "Domino",
+  scattered: "Scattered",
 };
+
+export const variantGroups: VariantGroup[] = [
+  {
+    group: "none",
+    label: "Classic",
+    items: [{ value: "classic", label: variantMap.classic }],
+  },
+  {
+    group: "mine-types",
+    label: "Different mine types",
+    items: [
+      { value: "multimines", label: variantMap.multimines },
+      { value: "omega", label: variantMap.omega },
+    ],
+  },
+  {
+    group: "number-scheme",
+    label: "Different number scheme",
+    items: [
+      { value: "liar", label: variantMap.liar },
+      { value: "amplified", label: variantMap.amplified },
+      { value: "contrast", label: variantMap.contrast },
+      { value: "crossed", label: variantMap.crossed },
+      { value: "knight", label: variantMap.knight },
+    ],
+  },
+  {
+    group: "mine-generation",
+    label: "Different mine generation",
+    items: [
+      { value: "domino", label: variantMap.domino },
+      { value: "scattered", label: variantMap.scattered },
+    ],
+  },
+];
 
 export const difficultyMap = {
   beg: { full: "Beginner", short: "Beg" },

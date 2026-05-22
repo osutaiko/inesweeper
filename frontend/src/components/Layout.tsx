@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
 import { ThemeProvider } from "./theme-provider";
 import { DifficultyName, TimeRecord, VariantName } from "@/lib/types";
-import { boardConfigLibrary, difficultyMap, variantMap } from "@/lib/constants";
+import { boardConfigLibrary, difficultyMap, variantGroups } from "@/lib/constants";
 import { useMediaQuery } from "@/lib/utils";
 
 import GameBoard from "./GameBoard";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
+  SelectSeparator,
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
@@ -268,14 +271,20 @@ const Layout = () => {
             />
             <div className="flex flex-row gap-2">
               <Select value={variant} onValueChange={(value) => setVariant(value as VariantName)}>
-                <SelectTrigger className="w-[140px]">
+                <SelectTrigger className="w-[160px]">
                   <SelectValue placeholder="Variant" />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.entries(variantMap).map(([key, label]) => (
-                    <SelectItem key={key} value={key}>
-                      {label}
-                    </SelectItem>
+                  {variantGroups.map((group, groupIndex) => (
+                    <SelectGroup key={group.group}>
+                      {group.group !== "none" ? <SelectLabel>{group.label}</SelectLabel> : null}
+                      {group.items.map((item) => (
+                        <SelectItem key={item.value} value={item.value}>
+                          {item.label}
+                        </SelectItem>
+                      ))}
+                      {groupIndex < variantGroups.length - 1 ? <SelectSeparator className="my-1" /> : null}
+                    </SelectGroup>
                   ))}
                 </SelectContent>
               </Select>
@@ -284,11 +293,13 @@ const Layout = () => {
                   <SelectValue placeholder="Difficulty" />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.entries(difficultyMap).map(([key, label]) => (
-                    <SelectItem key={key} value={key}>
-                      {label.full}
-                    </SelectItem>
-                  ))}
+                  <SelectGroup>
+                    {Object.entries(difficultyMap).map(([key, label]) => (
+                      <SelectItem key={key} value={key}>
+                        {label.full}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
                 </SelectContent>
               </Select>
             </div>

@@ -45,27 +45,74 @@ export const GameBoard: React.FC<{
     setIncorrectFlagCells(null);
   };
 
+  const cardinalDirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+  const allDirs = [...cardinalDirs, [1, 1], [1, -1], [-1, 1], [-1, -1]];
+
   const handleBeforeFirstClick = (row: number, col: number) => {
     setIsFirstClick(false);
     setStartTime(Date.now());
-  
+    
     if (board[row][col].mineNum !== 0) {
       let newBoard = [...board];
-  
-      const emptySquares = [];
-      for (let i = 0; i < config.height; i++) {
-        for (let j = 0; j < config.width; j++) {
-          if (!newBoard[i][j].mineNum && (i !== row || j !== col)) {
-            emptySquares.push({ i, j });
+
+      if (config.mineGenDeviant === "domino") {
+        const hasAdjacentMine = (i: number, j: number) =>
+          allDirs.some(([dx, dy]) => newBoard[i + dx]?.[j + dy]?.mineNum);
+        const partner = cardinalDirs
+          .map(([dx, dy]) => [row + dx, col + dy] as [number, number])
+          .find(([i, j]) => i >= 0 && i < config.height && j >= 0 && j < config.width && newBoard[i][j].mineNum);
+
+        if (partner) {
+          const [pi, pj] = partner;
+          const mines = [newBoard[row][col].mineNum, newBoard[pi][pj].mineNum];
+          newBoard[row][col].mineNum = 0;
+          newBoard[pi][pj].mineNum = 0;
+
+          const edges = newBoard.flatMap((r, i) =>
+            r.flatMap((_, j) => [
+              ...(j + 1 < config.width ? [[i, j, i, j + 1]] : []),
+              ...(i + 1 < config.height ? [[i, j, i + 1, j]] : []),
+            ])
+          ).sort(() => Math.random() - 0.5) as [number, number, number, number][];
+
+          const spot = edges.find(([i1, j1, i2, j2]) =>
+            !(i1 === row && j1 === col) &&
+            !(i2 === row && j2 === col) &&
+            !hasAdjacentMine(i1, j1) &&
+            !hasAdjacentMine(i2, j2)
+          );
+
+          if (spot) {
+            const [i1, j1, i2, j2] = spot;
+            newBoard[i1][j1].mineNum = mines[0];
+            newBoard[i2][j2].mineNum = mines[1];
+          } else {
+            newBoard[row][col].mineNum = mines[0];
+            newBoard[pi][pj].mineNum = mines[1];
           }
         }
-      }
-  
-      const randomSquare = emptySquares[Math.floor(Math.random() * emptySquares.length)];
-  
-      if (randomSquare) {
-        newBoard[randomSquare.i][randomSquare.j].mineNum = newBoard[row][col].mineNum;
+      } else {
+        const mine = newBoard[row][col].mineNum;
         newBoard[row][col].mineNum = 0;
+
+        const emptySquares = [];
+        for (let i = 0; i < config.height; i++) {
+          for (let j = 0; j < config.width; j++) {
+            if (!newBoard[i][j].mineNum && (i !== row || j !== col) 
+              && !(config.mineGenDeviant === "scattered" && cardinalDirs.some(([di, dj]) => newBoard[i + di]?.[j + dj]?.mineNum))
+            ) {
+              emptySquares.push({ i, j });
+            }
+          }
+        }
+    
+        const randomSquare = emptySquares[Math.floor(Math.random() * emptySquares.length)];
+    
+        if (randomSquare) {
+          newBoard[randomSquare.i][randomSquare.j].mineNum = mine;
+        } else {
+          newBoard[row][col].mineNum = mine;
+        }
       }
   
       setBoard(newBoard);
@@ -336,13 +383,13 @@ export const GameBoard: React.FC<{
                 {config.posMineCount > 0 && 
                   <div className="flex flex-row items-center gap-2.5">
                     <Flag stroke="red" fill="red" size={config.negMineCount > 0 ? 15 : 20} />
-                    <p className={`font-bold ${config.negMineCount > 0 ? "text-sm" : "text-xl"}`}>{remainingPosFlags}</p>
+                    <span className={`font-bold ${config.negMineCount > 0 ? "text-sm" : "text-xl"}`}>{remainingPosFlags}</span>
                   </div>
                 }
                 {config.negMineCount > 0 && 
                   <div className="flex flex-row items-center gap-2.5">
                     <Flag stroke="blue" fill="blue" size={config.posMineCount > 0 ? 15 : 20} className="rotate-180" />
-                    <p className={`font-bold ${config.posMineCount > 0 ? "text-sm" : "text-xl"}`}>{remainingNegFlags}</p>
+                    <span className={`font-bold ${config.posMineCount > 0 ? "text-sm" : "text-xl"}`}>{remainingNegFlags}</span>
                   </div>
                 }
               </div>
@@ -355,9 +402,9 @@ export const GameBoard: React.FC<{
                 {isGameOver === "loss" && <Skull />}
               </Button>
               <div className="flex h-[40px] justify-center items-center px-3 rounded-md overflow-hidden bg-game-button">
-                <p className="font-bold text-xl">
+                <span className="font-bold text-xl">
                   {isGameOver ? formatTimeMs(timeElapsed) : Math.floor(timeElapsed / 1000)}
-                </p>
+                </span>
               </div>
 
             </div>

@@ -7,12 +7,67 @@ const placeMines = (board: Board, config: BoardConfig) => {
   const maxMinesPerCell = config.maxMinesPerCell;
 
   const tilesWithMines: number[][] = [];
-  while (tilesWithMines.length < totalTilesWithMines) {
-    const x = Math.floor(Math.random() * config.width);
-    const y = Math.floor(Math.random() * config.height);
+  if (config.mineGenDeviant === "domino") {
+    const blocked: number[][] = [];
+    const has = (coords: number[][], x: number, y: number) =>
+      coords.some(([cx, cy]) => cx === x && cy === y);
 
-    if (!tilesWithMines.some(([tx, ty]) => tx === x && ty === y)) {
-      tilesWithMines.push([x, y]);
+    const blockAround = (x: number, y: number) => {
+      for (let dx = -1; dx <= 1; dx++) {
+        for (let dy = -1; dy <= 1; dy++) {
+          blocked.push([x + dx, y + dy]);
+        }
+      }
+    };
+
+    const edges = board
+      .flatMap((row, y) =>
+        row.flatMap((_, x) => [
+          ...(x + 1 < config.width ? [[x, y, x + 1, y]] : []),
+          ...(y + 1 < config.height ? [[x, y, x, y + 1]] : []),
+        ])
+      )
+      .sort(() => Math.random() - 0.5);
+
+    for (const [x1, y1, x2, y2] of edges) {
+      if (tilesWithMines.length === totalTilesWithMines) break;
+      if (has(blocked, x1, y1) || has(blocked, x2, y2)) continue;
+
+      blockAround(x1, y1);
+      blockAround(x2, y2);
+
+      tilesWithMines.push([x1, y1], [x2, y2]);
+    }
+  } else if (config.mineGenDeviant === "scattered") {
+    const has = (x: number, y: number) =>
+      tilesWithMines.some(([tx, ty]) => tx === x && ty === y);
+
+    const canPlace = (x: number, y: number) =>
+      !has(x, y) &&
+      ![[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) =>
+        has(x + dx, y + dy)
+      );
+
+    const cells = board
+      .flatMap((row, y) => row.map((_, x) => [x, y] as [number, number]))
+      .sort(() => Math.random() - 0.5);
+
+    for (const [x, y] of cells) {
+      if (tilesWithMines.length === totalTilesWithMines) break;
+      if (canPlace(x, y)) tilesWithMines.push([x, y]);
+    }
+
+    if (tilesWithMines.length < totalTilesWithMines) {
+      throw new Error("Unable to generate a scattered mine layout.");
+    }
+  } else {
+    while (tilesWithMines.length < totalTilesWithMines) {
+      const x = Math.floor(Math.random() * config.width);
+      const y = Math.floor(Math.random() * config.height);
+
+      if (!tilesWithMines.some(([tx, ty]) => tx === x && ty === y)) {
+        tilesWithMines.push([x, y]);
+      }
     }
   }
 
