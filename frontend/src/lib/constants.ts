@@ -34,8 +34,8 @@ export const boardConfigLibrary: BoardConfigLibrary = {
   },
   "amplified": {
     "beg": { width: 9, height: 9, mineTileCount: 12, posMineCount: 12, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "amplified" },
-    "int": { width: 16, height: 16, mineTileCount: 50, posMineCount: 50, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "amplified" },
-    "exp": { width: 30, height: 16, mineTileCount: 120, posMineCount: 120, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "amplified" },
+    "int": { width: 16, height: 16, mineTileCount: 55, posMineCount: 55, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "amplified" },
+    "exp": { width: 30, height: 16, mineTileCount: 130, posMineCount: 130, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "amplified" },
   },
   "contrast": {
     "beg": { width: 9, height: 9, mineTileCount: 10, posMineCount: 10, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "contrast" },
