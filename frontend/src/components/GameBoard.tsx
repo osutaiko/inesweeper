@@ -45,16 +45,17 @@ export const GameBoard: React.FC<{
     setIncorrectFlagCells(null);
   };
 
+  const cardinalDirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+  const allDirs = [...cardinalDirs, [1, 1], [1, -1], [-1, 1], [-1, -1]];
+
   const handleBeforeFirstClick = (row: number, col: number) => {
     setIsFirstClick(false);
     setStartTime(Date.now());
-  
+    
     if (board[row][col].mineNum !== 0) {
       let newBoard = [...board];
 
       if (config.mineGenDeviant === "domino") {
-        const cardinalDirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
-        const allDirs = [...cardinalDirs, [1, 1], [1, -1], [-1, 1], [-1, -1]];
         const hasAdjacentMine = (i: number, j: number) =>
           allDirs.some(([dx, dy]) => newBoard[i + dx]?.[j + dy]?.mineNum);
         const partner = cardinalDirs
@@ -91,10 +92,15 @@ export const GameBoard: React.FC<{
           }
         }
       } else {
+        const mine = newBoard[row][col].mineNum;
+        newBoard[row][col].mineNum = 0;
+
         const emptySquares = [];
         for (let i = 0; i < config.height; i++) {
           for (let j = 0; j < config.width; j++) {
-            if (!newBoard[i][j].mineNum && (i !== row || j !== col)) {
+            if (!newBoard[i][j].mineNum && (i !== row || j !== col) 
+              && !(config.mineGenDeviant === "scattered" && cardinalDirs.some(([di, dj]) => newBoard[i + di]?.[j + dj]?.mineNum))
+            ) {
               emptySquares.push({ i, j });
             }
           }
@@ -103,8 +109,9 @@ export const GameBoard: React.FC<{
         const randomSquare = emptySquares[Math.floor(Math.random() * emptySquares.length)];
     
         if (randomSquare) {
-          newBoard[randomSquare.i][randomSquare.j].mineNum = newBoard[row][col].mineNum;
-          newBoard[row][col].mineNum = 0;
+          newBoard[randomSquare.i][randomSquare.j].mineNum = mine;
+        } else {
+          newBoard[row][col].mineNum = mine;
         }
       }
   

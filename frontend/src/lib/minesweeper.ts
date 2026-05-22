@@ -38,6 +38,28 @@ const placeMines = (board: Board, config: BoardConfig) => {
 
       tilesWithMines.push([x1, y1], [x2, y2]);
     }
+  } else if (config.mineGenDeviant === "scattered") {
+    const has = (x: number, y: number) =>
+      tilesWithMines.some(([tx, ty]) => tx === x && ty === y);
+
+    const canPlace = (x: number, y: number) =>
+      !has(x, y) &&
+      ![[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) =>
+        has(x + dx, y + dy)
+      );
+
+    const cells = board
+      .flatMap((row, y) => row.map((_, x) => [x, y] as [number, number]))
+      .sort(() => Math.random() - 0.5);
+
+    for (const [x, y] of cells) {
+      if (tilesWithMines.length === totalTilesWithMines) break;
+      if (canPlace(x, y)) tilesWithMines.push([x, y]);
+    }
+
+    if (tilesWithMines.length < totalTilesWithMines) {
+      throw new Error("Unable to generate a scattered mine layout.");
+    }
   } else {
     while (tilesWithMines.length < totalTilesWithMines) {
       const x = Math.floor(Math.random() * config.width);

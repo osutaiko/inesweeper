@@ -57,6 +57,11 @@ export const boardConfigLibrary: BoardConfigLibrary = {
     "int": { width: 16, height: 16, mineTileCount: 60, posMineCount: 60, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: null, mineGenDeviant: "domino" },
     "exp": { width: 30, height: 16, mineTileCount: 120, posMineCount: 120, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: null, mineGenDeviant: "domino" },
   },
+  "scattered": {
+    "beg": { width: 9, height: 9, mineTileCount: 18, posMineCount: 18, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: null, mineGenDeviant: "scattered" },
+    "int": { width: 16, height: 16, mineTileCount: 64, posMineCount: 64, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: null, mineGenDeviant: "scattered" },
+    "exp": { width: 30, height: 16, mineTileCount: 130, posMineCount: 130, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: null, mineGenDeviant: "scattered" },
+  },
 };
 
 export const variantMap: Record<VariantName, string> = {
@@ -69,6 +74,7 @@ export const variantMap: Record<VariantName, string> = {
   crossed: "Crossed",
   knight: "Knight's Path",
   domino: "Domino",
+  scattered: "Scattered",
 };
 
 export const variantGroups: VariantGroup[] = [
@@ -101,6 +107,7 @@ export const variantGroups: VariantGroup[] = [
     label: "Different mine generation",
     items: [
       { value: "domino", label: variantMap.domino },
+      { value: "scattered", label: variantMap.scattered },
     ],
   },
 ];
