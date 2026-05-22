@@ -1,4 +1,8 @@
-export type VariantName = "classic" | "multimines" | "liar" | "omega" | "amplified" | "contrast" | "crossed" | "knight";
+export type VariantName = 
+  | "classic"
+  | "multimines" | "omega" 
+  | "liar" | "amplified" | "contrast" | "crossed" | "knight"
+  | "domino";
 export type VariantGroupName = "none" | "mine-types" | "number-scheme" | "mine-generation";
 export type DifficultyName = "beg" | "int" | "exp";
 
@@ -10,6 +14,7 @@ export type BoardConfig = {
   posMineCount: number;
   negMineCount: number;
   cellNumberDeviant: "lie" | "amplified" | "contrast" | "cross" | "knight" | null;
+  mineGenDeviant?: "domino" | null;
 };
 
 export type BoardConfigLibrary = {

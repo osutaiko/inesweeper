@@ -51,21 +51,61 @@ export const GameBoard: React.FC<{
   
     if (board[row][col].mineNum !== 0) {
       let newBoard = [...board];
-  
-      const emptySquares = [];
-      for (let i = 0; i < config.height; i++) {
-        for (let j = 0; j < config.width; j++) {
-          if (!newBoard[i][j].mineNum && (i !== row || j !== col)) {
-            emptySquares.push({ i, j });
+
+      if (config.mineGenDeviant === "domino") {
+        const cardinalDirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+        const allDirs = [...cardinalDirs, [1, 1], [1, -1], [-1, 1], [-1, -1]];
+        const hasAdjacentMine = (i: number, j: number) =>
+          allDirs.some(([dx, dy]) => newBoard[i + dx]?.[j + dy]?.mineNum);
+        const partner = cardinalDirs
+          .map(([dx, dy]) => [row + dx, col + dy] as [number, number])
+          .find(([i, j]) => i >= 0 && i < config.height && j >= 0 && j < config.width && newBoard[i][j].mineNum);
+
+        if (partner) {
+          const [pi, pj] = partner;
+          const mines = [newBoard[row][col].mineNum, newBoard[pi][pj].mineNum];
+          newBoard[row][col].mineNum = 0;
+          newBoard[pi][pj].mineNum = 0;
+
+          const edges = newBoard.flatMap((r, i) =>
+            r.flatMap((_, j) => [
+              ...(j + 1 < config.width ? [[i, j, i, j + 1]] : []),
+              ...(i + 1 < config.height ? [[i, j, i + 1, j]] : []),
+            ])
+          ).sort(() => Math.random() - 0.5) as [number, number, number, number][];
+
+          const spot = edges.find(([i1, j1, i2, j2]) =>
+            !(i1 === row && j1 === col) &&
+            !(i2 === row && j2 === col) &&
+            !hasAdjacentMine(i1, j1) &&
+            !hasAdjacentMine(i2, j2)
+          );
+
+          if (spot) {
+            const [i1, j1, i2, j2] = spot;
+            newBoard[i1][j1].mineNum = mines[0];
+            newBoard[i2][j2].mineNum = mines[1];
+          } else {
+            newBoard[row][col].mineNum = mines[0];
+            newBoard[pi][pj].mineNum = mines[1];
           }
         }
-      }
-  
-      const randomSquare = emptySquares[Math.floor(Math.random() * emptySquares.length)];
-  
-      if (randomSquare) {
-        newBoard[randomSquare.i][randomSquare.j].mineNum = newBoard[row][col].mineNum;
-        newBoard[row][col].mineNum = 0;
+      } else {
+        const emptySquares = [];
+        for (let i = 0; i < config.height; i++) {
+          for (let j = 0; j < config.width; j++) {
+            if (!newBoard[i][j].mineNum && (i !== row || j !== col)) {
+              emptySquares.push({ i, j });
+            }
+          }
+        }
+    
+        const randomSquare = emptySquares[Math.floor(Math.random() * emptySquares.length)];
+    
+        if (randomSquare) {
+          newBoard[randomSquare.i][randomSquare.j].mineNum = newBoard[row][col].mineNum;
+          newBoard[row][col].mineNum = 0;
+        }
       }
   
       setBoard(newBoard);

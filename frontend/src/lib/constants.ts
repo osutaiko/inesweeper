@@ -52,6 +52,11 @@ export const boardConfigLibrary: BoardConfigLibrary = {
     "int": { width: 16, height: 16, mineTileCount: 45, posMineCount: 45, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "knight" },
     "exp": { width: 30, height: 16, mineTileCount: 99, posMineCount: 99, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "knight" },
   },
+  "domino": {
+    "beg": { width: 9, height: 9, mineTileCount: 14, posMineCount: 14, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: null, mineGenDeviant: "domino" },
+    "int": { width: 16, height: 16, mineTileCount: 60, posMineCount: 60, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: null, mineGenDeviant: "domino" },
+    "exp": { width: 30, height: 16, mineTileCount: 120, posMineCount: 120, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: null, mineGenDeviant: "domino" },
+  },
 };
 
 export const variantMap: Record<VariantName, string> = {
@@ -63,6 +68,7 @@ export const variantMap: Record<VariantName, string> = {
   contrast: "Contrast",
   crossed: "Crossed",
   knight: "Knight's Path",
+  domino: "Domino",
 };
 
 export const variantGroups: VariantGroup[] = [
@@ -93,7 +99,9 @@ export const variantGroups: VariantGroup[] = [
   {
     group: "mine-generation",
     label: "Different mine generation",
-    items: [],
+    items: [
+      { value: "domino", label: variantMap.domino },
+    ],
   },
 ];
 
