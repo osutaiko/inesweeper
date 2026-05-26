@@ -298,7 +298,7 @@ export const GameBoard: React.FC<{
     }
   };
 
-  const { remainingPosFlags, remainingNegFlags } = countRemainingFlags(board);
+  const { remainingPosFlags, remainingNegFlags, remainingFlagTiles } = countRemainingFlags(board);
 
   const getNumberColorClass = (num: number | null) => {
   ["text-game-number-1", "text-game-number-2", "text-game-number-3", "text-game-number-4", "text-game-number-5", "text-game-number-6", "text-game-number-7", "text-game-number-8", "text-game-number-0", "text-game-number--1", "text-game-number--2", "text-game-number--3", "text-game-number--4", "text-game-number--5", "text-game-number--6", "text-game-number--7", "text-game-number--8"];
@@ -379,7 +379,12 @@ export const GameBoard: React.FC<{
                 {config.posMineCount > 0 && 
                   <div className="flex flex-row items-center gap-2.5">
                     <Flag stroke="red" fill="red" size={config.negMineCount > 0 ? 15 : 20} />
-                    <span className={`font-bold ${config.negMineCount > 0 ? "text-sm" : "text-xl"}`}>{remainingPosFlags}</span>
+                    <span className={`font-bold ${config.negMineCount > 0 ? "text-sm" : "text-xl"}`}>
+                      {remainingPosFlags}
+                      {config.maxMinesPerCell > 1 && (
+                        <span className="text-muted-foreground text-xs"> /{remainingFlagTiles}</span>
+                      )}
+                    </span>
                   </div>
                 }
                 {config.negMineCount > 0 && 

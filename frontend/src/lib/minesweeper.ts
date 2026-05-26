@@ -323,21 +323,26 @@ export const handleFlag = (board: Board, row: number, col: number, config: Board
   return updatedBoard;
 };
 
-export const countRemainingFlags = (board: Board): { remainingPosFlags: number; remainingNegFlags: number } => {
+export const countRemainingFlags = (board: Board): { remainingPosFlags: number; remainingNegFlags: number; remainingFlagTiles: number } => {
   let totalPosMines = 0;
   let totalNegMines = 0;
+  let totalMineTiles = 0;
   let placedPosFlags = 0;
   let placedNegFlags = 0;
+  let placedFlagTiles = 0;
 
   for (const row of board) {
     for (const cell of row) {
       if (cell.mineNum > 0) {
         totalPosMines += cell.mineNum;
+        totalMineTiles++;
       } else if (cell.mineNum < 0) {
         totalNegMines += Math.abs(cell.mineNum);
+        totalMineTiles++;
       }
 
       if (cell.state.type === "flagged") {
+        placedFlagTiles++;
         if (cell.state.flagNum > 0) {
           placedPosFlags += cell.state.flagNum;
         } else {
@@ -349,10 +354,12 @@ export const countRemainingFlags = (board: Board): { remainingPosFlags: number; 
 
   const remainingPosFlags = totalPosMines - placedPosFlags;
   const remainingNegFlags = totalNegMines - placedNegFlags;
+  const remainingFlagTiles = totalMineTiles - placedFlagTiles;
 
   return {
     remainingPosFlags: remainingPosFlags,
     remainingNegFlags: remainingNegFlags,
+    remainingFlagTiles: remainingFlagTiles,
   };
 };
 
