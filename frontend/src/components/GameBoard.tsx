@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Board, BoardConfig, Cell, TimeRecord } from "@/lib/types";
 import { createBoard, handleClick, handleChord, handleFlag, isWin, isLoss, countRemainingFlags, extractMinesFromBoard, iterateNeighbors } from "@/lib/minesweeper";
 import { formatTimeMs } from "@/lib/utils";
-import { Flag, Laugh, Meh, Shovel, Skull, Smile, Sun } from "lucide-react";
+import { Flag, Laugh, Meh, MoveUp, Shovel, Skull, Smile, Sun } from "lucide-react";
 import { Button } from "./ui/button";
 
 export const GameBoard: React.FC<{
@@ -421,6 +421,7 @@ export const GameBoard: React.FC<{
           >
             {board.map((row, rowIndex) =>
               row.map((cell, colIndex) => {
+                const compassNum = cell.state.type === "revealed" && typeof cell.state.num === "object" ? cell.state.num : null;
                 const getBgClass = () => {
                   if (cell.state.type === "revealed") {
                     if (isGameOver === "loss" && explodedCell && explodedCell.row === rowIndex && explodedCell.col === colIndex) {
@@ -479,10 +480,24 @@ export const GameBoard: React.FC<{
                               fill={cell.mineNum > 0 ? "black" : "white"}
                             />
                           ))}
-                        </div> : 
-                      <span className={`font-bold text-xl ${getNumberColorClass(cell.state.num)}`}>
-                        {cell.state.num}
-                      </span>
+                        </div> : (
+                        compassNum ? (
+                          <>
+                            {compassNum.angle === null ? (
+                              <div className="h-2 w-2 rounded-full bg-foreground" />
+                            ) : (
+                              <MoveUp
+                                className="h-[18px] w-[18px]"
+                                style={{ transform: `rotate(${compassNum.angle}rad)` }}
+                              />
+                            )}
+                          </>
+                        ) : (
+                          <span className={`font-bold text-xl ${getNumberColorClass(cell.state.num)}`}>
+                            {cell.state.num}
+                          </span>
+                        )
+                      )
                     )}
                     {cell.state.type === "flagged" && (
                       <div

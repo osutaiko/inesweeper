@@ -1,5 +1,7 @@
 import { Board, BoardConfig, Cell } from "./types";
 
+const VECTOR_EPSILON = 0.000001;
+
 const cloneBoard = (board: Board) => board.map(row => [...row]);
 
 const placeMines = (board: Board, config: BoardConfig) => {
@@ -143,7 +145,32 @@ export const iterateNeighbors = (
   }
 };
 
-export const getCellNumber = (board: Board, row: number, col: number, config: BoardConfig): number | null => {
+export const getCellNumber = (board: Board, row: number, col: number, config: BoardConfig): number | { type: "compass"; angle: number | null } | null => {
+  if (config.cellNumberDeviant === "compass") {
+    let x = 0;
+    let y = 0;
+    let mineCount = 0;
+
+    iterateNeighbors(board, row, col, config, (nx, ny, neighbor) => {
+      if (neighbor.mineNum) {
+        const angle = Math.atan2(ny - col, row - nx);
+        x += Math.cos(angle);
+        y += Math.sin(angle);
+        mineCount++;
+      }
+    });
+
+    if (mineCount === 0) {
+      return null;
+    }
+
+    if (Math.abs(x) < VECTOR_EPSILON && Math.abs(y) < VECTOR_EPSILON) {
+      return { type: "compass", angle: null };
+    }
+
+    return { type: "compass", angle: Math.atan2(y, x) };
+  }
+
   let cellNumber: number | null = null;
 
   iterateNeighbors(board, row, col, config, (nx, ny, neighbor) => {
@@ -242,6 +269,7 @@ export const handleChord = (board: Board, row: number, col: number, config: Boar
   const cell = updatedBoard[row][col];
 
   if (cell.state.type !== "revealed") return board;
+  if (typeof cell.state.num !== "number") return updatedBoard;
 
   const revealSurroundingHiddens = () => {
     iterateNeighbors(updatedBoard, row, col, config, (nx, ny, neighbor) => {

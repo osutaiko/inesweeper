@@ -1,7 +1,7 @@
 export type VariantName = 
   | "classic"
   | "multimines" | "omega" 
-  | "liar" | "amplified" | "contrast" | "crossed" | "knight"
+  | "liar" | "amplified" | "contrast" | "crossed" | "knight" | "compass"
   | "domino" | "scattered";
 export type VariantGroupName = "none" | "mine-types" | "number-scheme" | "mine-generation";
 export type DifficultyName = "beg" | "int" | "exp";
@@ -13,7 +13,7 @@ export type BoardConfig = {
   mineTileCount: number;
   posMineCount: number;
   negMineCount: number;
-  cellNumberDeviant: "lie" | "amplified" | "contrast" | "cross" | "knight" | null;
+  cellNumberDeviant: "lie" | "amplified" | "contrast" | "cross" | "knight" | "compass" | null;
   mineGenDeviant?: "domino" | "scattered" | null;
 };
 
@@ -25,7 +25,7 @@ export type BoardConfigLibrary = {
 
 export type Cell = {
   state: { type: "hidden"; } 
-       | { type: "revealed"; num: number | null; } 
+       | { type: "revealed"; num: number | { type: "compass"; angle: number | null } | null; } 
        | { type: "flagged"; flagNum: number; };
   mineNum: number;
 };

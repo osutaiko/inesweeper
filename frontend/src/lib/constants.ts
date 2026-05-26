@@ -52,6 +52,11 @@ export const boardConfigLibrary: BoardConfigLibrary = {
     "int": { width: 16, height: 16, mineTileCount: 45, posMineCount: 45, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "knight" },
     "exp": { width: 30, height: 16, mineTileCount: 99, posMineCount: 99, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "knight" },
   },
+  "compass": {
+    "beg": { width: 9, height: 9, mineTileCount: 10, posMineCount: 10, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "compass" },
+    "int": { width: 16, height: 16, mineTileCount: 50, posMineCount: 50, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "compass" },
+    "exp": { width: 30, height: 16, mineTileCount: 125, posMineCount: 125, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "compass" },
+  },
   "domino": {
     "beg": { width: 9, height: 9, mineTileCount: 14, posMineCount: 14, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: null, mineGenDeviant: "domino" },
     "int": { width: 16, height: 16, mineTileCount: 60, posMineCount: 60, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: null, mineGenDeviant: "domino" },
@@ -73,6 +78,7 @@ export const variantMap: Record<VariantName, string> = {
   contrast: "Contrast",
   crossed: "Crossed",
   knight: "Knight's Path",
+  compass: "Compass",
   domino: "Domino",
   scattered: "Scattered",
 };
@@ -100,6 +106,7 @@ export const variantGroups: VariantGroup[] = [
       { value: "contrast", label: variantMap.contrast },
       { value: "crossed", label: variantMap.crossed },
       { value: "knight", label: variantMap.knight },
+      { value: "compass", label: variantMap.compass },
     ],
   },
   {
