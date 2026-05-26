@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Board, BoardConfig, Cell, TimeRecord } from "@/lib/types";
 import { createBoard, handleClick, handleChord, handleFlag, isWin, isLoss, countRemainingFlags, extractMinesFromBoard, iterateNeighbors } from "@/lib/minesweeper";
 import { formatTimeMs } from "@/lib/utils";
-import { Flag, Laugh, Meh, MoveUp, Shovel, Skull, Smile, Sun } from "lucide-react";
+import { Dot, Flag, Laugh, Meh, MoveUp, Shovel, Skull, Smile, Sun } from "lucide-react";
 import { Button } from "./ui/button";
 
 export const GameBoard: React.FC<{
@@ -484,12 +484,9 @@ export const GameBoard: React.FC<{
                         compassNum ? (
                           <>
                             {compassNum.angle === null ? (
-                              <div className="h-2 w-2 rounded-full bg-foreground" />
+                              <Dot size={18} />
                             ) : (
-                              <MoveUp
-                                className="h-[18px] w-[18px]"
-                                style={{ transform: `rotate(${compassNum.angle}rad)` }}
-                              />
+                              <MoveUp size={18} style={{ transform: `rotate(${compassNum.angle}rad)` }} />
                             )}
                           </>
                         ) : (
