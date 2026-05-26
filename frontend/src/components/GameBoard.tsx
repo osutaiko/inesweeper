@@ -455,10 +455,16 @@ export const GameBoard: React.FC<{
                     onMouseLeave={() => setHoveredCell(null)}
                   >
                     {((config.cellNumberDeviant === "amplified" || config.cellNumberDeviant === "contrast") && (!(cell.state.type === "revealed" && cell.mineNum === 0)) && ((rowIndex + colIndex) % 2 === 1)) ?
-                      <div className="absolute w-full h-full rounded-[3px] border-2 border-game-redborder" /> : <></>
+                      <div className="pointer-events-none absolute inset-0">
+                        <div className="absolute left-0 top-0 h-[14px] w-[5px] rounded-br-md bg-game-redborder" />
+                        <div className="absolute left-0 top-0 h-[5px] w-[14px] rounded-br-md bg-game-redborder" />
+                      </div> : <></>
                     }
                     {((config.cellNumberDeviant === "contrast") && (!(cell.state.type === "revealed" && cell.mineNum === 0)) && ((rowIndex + colIndex) % 2 === 0)) ?
-                      <div className="absolute w-full h-full rounded-[3px] border-2 border-game-blueborder" /> : <></>
+                      <div className="pointer-events-none absolute inset-0">
+                        <div className="absolute right-0 top-0 h-[14px] w-[5px] rounded-bl-md bg-game-blueborder" />
+                        <div className="absolute right-0 top-0 h-[5px] w-[14px] rounded-bl-md bg-game-blueborder" />
+                      </div> : <></>
                     }
                     {cell.state.type === "revealed" && (
                       cell.mineNum ? 
