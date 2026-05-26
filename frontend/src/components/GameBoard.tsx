@@ -226,10 +226,6 @@ export const GameBoard: React.FC<{
 
     const touch = e.touches[0];
     setTouchStartPos({ x: touch.clientX, y: touch.clientY });
-
-    if (isFlagToggled) {
-      setBoard(handleFlag(board, row, col, config));
-    }
     return;
   };
 
@@ -245,16 +241,19 @@ export const GameBoard: React.FC<{
       return;
     }
 
+    if (isFlagToggled) {
+      setBoard(handleFlag(board, row, col, config));
+      return;
+    }
+
     if (board[row][col].state.type === "revealed") {
         setBoard(handleChord(board, row, col, config));
     }
 
-    if (!isFlagToggled) {
-      if (isFirstClick) {
-        handleBeforeFirstClick(row, col);
-      }
-      setBoard(handleClick(board, row, col, config));
+    if (isFirstClick) {
+      handleBeforeFirstClick(row, col);
     }
+    setBoard(handleClick(board, row, col, config));
     return;
   };
 
