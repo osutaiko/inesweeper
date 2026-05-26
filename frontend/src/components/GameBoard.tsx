@@ -241,13 +241,14 @@ export const GameBoard: React.FC<{
       return;
     }
 
-    if (isFlagToggled) {
-      setBoard(handleFlag(board, row, col, config));
+    if (board[row][col].state.type === "revealed") {
+      setBoard(handleChord(board, row, col, config));
       return;
     }
 
-    if (board[row][col].state.type === "revealed") {
-        setBoard(handleChord(board, row, col, config));
+    if (isFlagToggled) {
+      setBoard(handleFlag(board, row, col, config));
+      return;
     }
 
     if (isFirstClick) {
