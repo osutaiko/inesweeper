@@ -1,5 +1,7 @@
 import { Board, BoardConfig, Cell } from "./types";
 
+const cloneBoard = (board: Board) => board.map(row => [...row]);
+
 const placeMines = (board: Board, config: BoardConfig) => {
   let placedPosMines = 0;
   let placedNegMines = 0;
@@ -170,27 +172,27 @@ export const getCellNumber = (board: Board, row: number, col: number, config: Bo
   return cellNumber;
 };
 
-export const handleClick = (board: Board, row: number, col: number, config: BoardConfig, setBoard: (updatedBoard: Board) => void) => {
-  const updatedBoard = [...board.map(row => [...row])];
-  const cell = board[row][col];
-  if (cell.state.type !== "hidden") return;
+export const handleClick = (board: Board, row: number, col: number, config: BoardConfig): Board => {
+  let updatedBoard = cloneBoard(board);
+  const cell = updatedBoard[row][col];
+  if (cell.state.type !== "hidden") return board;
 
-  const cellNumber = getCellNumber(board, row, col, config);
+  const cellNumber = getCellNumber(updatedBoard, row, col, config);
   
   cell.state = { type: "revealed", num: cellNumber };
   if (cell.mineNum !== 0) {
-    return;
+    return updatedBoard;
   }
 
   if (cell.state.num === null || (cell.state.num === 0 && (config.cellNumberDeviant !== "lie"))) {
-    iterateNeighbors(board, row, col, config, (nx, ny, neighbor) => {
+    iterateNeighbors(updatedBoard, row, col, config, (nx, ny, neighbor) => {
       if (neighbor.mineNum === 0) {
-        handleClick(board, nx, ny, config, setBoard);
+        updatedBoard = handleClick(updatedBoard, nx, ny, config);
       }
     });
   }
 
-  setBoard(updatedBoard);
+  return updatedBoard;
 };
 
 export const getNeighborCounts = (board: Board, row: number, col: number, config: BoardConfig) => {
@@ -235,16 +237,16 @@ export const getNeighborCounts = (board: Board, row: number, col: number, config
   return { flags: surroundingFlags, hiddens: surroundingHiddens, redHiddens: surroundingRedHiddens, blueHiddens: surroundingBlueHiddens };
 };
 
-export const handleChord = (board: Board, row: number, col: number, config: BoardConfig, setBoard: (updatedBoard: Board) => void) => {
-  const updatedBoard = [...board.map(row => [...row])];
+export const handleChord = (board: Board, row: number, col: number, config: BoardConfig): Board => {
+  let updatedBoard = cloneBoard(board);
   const cell = updatedBoard[row][col];
 
-  if (cell.state.type !== "revealed") return;
+  if (cell.state.type !== "revealed") return board;
 
   const revealSurroundingHiddens = () => {
-    iterateNeighbors(board, row, col, config, (nx, ny, neighbor) => {
+    iterateNeighbors(updatedBoard, row, col, config, (nx, ny, neighbor) => {
       if (neighbor.state.type === "hidden") {
-        handleClick(board, nx, ny, config, setBoard);
+        updatedBoard = handleClick(updatedBoard, nx, ny, config);
       }
     });
   };
@@ -256,8 +258,7 @@ export const handleChord = (board: Board, row: number, col: number, config: Boar
     if (cell.state.num === neighborCounts.flags - 1 || (neighborCounts.hiddens === 1 && cell.state.num === neighborCounts.flags + 1)) {
       revealSurroundingHiddens();
     }
-    setBoard(updatedBoard);
-    return;
+    return updatedBoard;
   }
 
   // Chording rules for Omega
@@ -265,8 +266,7 @@ export const handleChord = (board: Board, row: number, col: number, config: Boar
     if (neighborCounts.hiddens === 1 && neighborCounts.flags === cell.state.num) {
       revealSurroundingHiddens();
     }
-    setBoard(updatedBoard);
-    return;
+    return updatedBoard;
   }
 
   // Chording rules for Contrast
@@ -276,22 +276,21 @@ export const handleChord = (board: Board, row: number, col: number, config: Boar
         revealSurroundingHiddens();
       }
     }
-    setBoard(updatedBoard);
-    return;
+    return updatedBoard;
   }
 
   // General chording rule
   if (neighborCounts.flags === cell.state.num) {
     revealSurroundingHiddens();
   }
-  setBoard(updatedBoard);
+  return updatedBoard;
 };
 
-export const handleFlag = (board: Board, row: number, col: number, config: BoardConfig, setBoard: (updatedBoard: Board) => void) => {
-  const updatedBoard = [...board.map(row => [...row])];
+export const handleFlag = (board: Board, row: number, col: number, config: BoardConfig): Board => {
+  const updatedBoard = cloneBoard(board);
   const cell = updatedBoard[row][col];
 
-  if (cell.state.type === "revealed") return;
+  if (cell.state.type === "revealed") return board;
 
   if (cell.state.type === "hidden") {
     if (config.posMineCount > 0) {
@@ -321,7 +320,7 @@ export const handleFlag = (board: Board, row: number, col: number, config: Board
     }
   }
 
-  setBoard(updatedBoard);
+  return updatedBoard;
 };
 
 export const countRemainingFlags = (board: Board): { remainingPosFlags: number; remainingNegFlags: number } => {

@@ -228,7 +228,7 @@ export const GameBoard: React.FC<{
     setTouchStartPos({ x: touch.clientX, y: touch.clientY });
 
     if (isFlagToggled) {
-      handleFlag(board, row, col, config, setBoard);
+      setBoard(handleFlag(board, row, col, config));
     }
     return;
   };
@@ -246,14 +246,14 @@ export const GameBoard: React.FC<{
     }
 
     if (board[row][col].state.type === "revealed") {
-        handleChord(board, row, col, config, setBoard);
+        setBoard(handleChord(board, row, col, config));
     }
 
     if (!isFlagToggled) {
       if (isFirstClick) {
         handleBeforeFirstClick(row, col);
       }
-      handleClick(board, row, col, config, setBoard);
+      setBoard(handleClick(board, row, col, config));
     }
     return;
   };
@@ -268,7 +268,7 @@ export const GameBoard: React.FC<{
     } else if (e.button === 2) {
       setIsRmbDown(true);
       if (!isLmbDown) {
-        handleFlag(board, row, col, config, setBoard);
+        setBoard(handleFlag(board, row, col, config));
       }
     }
   };
@@ -281,19 +281,19 @@ export const GameBoard: React.FC<{
     if (e.button === 0) {
       setIsLmbDown(false);
       if (isRmbDown) {
-        handleChord(board, row, col, config, setBoard);
+        setBoard(handleChord(board, row, col, config));
       } else {
         if (isFirstClick) {
           handleBeforeFirstClick(row, col);
         }
-        handleClick(board, row, col, config, setBoard);
+        setBoard(handleClick(board, row, col, config));
       }
     } else if (e.button === 1) {
-      handleChord(board, row, col, config, setBoard);
+      setBoard(handleChord(board, row, col, config));
     } else if (e.button === 2) {
       setIsRmbDown(false);
       if (isLmbDown) {
-        handleChord(board, row, col, config, setBoard);
+        setBoard(handleChord(board, row, col, config));
       }
     }
   };
