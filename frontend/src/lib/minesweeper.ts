@@ -378,12 +378,18 @@ export const handleClick = (board: Board, row: number, col: number, config: Boar
 
   const cellNumber = getCellNumber(updatedBoard, row, col, config);
   
+  // Always reveal cell
   cell.state = { type: "revealed", num: cellNumber };
+
+  // If clicked on a mine, return immediately to face doom
   if (cell.mineNum !== 0) {
     return updatedBoard;
   }
 
+  // If clicked on a safe file, check if num===null (opening)
+  // Also treat explicit zeros as an opening for most modes
   if (cell.state.num === null || (cell.state.num === 0 && (config.cellNumberDeviant !== "lie"))) {
+    // Recursively reveal all neighbors of null tiles
     iterateNeighbors(updatedBoard, row, col, config, (nx, ny, neighbor) => {
       if (neighbor.mineNum === 0) {
         updatedBoard = handleClick(updatedBoard, nx, ny, config);
@@ -394,7 +400,7 @@ export const handleClick = (board: Board, row: number, col: number, config: Boar
   return updatedBoard;
 };
 
-// Helper for chording
+// Get neighbor stats for a given cell - helper for chording logic
 export const getNeighborCounts = (board: Board, row: number, col: number, config: BoardConfig) => {
   let surroundingFlags = 0;
   let surroundingHiddens = 0;
@@ -403,19 +409,30 @@ export const getNeighborCounts = (board: Board, row: number, col: number, config
 
   iterateNeighbors(board, row, col, config, (nx, ny, neighbor) => {
     if (neighbor.state.type === "flagged") {
+      // Count considering cell modifications (amplified/contrast) at this step
+      // to make chording check as easy as possible
+
+      //#region getNeighborCounts::Amplified
       if (config.cellNumberDeviant === "amplified") {
         if ((nx + ny) % 2 === 1) {
           surroundingFlags += neighbor.state.flagNum * 2;
         } else {
           surroundingFlags += neighbor.state.flagNum;
         }
-      } else if (config.cellNumberDeviant === "contrast") {
+      }
+      //#endregion
+      
+      //#region getNeighborCounts::Contrast
+      else if (config.cellNumberDeviant === "contrast") {
         if ((nx + ny) % 2 === 1) {
           surroundingFlags += neighbor.state.flagNum;
         } else {
           surroundingFlags -= neighbor.state.flagNum;
         }
-      } else {
+      }
+      //#endregion
+      
+      else {
         surroundingFlags += neighbor.state.flagNum;
       }
     } else if (neighbor.state.type === "hidden") {
@@ -437,6 +454,7 @@ export const getNeighborCounts = (board: Board, row: number, col: number, config
   return { flags: surroundingFlags, hiddens: surroundingHiddens, redHiddens: surroundingRedHiddens, blueHiddens: surroundingBlueHiddens };
 };
 
+// Chord action
 export const handleChord = (board: Board, row: number, col: number, config: BoardConfig): Board => {
   let updatedBoard = cloneBoard(board);
   const cell = updatedBoard[row][col];
@@ -444,6 +462,7 @@ export const handleChord = (board: Board, row: number, col: number, config: Boar
   if (cell.state.type !== "revealed") return board;
   if (typeof cell.state.num !== "number") return updatedBoard;
 
+  // Recursively (in case of new opening) reveal neighboring hidden cells on chord
   const revealSurroundingHiddens = () => {
     iterateNeighbors(updatedBoard, row, col, config, (nx, ny, neighbor) => {
       if (neighbor.state.type === "hidden") {
@@ -454,23 +473,31 @@ export const handleChord = (board: Board, row: number, col: number, config: Boar
 
   const neighborCounts = getNeighborCounts(board, row, col, config);
 
-  // Chording rules for Liar
+  //#region getNeighborCounts::Liar
+  // - trivial: number one less than flags
+  // - trivial: only one hidden neighbor which is obviously not a mine
   if (config.cellNumberDeviant === "lie") { 
     if (cell.state.num === neighborCounts.flags - 1 || (neighborCounts.hiddens === 1 && cell.state.num === neighborCounts.flags + 1)) {
       revealSurroundingHiddens();
     }
     return updatedBoard;
   }
+  //#endregion
 
-  // Chording rules for Omega
+  //#region getNeighborCounts::Omega
+  // - only when trivial: only one hidden neighbor
+  // ...since you can't know for sure if the hidden pair of cells are empty or contain a +/- mine pair
   if (config.negMineCount > 0) {
     if (neighborCounts.hiddens === 1 && neighborCounts.flags === cell.state.num) {
       revealSurroundingHiddens();
     }
     return updatedBoard;
   }
+  //#endregion
 
-  // Chording rules for Contrast
+  //#region getNeighborCounts::Contrast
+  // - only when trivial: only one hidden neighbor
+  // ...since you can't know for sure if the hidden pair of cells are empty or contain a red/blue mine pair
   if (config.cellNumberDeviant === "contrast") { 
     if (neighborCounts.flags === cell.state.num) {
       if (neighborCounts.redHiddens === 0 || neighborCounts.blueHiddens === 0) {
@@ -479,19 +506,25 @@ export const handleChord = (board: Board, row: number, col: number, config: Boar
     }
     return updatedBoard;
   }
+  //#endregion
 
-  // General chording rule
+  // In general, chord when neighboring flags equal the displayed number
   if (neighborCounts.flags === cell.state.num) {
     revealSurroundingHiddens();
   }
   return updatedBoard;
 };
 
+// Flag action
 export const handleFlag = (board: Board, row: number, col: number, config: BoardConfig): Board => {
   const updatedBoard = cloneBoard(board);
   const cell = updatedBoard[row][col];
 
   if (cell.state.type === "revealed") return board;
+
+  // Most variants: hid -> flag -> hid -> ...
+  // * Omega: hid -> + -> - -> hid -> ...
+  // * Multimines: hid -> 1 -> 2 -> 3 -> hid -> ...
 
   if (cell.state.type === "hidden") {
     if (config.posMineCount > 0) {
@@ -524,6 +557,7 @@ export const handleFlag = (board: Board, row: number, col: number, config: Board
   return updatedBoard;
 };
 
+// Get remaining unflagged tile (mine) stats for display in GameBoard header
 export const countRemainingFlags = (board: Board): { remainingPosFlags: number; remainingNegFlags: number; remainingFlagTiles: number } => {
   let totalPosMines = 0;
   let totalNegMines = 0;
@@ -564,6 +598,7 @@ export const countRemainingFlags = (board: Board): { remainingPosFlags: number; 
   };
 };
 
+// Get list of mine coordinates in board
 export const extractMinesFromBoard = (board: Board): number[][] => {
   return board.map(row => row.map(cell => cell.mineNum));
 };
