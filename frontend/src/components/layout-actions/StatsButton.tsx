@@ -29,7 +29,7 @@ const StatsButton = ({ isDesktop, displayedRecords, isAuthed }: StatsButtonProps
         <ChartColumnIncreasing />
       </Button>
     </DialogTrigger>
-    <DialogContent className="gap-6">
+    <DialogContent className="gap-6 px-0 min-[400px]:px-6">
       <DialogHeader>
         <DialogTitle>My Records</DialogTitle>
         <DialogDescription hidden={isAuthed}>

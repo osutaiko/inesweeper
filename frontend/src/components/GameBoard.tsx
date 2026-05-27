@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Board, BoardConfig, Cell, TimeRecord } from "@/lib/types";
-import { COMPASS_ANGLES, createBoard, handleClick, handleChord, handleFlag, isWin, isLoss, countRemainingFlags, extractMinesFromBoard, iterateNeighbors } from "@/lib/minesweeper";
+import { COMPASS_ANGLES, createBoard, handleClick, handleChord, handleFlag, handleBeforeFirstClick as updateBoardBeforeFirstClick, isWin, isLoss, countRemainingFlags, extractMinesFromBoard, iterateNeighbors } from "@/lib/minesweeper";
 import { formatTimeMs } from "@/lib/utils";
 import { Dot, Flag, Laugh, Meh, MoveUp, Shovel, Skull, Smile, Sun } from "lucide-react";
 import { Button } from "./ui/button";
@@ -45,77 +45,12 @@ export const GameBoard: React.FC<{
     setIncorrectFlagCells(null);
   };
 
-  const cardinalDirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
-  const allDirs = [...cardinalDirs, [1, 1], [1, -1], [-1, 1], [-1, -1]];
-
   const handleBeforeFirstClick = (row: number, col: number) => {
     setIsFirstClick(false);
     setStartTime(Date.now());
     
     if (board[row][col].mineNum !== 0) {
-      let newBoard = [...board];
-
-      if (config.mineGenDeviant === "domino") {
-        const hasAdjacentMine = (i: number, j: number) =>
-          allDirs.some(([dx, dy]) => newBoard[i + dx]?.[j + dy]?.mineNum);
-        const partner = cardinalDirs
-          .map(([dx, dy]) => [row + dx, col + dy] as [number, number])
-          .find(([i, j]) => i >= 0 && i < config.height && j >= 0 && j < config.width && newBoard[i][j].mineNum);
-
-        if (partner) {
-          const [pi, pj] = partner;
-          const mines = [newBoard[row][col].mineNum, newBoard[pi][pj].mineNum];
-          newBoard[row][col].mineNum = 0;
-          newBoard[pi][pj].mineNum = 0;
-
-          const edges = newBoard.flatMap((r, i) =>
-            r.flatMap((_, j) => [
-              ...(j + 1 < config.width ? [[i, j, i, j + 1]] : []),
-              ...(i + 1 < config.height ? [[i, j, i + 1, j]] : []),
-            ])
-          ).sort(() => Math.random() - 0.5) as [number, number, number, number][];
-
-          const spot = edges.find(([i1, j1, i2, j2]) =>
-            !(i1 === row && j1 === col) &&
-            !(i2 === row && j2 === col) &&
-            !hasAdjacentMine(i1, j1) &&
-            !hasAdjacentMine(i2, j2)
-          );
-
-          if (spot) {
-            const [i1, j1, i2, j2] = spot;
-            newBoard[i1][j1].mineNum = mines[0];
-            newBoard[i2][j2].mineNum = mines[1];
-          } else {
-            newBoard[row][col].mineNum = mines[0];
-            newBoard[pi][pj].mineNum = mines[1];
-          }
-        }
-      } else {
-        const mine = newBoard[row][col].mineNum;
-        newBoard[row][col].mineNum = 0;
-
-        const emptySquares = [];
-        for (let i = 0; i < config.height; i++) {
-          for (let j = 0; j < config.width; j++) {
-            if (!newBoard[i][j].mineNum && (i !== row || j !== col) 
-              && !(config.mineGenDeviant === "scattered" && cardinalDirs.some(([di, dj]) => newBoard[i + di]?.[j + dj]?.mineNum))
-            ) {
-              emptySquares.push({ i, j });
-            }
-          }
-        }
-    
-        const randomSquare = emptySquares[Math.floor(Math.random() * emptySquares.length)];
-    
-        if (randomSquare) {
-          newBoard[randomSquare.i][randomSquare.j].mineNum = mine;
-        } else {
-          newBoard[row][col].mineNum = mine;
-        }
-      }
-  
-      setBoard(newBoard);
+      setBoard(updateBoardBeforeFirstClick(board, row, col, config));
     }
   };
 

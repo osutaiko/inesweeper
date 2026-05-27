@@ -3,6 +3,11 @@ import { ThemeProvider } from "./theme-provider";
 import { DifficultyName, TimeRecord, VariantName } from "@/lib/types";
 import { boardConfigLibrary, difficultyMap, variantGroups } from "@/lib/constants";
 import { useMediaQuery } from "@/lib/utils";
+import {
+  loadCurrentAuthUser,
+  subscribeToAuthUser,
+  type AuthUser,
+} from "@/lib/auth";
 
 import GameBoard from "./GameBoard";
 import {
@@ -23,26 +28,6 @@ import AuthButton from "./layout-actions/AuthButton";
 import InfoButton from "./layout-actions/InfoButton";
 import SettingsButton from "./layout-actions/SettingsButton";
 import StatsButton from "./layout-actions/StatsButton";
-import { supabase } from "@/lib/supabase";
-import type { User } from "@supabase/supabase-js";
-
-type AuthUser = {
-  id: string;
-  email: string | null;
-  name: string;
-  avatarUrl: string | null;
-};
-
-const toAuthUser = (user: User): AuthUser => ({
-  id: user.id,
-  email: user.email,
-  name:
-    user.user_metadata?.full_name ??
-    user.user_metadata?.name ??
-    user.email ??
-    "User",
-  avatarUrl: user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null,
-});
 
 const Layout = () => {
   const isDesktop = useMediaQuery("(min-width: 640px)");
@@ -75,22 +60,18 @@ const Layout = () => {
     let isActive = true;
 
     const loadAuthUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const user = await loadCurrentAuthUser();
 
       if (!isActive) {
         return;
       }
 
-      setAuthUser(user ? toAuthUser(user) : null);
+      setAuthUser(user);
       setAuthLoaded(true);
     };
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setAuthUser(session?.user ? toAuthUser(session.user) : null);
+    const subscription = subscribeToAuthUser((user) => {
+      setAuthUser(user);
       setAuthLoaded(true);
     });
 
