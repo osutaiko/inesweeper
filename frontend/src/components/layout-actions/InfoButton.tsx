@@ -76,6 +76,12 @@ const InfoButton = () => (
                 <h4 className="font-medium">Knight&apos;s Path</h4>
                 <p>The number on a cell indicates how many mines are two cells away in one direction and one cell away in another (i.e., knight&apos;s path in chess).</p>
               </div>
+              <div className="flex flex-col gap-1">
+                <h4 className="font-medium">Compass</h4>
+                <p>Numbers are replaced by arrows pointing toward the average direction of mines in the neighboring eight cells.</p>
+                <small>Note: A dot means nearby mines cancel out.</small>
+                <small>Arrows are color coded. White arrows for main 8 directions (N, NE, E, SE, S, SW, W, NW), blue arrows for 22.5° half-steps, and red for in-between angles.</small>
+              </div>
             </div>
           </TabsContent>
           <TabsContent value="mine-calculation" className="mt-4">
