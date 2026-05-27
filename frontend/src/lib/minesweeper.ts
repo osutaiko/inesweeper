@@ -1,15 +1,16 @@
 import { Board, BoardConfig, Cell } from "./types";
 
-// Although the mathematically accurate angles include ~9.7356° just display it as 360/32 = 11.25°
+// Snapped angles to display for compass mode
 export const COMPASS_ANGLES = Array.from({ length: 32 }, (_, index) => {
+  // Although the mathematically accurate angles include ~9.7356°
+  // just display it as 360/32 = 11.25° for clarity
   return index * Math.PI / 16;
 });
 
-const cloneBoard = (board: Board) => board.map(row => [...row]);
+// Shallow copy board helper
+const cloneBoard = (board: Board) => board.map(row => [...row]);  
 
-const getCompassAngleIndex = (x: number, y: number) =>
-  Math.round(((Math.atan2(y, x) + Math.PI * 2) % (Math.PI * 2)) / (Math.PI / 16)) % 32;
-
+// Randomly generate minefield from empty board
 const placeMines = (board: Board, config: BoardConfig) => {
   let placedPosMines = 0;
   let placedNegMines = 0;
@@ -17,11 +18,14 @@ const placeMines = (board: Board, config: BoardConfig) => {
   const maxMinesPerCell = config.maxMinesPerCell;
 
   const tilesWithMines: number[][] = [];
+
+  //#region placeMines::Domino
   if (config.mineGenDeviant === "domino") {
     const blocked: number[][] = [];
     const has = (coords: number[][], x: number, y: number) =>
       coords.some(([cx, cy]) => cx === x && cy === y);
 
+    // Block cells around dominoes
     const blockAround = (x: number, y: number) => {
       for (let dx = -1; dx <= 1; dx++) {
         for (let dy = -1; dy <= 1; dy++) {
@@ -30,6 +34,8 @@ const placeMines = (board: Board, config: BoardConfig) => {
       }
     };
 
+    // Keep list of all "edges" in the whole board and shuffle
+    // Iterate through list and place domino if not blocked
     const edges = board
       .flatMap((row, y) =>
         row.flatMap((_, x) => [
@@ -43,21 +49,29 @@ const placeMines = (board: Board, config: BoardConfig) => {
       if (tilesWithMines.length === totalTilesWithMines) break;
       if (has(blocked, x1, y1) || has(blocked, x2, y2)) continue;
 
+      // Block adjacent "edges" from the one just placed
       blockAround(x1, y1);
       blockAround(x2, y2);
 
       tilesWithMines.push([x1, y1], [x2, y2]);
     }
-  } else if (config.mineGenDeviant === "scattered") {
+  }
+  //#endregion
+
+  //#region placeMines::Scattered
+  else if (config.mineGenDeviant === "scattered") {
     const has = (x: number, y: number) =>
       tilesWithMines.some(([tx, ty]) => tx === x && ty === y);
 
+    // Can place mine only if orthogonal neighbors dont have a mine
     const canPlace = (x: number, y: number) =>
       !has(x, y) &&
       ![[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) =>
         has(x + dx, y + dy)
       );
-
+    
+    // Shuffle all cells in board
+    // Iterate through list and place mines if canPlace
     const cells = board
       .flatMap((row, y) => row.map((_, x) => [x, y] as [number, number]))
       .sort(() => Math.random() - 0.5);
@@ -66,11 +80,11 @@ const placeMines = (board: Board, config: BoardConfig) => {
       if (tilesWithMines.length === totalTilesWithMines) break;
       if (canPlace(x, y)) tilesWithMines.push([x, y]);
     }
+  }
+  //#endregion
 
-    if (tilesWithMines.length < totalTilesWithMines) {
-      throw new Error("Unable to generate a scattered mine layout.");
-    }
-  } else {
+  // Variants without mineGenDeviant
+  else {
     while (tilesWithMines.length < totalTilesWithMines) {
       const x = Math.floor(Math.random() * config.width);
       const y = Math.floor(Math.random() * config.height);
@@ -82,10 +96,16 @@ const placeMines = (board: Board, config: BoardConfig) => {
   }
 
   for (const [x, y] of tilesWithMines) {
+    //#region placeMines::Multimines
+    // Randomly assign 1 ~ maxMinesPerCell mines per tileWIthMine
     const totalMines = Math.floor(Math.random() * maxMinesPerCell) + 1;
+    //#endregion
 
     const posMines = Math.min(totalMines, config.posMineCount - placedPosMines);
+    
+    //#region placeMines::Omega
     const negMines = Math.min(totalMines - posMines, config.negMineCount - placedNegMines);
+    //#endregion
 
     placedPosMines += posMines;
     placedNegMines += negMines;
@@ -94,6 +114,7 @@ const placeMines = (board: Board, config: BoardConfig) => {
   }
 };
 
+// Prepare board ready for play
 export const createBoard = (config: BoardConfig): Cell[][] | undefined => {
   const board: Board = Array.from({ length: config.height }, () =>
     Array.from({ length: config.width }, () => ({
@@ -106,6 +127,8 @@ export const createBoard = (config: BoardConfig): Cell[][] | undefined => {
   return board;
 };
 
+// Win condition
+// check: all non-mine cells should be revealed
 export const isWin = (board: Board): boolean => {
   return board.every(row =>
     row.every(cell =>
@@ -115,6 +138,8 @@ export const isWin = (board: Board): boolean => {
   );
 };
 
+// Loss condition
+// check: a mine cell is revealed
 export const isLoss = (board: Board): { row: number; col: number } | null => {
   for (let row = 0; row < board.length; row++) {
     for (let col = 0; col < board[row].length; col++) {
@@ -127,16 +152,23 @@ export const isLoss = (board: Board): { row: number; col: number } | null => {
   return null;
 };
 
+// Called after user inputs first reveal action (LMB/touch)
+// Only reposition mine if first click is a mine (for now)
 export const handleBeforeFirstClick = (board: Board, row: number, col: number, config: BoardConfig): Board => {
   const cardinalDirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
   const allDirs = [...cardinalDirs, [1, 1], [1, -1], [-1, 1], [-1, -1]];
 
+  // Only if first click is a mine
   if (board[row][col].mineNum !== 0) {
     let newBoard = [...board];
-
+    
+    //#region handleBeforeFirstClick::Domino
     if (config.mineGenDeviant === "domino") {
       const hasAdjacentMine = (i: number, j: number) =>
         allDirs.some(([dx, dy]) => newBoard[i + dx]?.[j + dy]?.mineNum);
+
+      // Find partner of the mine hit
+      // Luckily this is deterministic as we don't allow dominoes to touch!
       const partner = cardinalDirs
         .map(([dx, dy]) => [row + dx, col + dy] as [number, number])
         .find(([i, j]) => i >= 0 && i < config.height && j >= 0 && j < config.width && newBoard[i][j].mineNum);
@@ -144,9 +176,14 @@ export const handleBeforeFirstClick = (board: Board, row: number, col: number, c
       if (partner) {
         const [pi, pj] = partner;
         const mines = [newBoard[row][col].mineNum, newBoard[pi][pj].mineNum];
+
+        // Remove both mines of domino
+        // We remove before relocation to allow new domino placement near click
+        // ... (otherwise mine density would statistically be biased to be lower around where user first-clicked)
         newBoard[row][col].mineNum = 0;
         newBoard[pi][pj].mineNum = 0;
 
+        // Same logic as placeMines::Domino
         const edges = newBoard.flatMap((r, i) =>
           r.flatMap((_, j) => [
             ...(j + 1 < config.width ? [[i, j, i, j + 1]] : []),
@@ -165,20 +202,35 @@ export const handleBeforeFirstClick = (board: Board, row: number, col: number, c
           const [i1, j1, i2, j2] = spot;
           newBoard[i1][j1].mineNum = mines[0];
           newBoard[i2][j2].mineNum = mines[1];
-        } else {
+        } 
+
+        // In higher density boards I found that it sometimes fails to find ANY vaild spot to relocate
+        else {
+          // Accept defeat
           newBoard[row][col].mineNum = mines[0];
           newBoard[pi][pj].mineNum = mines[1];
         }
       }
-    } else {
+    }
+    //#endregion
+
+    // Variants without mineGenDeviant
+    else {
       const mine = newBoard[row][col].mineNum;
       newBoard[row][col].mineNum = 0;
 
+      // Keep list of empty squares and pick one to relocate to
       const emptySquares = [];
+
       for (let i = 0; i < config.height; i++) {
         for (let j = 0; j < config.width; j++) {
-          if (!newBoard[i][j].mineNum && (i !== row || j !== col) 
-            && !(config.mineGenDeviant === "scattered" && cardinalDirs.some(([di, dj]) => newBoard[i + di]?.[j + dj]?.mineNum))
+          if (
+            !newBoard[i][j].mineNum && (i !== row || j !== col) 
+            &&
+            //#region handleBeforeFirstClick::Scattered
+            // Shouldn't place next to existing mine
+            !(config.mineGenDeviant === "scattered" && cardinalDirs.some(([di, dj]) => newBoard[i + di]?.[j + dj]?.mineNum))
+            //#endregion
           ) {
             emptySquares.push({ i, j });
           }
@@ -187,6 +239,7 @@ export const handleBeforeFirstClick = (board: Board, row: number, col: number, c
   
       const randomSquare = emptySquares[Math.floor(Math.random() * emptySquares.length)];
   
+      // Must preserve mineNum of original mine
       if (randomSquare) {
         newBoard[randomSquare.i][randomSquare.j].mineNum = mine;
       } else {
@@ -200,6 +253,8 @@ export const handleBeforeFirstClick = (board: Board, row: number, col: number, c
   return board;
 };
 
+// Helper for iterating neighbors around a cell
+// Usage: iterateNeighbors(board, row, col, config, (nx, ny, neighbor) => { stuff with (side) effects })
 export const iterateNeighbors = (
   board: Board,
   row: number,
@@ -224,7 +279,11 @@ export const iterateNeighbors = (
   }
 };
 
+// Calculate cell number by looking up neighbor mines
 export const getCellNumber = (board: Board, row: number, col: number, config: BoardConfig): number | { type: "compass"; angleIndex: number | null } | null => {
+  //#region getCellNumber::Compass
+  // Vector sum of neighboring mines
+  // Treat all neighbors with equal weight - normalize with *SQRT1_2 for diagonals
   if (config.cellNumberDeviant === "compass") {
     let x = 0;
     let y = 0;
@@ -241,16 +300,31 @@ export const getCellNumber = (board: Board, row: number, col: number, config: Bo
       }
     });
 
+    // Return blank
     if (mineCount === 0) {
       return null;
     }
 
+    // If vector sum is (0, 0) return dot (index=null)
     if (x === 0 && y === 0) {
       return { type: "compass", angleIndex: null };
     }
+    
+    // Compass angle bins as indices, from vector sum
+    // 0 = 0°, 1 = 9.74°, ..., 4 = 45°, ..., 8 = 90°, ..., 31 = 348.75°
 
-    return { type: "compass", angleIndex: getCompassAngleIndex(x, y) };
+    // Vector to angle
+    const angle = Math.atan2(y, x);
+
+    // Convert negative inclusive angles to [0, 2pi)
+    const normalizedAngle = (angle + Math.PI * 2) % (Math.PI * 2);
+
+    // Angle to bin
+    const angleIndex = Math.round(normalizedAngle / (Math.PI / 16)) % 32;
+
+    return { type: "compass", angleIndex };
   }
+  //#endregion
 
   let cellNumber: number | null = null;
 
@@ -259,27 +333,44 @@ export const getCellNumber = (board: Board, row: number, col: number, config: Bo
       if (cellNumber === null) {
         cellNumber = 0;
       }
+      
+      //#region getCellNumber::Amplified
       if (config.cellNumberDeviant === "amplified") {
+        // Double count red cells
         cellNumber += (nx + ny) % 2 === 1 ? neighbor.mineNum * 2 : neighbor.mineNum;
-      } else if (config.cellNumberDeviant === "contrast") {
+      }
+      //#endregion
+      
+      //#region getCellNumber::Contrast
+      else if (config.cellNumberDeviant === "contrast") {
+        // Decrement blue cells
         cellNumber += (nx + ny) % 2 === 1 ? neighbor.mineNum : -neighbor.mineNum;
-      } else {
+      }
+      //#endregion
+      
+      else {
         cellNumber += neighbor.mineNum;
       }
     }
   });
 
+  //#region getCellNumber::Lie
   if (config.cellNumberDeviant === "lie" && cellNumber !== null) {
+    // Randomly +/-1 true number
     cellNumber = Math.random() < 0.5 ? cellNumber - 1 : cellNumber + 1;
   }
+  //#endregion
 
+  //#region getCellNumber::Contrast
   if (config.cellNumberDeviant === "contrast" && cellNumber !== null) {
     cellNumber = Math.abs(cellNumber);
   }
+  //#endregion
 
   return cellNumber;
 };
 
+// Click action for reveal
 export const handleClick = (board: Board, row: number, col: number, config: BoardConfig): Board => {
   let updatedBoard = cloneBoard(board);
   const cell = updatedBoard[row][col];
@@ -303,6 +394,7 @@ export const handleClick = (board: Board, row: number, col: number, config: Boar
   return updatedBoard;
 };
 
+// Helper for chording
 export const getNeighborCounts = (board: Board, row: number, col: number, config: BoardConfig) => {
   let surroundingFlags = 0;
   let surroundingHiddens = 0;
