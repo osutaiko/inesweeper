@@ -25,7 +25,7 @@ export type BoardConfigLibrary = {
 
 export type Cell = {
   state: { type: "hidden"; } 
-       | { type: "revealed"; num: number | { type: "compass"; angle: number | null } | null; } 
+       | { type: "revealed"; num: number | { type: "compass"; angleIndex: number | null } | null; } 
        | { type: "flagged"; flagNum: number; };
   mineNum: number;
 };

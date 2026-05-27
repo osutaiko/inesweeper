@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Board, BoardConfig, Cell, TimeRecord } from "@/lib/types";
-import { createBoard, handleClick, handleChord, handleFlag, isWin, isLoss, countRemainingFlags, extractMinesFromBoard, iterateNeighbors } from "@/lib/minesweeper";
+import { COMPASS_ANGLES, createBoard, handleClick, handleChord, handleFlag, isWin, isLoss, countRemainingFlags, extractMinesFromBoard, iterateNeighbors } from "@/lib/minesweeper";
 import { formatTimeMs } from "@/lib/utils";
 import { Dot, Flag, Laugh, Meh, MoveUp, Shovel, Skull, Smile, Sun } from "lucide-react";
 import { Button } from "./ui/button";
@@ -317,6 +317,18 @@ export const GameBoard: React.FC<{
   }
 };
 
+  const getCompassColorClass = (angleIndex: number) => {
+    if (angleIndex % 4 === 0) {
+      return "text-foreground";
+    }
+
+    if (angleIndex % 2 === 0) {
+      return "text-game-number-1";
+    }
+
+    return "text-game-number-3";
+  };
+
   const getFlagButtonPositionClass = () => {
     switch (flagButtonPosition) {
       case "bottom-left": return "bottom-0 left-0 rounded-tl-none rounded-tr-md rounded-bl-none rounded-br-none";
@@ -483,10 +495,10 @@ export const GameBoard: React.FC<{
                         </div> : (
                         compassNum ? (
                           <>
-                            {compassNum.angle === null ? (
-                              <Dot size={18} />
+                            {compassNum.angleIndex === null ? (
+                              <Dot size={18} className="text-foreground" />
                             ) : (
-                              <MoveUp size={18} style={{ transform: `rotate(${compassNum.angle}rad)` }} />
+                              <MoveUp className={getCompassColorClass(compassNum.angleIndex)} size={18} style={{ transform: `rotate(${COMPASS_ANGLES[compassNum.angleIndex]}rad)` }} />
                             )}
                           </>
                         ) : (

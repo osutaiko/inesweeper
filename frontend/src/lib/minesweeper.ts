@@ -1,8 +1,16 @@
 import { Board, BoardConfig, Cell } from "./types";
 
-const VECTOR_EPSILON = 0.000001;
+const COMPASS_ANGLE_OFFSETS = [0, Math.atan(3 - 2 * Math.SQRT2), Math.PI / 8, Math.atan(Math.SQRT1_2)];
+
+export const COMPASS_ANGLES = Array.from({ length: 32 }, (_, index) => {
+  const sector = Math.floor(index / 4);
+  return sector * Math.PI / 4 + COMPASS_ANGLE_OFFSETS[index % 4];
+});
 
 const cloneBoard = (board: Board) => board.map(row => [...row]);
+
+const getCompassAngleIndex = (x: number, y: number) =>
+  Math.round(((Math.atan2(y, x) + Math.PI * 2) % (Math.PI * 2)) / (Math.PI / 16)) % 32;
 
 const placeMines = (board: Board, config: BoardConfig) => {
   let placedPosMines = 0;
@@ -145,7 +153,7 @@ export const iterateNeighbors = (
   }
 };
 
-export const getCellNumber = (board: Board, row: number, col: number, config: BoardConfig): number | { type: "compass"; angle: number | null } | null => {
+export const getCellNumber = (board: Board, row: number, col: number, config: BoardConfig): number | { type: "compass"; angleIndex: number | null } | null => {
   if (config.cellNumberDeviant === "compass") {
     let x = 0;
     let y = 0;
@@ -153,9 +161,11 @@ export const getCellNumber = (board: Board, row: number, col: number, config: Bo
 
     iterateNeighbors(board, row, col, config, (nx, ny, neighbor) => {
       if (neighbor.mineNum) {
-        const angle = Math.atan2(ny - col, row - nx);
-        x += Math.cos(angle);
-        y += Math.sin(angle);
+        const dx = nx - row;
+        const dy = ny - col;
+        const weight = dx === 0 || dy === 0 ? 1 : Math.SQRT1_2;
+        x -= dx * weight;
+        y += dy * weight;
         mineCount++;
       }
     });
@@ -164,11 +174,11 @@ export const getCellNumber = (board: Board, row: number, col: number, config: Bo
       return null;
     }
 
-    if (Math.abs(x) < VECTOR_EPSILON && Math.abs(y) < VECTOR_EPSILON) {
-      return { type: "compass", angle: null };
+    if (x === 0 && y === 0) {
+      return { type: "compass", angleIndex: null };
     }
 
-    return { type: "compass", angle: Math.atan2(y, x) };
+    return { type: "compass", angleIndex: getCompassAngleIndex(x, y) };
   }
 
   let cellNumber: number | null = null;
