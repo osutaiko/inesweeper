@@ -196,8 +196,6 @@ const Layout = () => {
   };
 
   const displayedRecords = authLoaded && authUser ? records : guestBestRecords;
-  const touchSafeInset = flagButtonSize + 12;
-  type FlagButtonPosition = "bottom-left" | "bottom-right" | "center-left" | "center-right";
 
   const basePaddingStyle = {
     paddingLeft: "24px",
@@ -206,25 +204,12 @@ const Layout = () => {
     paddingBottom: "16px",
   };
 
-  const positionPaddingMap: Record<FlagButtonPosition, Partial<typeof basePaddingStyle>> = {
-    "bottom-left": {
-      paddingLeft: `${touchSafeInset}px`,
-      paddingBottom: `${touchSafeInset}px`,
-    },
-    "bottom-right": {
-      paddingRight: `${touchSafeInset}px`,
-      paddingBottom: `${touchSafeInset}px`,
-    },
-    "center-left": {
-      paddingLeft: `${touchSafeInset}px`,
-    },
-    "center-right": {
-      paddingRight: `${touchSafeInset}px`,
-    },
-  };
-
   const mainPaddingStyle = isTouchscreen
-    ? { ...basePaddingStyle, ...positionPaddingMap[flagButtonPosition as FlagButtonPosition] }
+    ? {
+        ...basePaddingStyle,
+        paddingLeft: `${flagButtonSize + 8}px`,
+        paddingRight: `${flagButtonSize + 8}px`,
+      }
     : basePaddingStyle;
 
   return (
