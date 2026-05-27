@@ -1,10 +1,8 @@
 import { Board, BoardConfig, Cell } from "./types";
 
-const COMPASS_ANGLE_OFFSETS = [0, Math.atan(3 - 2 * Math.SQRT2), Math.PI / 8, Math.atan(Math.SQRT1_2)];
-
+// Although the mathematically accurate angles include ~9.7356° just display it as 360/32 = 11.25°
 export const COMPASS_ANGLES = Array.from({ length: 32 }, (_, index) => {
-  const sector = Math.floor(index / 4);
-  return sector * Math.PI / 4 + COMPASS_ANGLE_OFFSETS[index % 4];
+  return index * Math.PI / 16;
 });
 
 const cloneBoard = (board: Board) => board.map(row => [...row]);
