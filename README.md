@@ -24,6 +24,7 @@ A Collection of Interesting Minesweeper Variants.
 | **Contrast** | Numbers represent the difference in the number of mines between neighboring red and blue cells | [14MV[N]](https://store.steampowered.com/app/1865060/14_Minesweeper_Variants/) |
 | **Crossed** | The numbers indicate the number of mines in a cross-shaped region within distance 2 | [14MV[X]](https://store.steampowered.com/app/1865060/14_Minesweeper_Variants/) |
 | **Knight's Path** | The numbers indicate the number of mines in a chess knight's path | [Advent Calendar day 4/8](https://heptaveegesimal.com/2018/advent-calendar/) |
+| **Compass** | Numbers are replaced by arrows pointing toward the average direction of mines in neighboring cells | Original |
 
 ### Different mine generation
 | Variant | Description | (Main) Inspirations |
