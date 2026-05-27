@@ -496,7 +496,7 @@ export const handleChord = (board: Board, row: number, col: number, config: Boar
   //#endregion
 
   //#region getNeighborCounts::Contrast
-  // - only when trivial: only one hidden neighbor
+  // - only when trivial: no cells left hidden for either red or blue group
   // ...since you can't know for sure if the hidden pair of cells are empty or contain a red/blue mine pair
   if (config.cellNumberDeviant === "contrast") { 
     if (neighborCounts.flags === cell.state.num) {
