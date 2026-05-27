@@ -329,6 +329,14 @@ export const GameBoard: React.FC<{
     return "text-game-number-3";
   };
 
+  const getNearestCompassRayAngle = (angleIndex: number) => {
+    return Math.round(angleIndex / 4) * Math.PI / 4;
+  };
+
+  const getNearestCompassRayLengthClass = (angleIndex: number) => {
+    return Math.round(angleIndex / 4) % 2 === 0 ? "h-[12px]" : "h-[17px]";
+  };
+
   const getFlagButtonPositionClass = () => {
     switch (flagButtonPosition) {
       case "bottom-left": return "bottom-0 left-0 rounded-tl-none rounded-tr-md rounded-bl-none rounded-br-none";
@@ -498,7 +506,18 @@ export const GameBoard: React.FC<{
                             {compassNum.angleIndex === null ? (
                               <Dot size={18} className="text-foreground" />
                             ) : (
-                              <MoveUp className={getCompassColorClass(compassNum.angleIndex)} size={18} style={{ transform: `rotate(${COMPASS_ANGLES[compassNum.angleIndex]}rad)` }} />
+                              <>
+                                {compassNum.angleIndex % 2 === 1 && (
+                                  <div
+                                    className={`pointer-events-none absolute left-1/2 top-1/2 w-px bg-background rounded-full ${getNearestCompassRayLengthClass(compassNum.angleIndex)}`}
+                                    style={{
+                                      transform: `translate(-50%, -100%) rotate(${getNearestCompassRayAngle(compassNum.angleIndex)}rad)`,
+                                      transformOrigin: "bottom",
+                                    }}
+                                  />
+                                )}
+                                <MoveUp className={getCompassColorClass(compassNum.angleIndex)} size={18} style={{ transform: `rotate(${COMPASS_ANGLES[compassNum.angleIndex]}rad)` }} />
+                              </>
                             )}
                           </>
                         ) : (
