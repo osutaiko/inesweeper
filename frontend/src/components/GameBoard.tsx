@@ -398,7 +398,7 @@ export const GameBoard: React.FC<{
                 return (
                   <div
                     key={`${rowIndex}-${colIndex}`}
-                    className={`relative flex justify-center items-center border border-game-border ${getBgClass()} rounded-sm overflow-hidden`}
+                    className={`relative flex justify-center items-center font-minesweeper border border-game-border ${getBgClass()} rounded-sm overflow-hidden`}
                     onMouseDown={(e) => handleMouseDown(e, rowIndex, colIndex)}
                     onMouseUp={(e) => handleMouseUp(e, rowIndex, colIndex)}
                     onTouchStart={(e) => handleTouchStart(e, rowIndex, colIndex)}
@@ -426,7 +426,7 @@ export const GameBoard: React.FC<{
                             {Array.from({ length: Math.abs(cell.mineNum) }).map((_, idx) => (
                               <span
                                 key={`bomb-${idx}`}
-                                className={`${Math.abs(cell.mineNum) > 1 ? "text-[9px]" : "mt-[2px] ml-[2px] text-[18px]"} leading-[11.5px] font-minesweeper ${cell.mineNum > 0 ? "text-black" : "text-white"}`}
+                                className={`${Math.abs(cell.mineNum) > 1 ? "text-[9px]" : "mt-[2px] ml-[2px] text-[18px]"} leading-[11.5px] ${cell.mineNum > 0 ? "text-black" : "text-white"}`}
                               >
                                 *
                               </span>
@@ -453,7 +453,7 @@ export const GameBoard: React.FC<{
                           </>
                         ) : (
                           <span
-                            className={`font-minesweeper inline-block origin-center ml-[2px] text-lg ${getNumberColorClass(cell.state.num)}`}
+                            className={`inline-block origin-center ml-[2px] text-lg ${getNumberColorClass(cell.state.num)}`}
                             style={typeof cell.state.num === "number" && (Math.abs(cell.state.num) >= 10 || cell.state.num < 0) ? { transform: "scaleX(0.75)" } : undefined}
                           >
                             {cell.state.num}
