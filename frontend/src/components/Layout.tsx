@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ThemeProvider } from "./theme-provider";
 import { DifficultyName, TimeRecord, VariantName } from "@/lib/types";
 import { boardConfigLibrary, difficultyMap, variantGroups } from "@/lib/constants";
@@ -32,6 +32,7 @@ import StatsButton from "./layout-actions/StatsButton";
 const Layout = () => {
   const isDesktop = useMediaQuery("(min-width: 640px)");
   const isTouchscreen = useMediaQuery("(pointer: coarse) and (hover: none)");
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
   const [variant, setVariant] = useState<VariantName>("classic");
   const [difficulty, setDifficulty] = useState<DifficultyName>("beg");
   const [zoom, setZoom] = useState(100);
@@ -122,6 +123,19 @@ const Layout = () => {
     localStorage.setItem("flagButtonPosition", flagButtonPosition);
   }, [flagButtonPosition]);
 
+  useEffect(() => {
+    const viewport = scrollAreaRef.current?.querySelector("[data-radix-scroll-area-viewport]") as HTMLDivElement | null;
+    if (!viewport) {
+      return;
+    }
+
+    const frame = requestAnimationFrame(() => {
+      viewport.scrollLeft = Math.max((viewport.scrollWidth - viewport.clientWidth) / 2, 0);
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
   const addRecord = (newRecord: TimeRecord) => {
     if (authLoaded && authUser) {
       const existingIndex = records.findIndex(
@@ -207,7 +221,10 @@ const Layout = () => {
             <AuthButton authUser={authUser} />
           </div>
         </header>
-        <ScrollArea className="flex w-full h-[calc(100vh-57px)] sm:h-[calc(100vh-73px)]">
+        <ScrollArea
+          ref={scrollAreaRef}
+          className="flex w-full h-[calc(100vh-57px)] sm:h-[calc(100vh-73px)]"
+        >
           <main
             className="flex flex-col min-h-[calc(100vh-57px)] sm:min-h-[calc(100vh-73px)] gap-4 justify-center items-center px-[160px] py-6"
           >
