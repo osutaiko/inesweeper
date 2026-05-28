@@ -452,7 +452,10 @@ export const GameBoard: React.FC<{
                             )}
                           </>
                         ) : (
-                          <span className={`font-minesweeper ml-[2px] text-lg ${getNumberColorClass(cell.state.num)}`}>
+                          <span
+                            className={`font-minesweeper inline-block origin-center ml-[2px] text-lg ${getNumberColorClass(cell.state.num)}`}
+                            style={typeof cell.state.num === "number" && (Math.abs(cell.state.num) >= 10 || cell.state.num < 0) ? { transform: "scaleX(0.75)" } : undefined}
+                          >
                             {cell.state.num}
                           </span>
                         )
