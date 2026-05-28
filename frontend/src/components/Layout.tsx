@@ -30,19 +30,30 @@ import SettingsButton from "./layout-actions/SettingsButton";
 import StatsButton from "./layout-actions/StatsButton";
 
 const Layout = () => {
+  // For conditional rendering of flag toggle
   const isDesktop = useMediaQuery("(min-width: 640px)");
   const isTouchscreen = useMediaQuery("(pointer: coarse) and (hover: none)");
+
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  // Board config per game
   const [variant, setVariant] = useState<VariantName>("classic");
   const [difficulty, setDifficulty] = useState<DifficultyName>("beg");
+
+  // Settings
   const [zoom, setZoom] = useState(100);
   const [flagButtonSize, setFlagButtonSize] = useState(72);
   const [flagButtonPosition, setFlagButtonPosition] = useState("bottom-right");
+
+  // Statistics
   const [records, setRecords] = useState<TimeRecord[]>([]);
   const [guestBestRecords, setGuestBestRecords] = useState<TimeRecord[]>([]);
+
+  // Authentication
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [authLoaded, setAuthLoaded] = useState(false);
 
+  // Fetch local settings guest records from localstorage
   useEffect(() => {
     const savedRecords = localStorage.getItem("gameRecords");
     const savedGuestBestRecords = localStorage.getItem("guestBestRecords");
@@ -57,6 +68,7 @@ const Layout = () => {
     if (savedFlagButtonPosition) setFlagButtonPosition(savedFlagButtonPosition);
   }, []);
 
+  // Load current auth user once and keep in sync (subscribe)
   useEffect(() => {
     let isActive = true;
 
@@ -84,7 +96,7 @@ const Layout = () => {
     };
   }, []);
 
-  // If logged in load best times
+  // Replace local records with real ones from DB
   useEffect(() => {
     if (!authLoaded || !authUser) {
       return;
@@ -96,6 +108,7 @@ const Layout = () => {
       try {
         const bestTimes = await loadLoggedInBestTimes();
         if (!controller.signal.aborted) {
+          // Fallback to localstorage items
           setRecords(bestTimes);
           localStorage.setItem("gameRecords", JSON.stringify(bestTimes));
         }
@@ -111,24 +124,25 @@ const Layout = () => {
     return () => controller.abort();
   }, [authLoaded, authUser]);
 
+  // localStorage store UI settings
   useEffect(() => {
     localStorage.setItem("zoom", zoom.toString());
   }, [zoom]);
-
   useEffect(() => {
     localStorage.setItem("flagButtonSize", flagButtonSize.toString());
   }, [flagButtonSize]);
-
   useEffect(() => {
     localStorage.setItem("flagButtonPosition", flagButtonPosition);
   }, [flagButtonPosition]);
 
+  // Center the board horizontally on initial load
   useEffect(() => {
     const viewport = scrollAreaRef.current?.querySelector("[data-radix-scroll-area-viewport]") as HTMLDivElement | null;
     if (!viewport) {
       return;
     }
 
+    // Wait until scrollarea is ready
     const frame = requestAnimationFrame(() => {
       viewport.scrollLeft = Math.max((viewport.scrollWidth - viewport.clientWidth) / 2, 0);
     });
@@ -136,8 +150,11 @@ const Layout = () => {
     return () => cancelAnimationFrame(frame);
   }, []);
 
+  // Store only the best time per board config
+  // ...separately for authed and guest players
   const addRecord = (newRecord: TimeRecord) => {
     if (authLoaded && authUser) {
+      // Compare configs by value so we replace the matching best-time entry.
       const existingIndex = records.findIndex(
         (record) =>
           JSON.stringify(record.boardConfig) === JSON.stringify(newRecord.boardConfig),
@@ -157,6 +174,7 @@ const Layout = () => {
         localStorage.setItem("gameRecords", JSON.stringify(updatedRecords));
       }
 
+      // Forget server log since local state already holds the best times
       void recordLoggedInGameLog({
         boardConfig: newRecord.boardConfig,
         variant,
@@ -166,6 +184,7 @@ const Layout = () => {
       return;
     }
 
+    // Dedupe by board config
     const nextGuestBestRecords = [...guestBestRecords];
     const recordKey = JSON.stringify(newRecord.boardConfig);
     const existingIndex = nextGuestBestRecords.findIndex(
@@ -190,11 +209,13 @@ const Layout = () => {
     }
   };
 
+  // Swap between guest fallback for display
   const displayedRecords = authLoaded && authUser ? records : guestBestRecords;
 
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
       <div className="flex flex-col items-center min-h-screen overflow-hidden touch-none">
+        {/* Header */}
         <header className="flex flex-row w-full gap-4 px-3 sm:px-8 py-2 sm:py-4 justify-between items-center border-b overflow-x-auto">
           <a href="/">
             <div className="flex flex-row items-center gap-3">
@@ -226,9 +247,11 @@ const Layout = () => {
             <AuthButton authUser={authUser} />
           </div>
         </header>
+
+        {/* Main Play Area */}
         <ScrollArea
           ref={scrollAreaRef}
-          className="flex w-full h-[calc(100vh-57px)] sm:h-[calc(100vh-73px)]"
+          className="flex w-full h-[calc(100vh-57px)] sm:h-[calc(100vh-73px)]" /* FIXME: need way to avoid using magic */
         >
           <main
             className={`flex flex-col min-h-[calc(100vh-57px)] sm:min-h-[calc(100vh-73px)] gap-4 justify-center items-center ${isTouchscreen ? 'px-[160px]' : 'px-4'} py-6`}
@@ -242,7 +265,10 @@ const Layout = () => {
               isTouchscreen={isTouchscreen}
               addRecord={addRecord}
             />
+
+            {/* Board Config Section */}
             <div className="flex flex-row gap-2">
+              {/* Variant Selector */}
               <Select value={variant} onValueChange={(value) => setVariant(value as VariantName)}>
                 <SelectTrigger className="w-[160px]">
                   <SelectValue placeholder="Variant" />
@@ -261,6 +287,8 @@ const Layout = () => {
                   ))}
                 </SelectContent>
               </Select>
+              
+              {/* Difficulty Selector */}
               <Select value={difficulty} onValueChange={(value) => setDifficulty(value as DifficultyName)}>
                 <SelectTrigger className="w-[140px]">
                   <SelectValue placeholder="Difficulty" />
