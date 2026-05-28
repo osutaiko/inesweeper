@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Board, BoardConfig, Cell, TimeRecord } from "@/lib/types";
 import { COMPASS_ANGLES, createBoard, handleClick, handleChord, handleFlag, handleBeforeFirstClick as updateBoardBeforeFirstClick, isWin, isLoss, countRemainingFlags, extractMinesFromBoard, iterateNeighbors } from "@/lib/minesweeper";
 import { formatTimeMs } from "@/lib/utils";
-import { Dot, Flag, Laugh, Meh, MoveUp, Shovel, Skull, Smile } from "lucide-react";
+import { Dot, Laugh, Meh, MoveUp, Shovel, Skull, Smile } from "lucide-react";
 import { Button } from "./ui/button";
 
 export const GameBoard: React.FC<{
@@ -329,19 +329,23 @@ export const GameBoard: React.FC<{
               <div className="flex flex-col h-[40px] justify-center px-3 gap-0 -space-y-0.5 rounded-md overflow-hidden [&_svg]:size-auto bg-game-button">
                 {config.posMineCount > 0 && 
                   <div className="flex flex-row items-center gap-2.5">
-                    <Flag stroke="red" fill="red" size={config.negMineCount > 0 ? 15 : 20} />
+                    <span className={`font-minesweeper ${config.negMineCount > 0 ? "text-[15px]" : "text-[20px]"} text-red-500`}>
+                      `
+                    </span>
                     <span className={`font-bold ${config.negMineCount > 0 ? "text-sm" : "text-xl"}`}>
                       {remainingPosFlags}
                       {config.maxMinesPerCell > 1 && (
-                        <span className="text-muted-foreground text-xs"> /{remainingFlagTiles}</span>
+                        <span className="text-muted-foreground text-xs">/{remainingFlagTiles}</span>
                       )}
                     </span>
                   </div>
                 }
                 {config.negMineCount > 0 && 
                   <div className="flex flex-row items-center gap-2.5">
-                    <Flag stroke="blue" fill="blue" size={config.posMineCount > 0 ? 15 : 20} className="rotate-180" />
-                    <span className={`font-bold ${config.posMineCount > 0 ? "text-sm" : "text-xl"}`}>{remainingNegFlags}</span>
+                    <span className={`font-minesweeper ${config.posMineCount > 0 ? "text-[15px]" : "text-[20px]"} text-blue-500 rotate-180`}>
+                      `
+                    </span>
+                    <span className={`font-mono font-bold ${config.posMineCount > 0 ? "text-sm" : "text-xl"}`}>{remainingNegFlags}</span>
                   </div>
                 }
               </div>
@@ -468,20 +472,22 @@ export const GameBoard: React.FC<{
                         {(() => {
                           const flagNum = cell.state.flagNum;
                           return Array.from({ length: Math.abs(flagNum) }).map((_, idx) => (
-                            <Flag
+                            <span
                               key={`flag-${idx}`}
                               className={`${
-                                flagNum < 0 ? "rotate-180" : ""
-                              } ${Math.abs(flagNum) > 1 ? "w-[10px] h-[10px]" : "w-[18px] h-[18px]"}`}
-                              stroke={flagNum > 0 ? "red" : "blue"}
-                              fill={flagNum > 0 ? "red" : "blue"}
-                            />
+                                flagNum < 0 ? "rotate-180 text-blue-500 mr-[2px]" : "text-red-500 ml-[2px] leading-none"
+                              } ${Math.abs(flagNum) > 1 ? "text-[10px]" : "text-[18px]"}`}
+                            >
+                              `
+                            </span>
                           ));
                         })()}
                       </div>
                     )}
                     {cell.state.type === "hidden" && isFlagToggled && (
-                      <Flag className="w-[18px] h-[18px]" stroke="red" fill="red" opacity={0.15} />
+                      <span className="text-[18px] leading-none opacity-15">
+                        `
+                      </span>
                     )}
                   </div>
                 );
@@ -499,7 +505,7 @@ export const GameBoard: React.FC<{
           }}
           onClick={() => isGameOver ? handleReset() : setIsFlagToggled(!isFlagToggled)}
         >
-          {isGameOver ? (/* isGameOver === "win" ? <Laugh /> : */ <Skull />) : (isFlagToggled ? <Flag /> : <Shovel />)}
+          {isGameOver ? (/* isGameOver === "win" ? <Laugh /> : */ <Skull />) : (isFlagToggled ? <span className="font-mono text-2xl leading-none">`</span> : <Shovel />)}
         </Button>
       )}
     </>
