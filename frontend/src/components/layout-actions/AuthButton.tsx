@@ -9,15 +9,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Spinner } from "@/components/ui/spinner";
+import type { AuthUser } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
 import { UserCircle2 } from "lucide-react";
-
-type AuthUser = {
-  id: string;
-  email: string | null;
-  name: string;
-  avatarUrl: string | null;
-};
 
 type AuthButtonProps = {
   authUser: AuthUser | null;
