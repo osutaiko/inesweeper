@@ -197,21 +197,6 @@ const Layout = () => {
 
   const displayedRecords = authLoaded && authUser ? records : guestBestRecords;
 
-  const basePaddingStyle = {
-    paddingLeft: "24px",
-    paddingRight: "24px",
-    paddingTop: "16px",
-    paddingBottom: "16px",
-  };
-
-  const mainPaddingStyle = isTouchscreen
-    ? {
-        ...basePaddingStyle,
-        paddingLeft: `${flagButtonSize + 8}px`,
-        paddingRight: `${flagButtonSize + 8}px`,
-      }
-    : basePaddingStyle;
-
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
       <div className="flex flex-col items-center min-h-screen overflow-hidden touch-none">
@@ -243,8 +228,7 @@ const Layout = () => {
         </header>
         <ScrollArea className="flex w-full h-[calc(100vh-57px)] sm:h-[calc(100vh-73px)]">
           <main
-            className="flex flex-col min-h-[calc(100vh-57px)] sm:min-h-[calc(100vh-73px)] gap-4 justify-center items-center px-6 py-4"
-            style={mainPaddingStyle}
+            className="flex flex-col min-h-[calc(100vh-57px)] sm:min-h-[calc(100vh-73px)] gap-4 justify-center items-center px-[160px] py-6"
           >
             <GameBoard 
               key={`${variant}-${difficulty}`}
