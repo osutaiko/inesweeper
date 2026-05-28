@@ -51,7 +51,7 @@ const StatsButton = ({ isDesktop, displayedRecords, isAuthed }: StatsButtonProps
           <TableBody>
             {Object.keys(boardConfigLibrary).map((mode) => (
               <TableRow key={mode}>
-                <TableCell className="font-bold">
+                <TableCell className="px-4 py-2 font-bold">
                   {variantMap[mode as keyof typeof variantMap]}
                 </TableCell>
                 {Object.keys(difficultyMap).map((difficultyKey) => {
@@ -71,7 +71,7 @@ const StatsButton = ({ isDesktop, displayedRecords, isAuthed }: StatsButtonProps
                   );
 
                   return (
-                    <TableCell key={difficultyKey} className="text-center">
+                    <TableCell key={difficultyKey} className="p-2 text-center">
                       {bestTime === Infinity ? "-" : formatTimeMs(bestTime)}
                     </TableCell>
                   );
