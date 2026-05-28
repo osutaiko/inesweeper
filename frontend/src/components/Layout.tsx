@@ -226,7 +226,7 @@ const Layout = () => {
           className="flex w-full h-[calc(100vh-57px)] sm:h-[calc(100vh-73px)]"
         >
           <main
-            className="flex flex-col min-h-[calc(100vh-57px)] sm:min-h-[calc(100vh-73px)] gap-4 justify-center items-center px-[160px] py-6"
+            className={`flex flex-col min-h-[calc(100vh-57px)] sm:min-h-[calc(100vh-73px)] gap-4 justify-center items-center ${isTouchscreen ? 'px-[160px]' : 'px-4'} py-6`}
           >
             <GameBoard 
               key={`${variant}-${difficulty}`}
