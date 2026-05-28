@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Board, BoardConfig, Cell, TimeRecord } from "@/lib/types";
 import { COMPASS_ANGLES, createBoard, handleClick, handleChord, handleFlag, handleBeforeFirstClick as updateBoardBeforeFirstClick, isWin, isLoss, countRemainingFlags, extractMinesFromBoard, iterateNeighbors } from "@/lib/minesweeper";
 import { formatTimeMs } from "@/lib/utils";
-import { Dot, Flag, Laugh, Meh, MoveUp, Shovel, Skull, Smile, Sun } from "lucide-react";
+import { Dot, Flag, Laugh, Meh, MoveUp, Shovel, Skull, Smile } from "lucide-react";
 import { Button } from "./ui/button";
 
 export const GameBoard: React.FC<{
@@ -423,14 +423,14 @@ export const GameBoard: React.FC<{
                         <div
                           className="flex flex-wrap justify-center items-center"
                         >
-                          {Array.from({ length: Math.abs(cell.mineNum) }).map((_, idx) => (
-                            <Sun
-                              key={`bomb-${idx}`}
-                              className={`${cell.mineNum < 0 ? "rotate-180" : ""} ${Math.abs(cell.mineNum) > 1 ? "w-[12px] h-[12px]" : "w-[18px] h-[18px]"}`}
-                              stroke={cell.mineNum > 0 ? "black" : "white"}
-                              fill={cell.mineNum > 0 ? "black" : "white"}
-                            />
-                          ))}
+                            {Array.from({ length: Math.abs(cell.mineNum) }).map((_, idx) => (
+                              <span
+                                key={`bomb-${idx}`}
+                                className={`${Math.abs(cell.mineNum) > 1 ? "text-[9px]" : "mt-[2px] ml-[2px] text-[18px]"} leading-[11.5px] font-minesweeper ${cell.mineNum > 0 ? "text-black" : "text-white"}`}
+                              >
+                                *
+                              </span>
+                            ))}
                         </div> : (
                         compassNum ? (
                           <>
