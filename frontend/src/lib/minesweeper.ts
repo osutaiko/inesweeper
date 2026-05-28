@@ -279,6 +279,37 @@ export const iterateNeighbors = (
   }
 };
 
+// Helper to convert given vector sum to arrow index
+const getCompassAngleIndex = (x: number, y: number): number | null => {
+  if (x === 0 && y === 0) return null;
+
+  // Vector to angle
+  const angle = Math.atan2(y, x);
+
+  // Convert negative inclusive angles to [0, 2pi)
+  const normalizedAngle = (angle + Math.PI * 2) % (Math.PI * 2);
+
+  // Angle to bin
+  return Math.round(normalizedAngle / (Math.PI / 16)) % 32;
+};
+
+// Helper to iterate neighbors in compass mode considering normalization
+const iterateCompassNeighbors = (
+  board: Board,
+  row: number,
+  col: number,
+  config: BoardConfig,
+  callback: (x: number, y: number, neighbor: Cell) => void
+) => {
+  iterateNeighbors(board, row, col, config, (nx, ny, neighbor) => {
+    const dx = nx - row;
+    const dy = ny - col;
+    const weight = dx === 0 || dy === 0 ? 1 : Math.SQRT1_2;
+
+    callback(-dx * weight, dy * weight, neighbor);
+  });
+};
+
 // Calculate cell number by looking up neighbor mines
 export const getCellNumber = (board: Board, row: number, col: number, config: BoardConfig): number | { type: "compass"; angleIndex: number | null } | null => {
   //#region getCellNumber::Compass
@@ -289,13 +320,10 @@ export const getCellNumber = (board: Board, row: number, col: number, config: Bo
     let y = 0;
     let mineCount = 0;
 
-    iterateNeighbors(board, row, col, config, (nx, ny, neighbor) => {
+    iterateCompassNeighbors(board, row, col, config, (vectorX, vectorY, neighbor) => {
       if (neighbor.mineNum) {
-        const dx = nx - row;
-        const dy = ny - col;
-        const weight = dx === 0 || dy === 0 ? 1 : Math.SQRT1_2;
-        x -= dx * weight;
-        y += dy * weight;
+        x += vectorX;
+        y += vectorY;
         mineCount++;
       }
     });
@@ -312,17 +340,7 @@ export const getCellNumber = (board: Board, row: number, col: number, config: Bo
     
     // Compass angle bins as indices, from vector sum
     // 0 = 0°, 1 = 9.74°, ..., 4 = 45°, ..., 8 = 90°, ..., 31 = 348.75°
-
-    // Vector to angle
-    const angle = Math.atan2(y, x);
-
-    // Convert negative inclusive angles to [0, 2pi)
-    const normalizedAngle = (angle + Math.PI * 2) % (Math.PI * 2);
-
-    // Angle to bin
-    const angleIndex = Math.round(normalizedAngle / (Math.PI / 16)) % 32;
-
-    return { type: "compass", angleIndex };
+    return { type: "compass", angleIndex: getCompassAngleIndex(x, y) };
   }
   //#endregion
 
@@ -458,11 +476,6 @@ export const getNeighborCounts = (board: Board, row: number, col: number, config
 export const handleChord = (board: Board, row: number, col: number, config: BoardConfig): Board => {
   let updatedBoard = cloneBoard(board);
   const cell = updatedBoard[row][col];
-
-  if (cell.state.type !== "revealed") return board;
-  if (typeof cell.state.num !== "number") return updatedBoard;
-
-  // Recursively (in case of new opening) reveal neighboring hidden cells on chord
   const revealSurroundingHiddens = () => {
     iterateNeighbors(updatedBoard, row, col, config, (nx, ny, neighbor) => {
       if (neighbor.state.type === "hidden") {
@@ -470,6 +483,58 @@ export const handleChord = (board: Board, row: number, col: number, config: Boar
       }
     });
   };
+
+  if (cell.state.type !== "revealed") return board;
+
+  //#region handleChord::Compass
+  // Chord if: out of all possible mine arrangements in neighboring hidden cells,
+  // only the case of all-safe results in the same arrow
+  if (cell.state.num && typeof cell.state.num === "object" && cell.state.num.type === "compass") {
+    let flagX = 0;
+    let flagY = 0;
+    const hiddenVectors: [number, number][] = [];
+
+    // Calculate vector sum of flags as if they are mines
+    iterateCompassNeighbors(board, row, col, config, (x, y, neighbor) => {
+      if (neighbor.state.type === "flagged") {
+        flagX += x * neighbor.state.flagNum;
+        flagY += y * neighbor.state.flagNum;
+      } else if (neighbor.state.type === "hidden") {
+        hiddenVectors.push([x, y]);
+      }
+    });
+
+    // Only if angle by flags == displayed angle...
+    if (getCompassAngleIndex(flagX, flagY) === cell.state.num.angleIndex) {
+      let hiddenMineCouldKeepBin = false;
+      
+      for (let mask = 1; mask < (1 << hiddenVectors.length); mask++) {
+        let x = flagX;
+        let y = flagY;
+
+        for (let index = 0; index < hiddenVectors.length; index++) {
+          if (mask & (1 << index)) {
+            x += hiddenVectors[index][0];
+            y += hiddenVectors[index][1];
+          }
+        }
+
+        // Can't chord if some combination of hidden mines results in the same arrow
+        if (getCompassAngleIndex(x, y) === cell.state.num.angleIndex) {
+          hiddenMineCouldKeepBin = true;
+          break;
+        }
+      }
+
+      if (!hiddenMineCouldKeepBin) {
+        revealSurroundingHiddens();
+      }
+    }
+
+    return updatedBoard;
+  }
+  if (typeof cell.state.num !== "number") return updatedBoard;
+  //#endregion
 
   const neighborCounts = getNeighborCounts(board, row, col, config);
 
