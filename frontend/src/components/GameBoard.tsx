@@ -345,7 +345,7 @@ export const GameBoard: React.FC<{
                     <span className={`font-minesweeper ${config.posMineCount > 0 ? "text-[15px]" : "text-[20px]"} text-blue-500 rotate-180`}>
                       `
                     </span>
-                    <span className={`font-mono font-bold ${config.posMineCount > 0 ? "text-sm" : "text-xl"}`}>{remainingNegFlags}</span>
+                    <span className={`font-bold ${config.posMineCount > 0 ? "text-sm" : "text-xl"}`}>{remainingNegFlags}</span>
                   </div>
                 }
               </div>
@@ -485,7 +485,7 @@ export const GameBoard: React.FC<{
                       </div>
                     )}
                     {cell.state.type === "hidden" && isFlagToggled && (
-                      <span className="text-[18px] leading-none opacity-15">
+                      <span className="text-[18px] ml-[2px] leading-none opacity-15">
                         `
                       </span>
                     )}
@@ -505,7 +505,7 @@ export const GameBoard: React.FC<{
           }}
           onClick={() => isGameOver ? handleReset() : setIsFlagToggled(!isFlagToggled)}
         >
-          {isGameOver ? (/* isGameOver === "win" ? <Laugh /> : */ <Skull />) : (isFlagToggled ? <span className="font-mono text-2xl leading-none">`</span> : <Shovel />)}
+          {isGameOver ? (/* isGameOver === "win" ? <Laugh /> : */ <Skull />) : (isFlagToggled ? <span className="font-minesweeper text-2xl leading-none">`</span> : <Shovel />)}
         </Button>
       )}
     </>
