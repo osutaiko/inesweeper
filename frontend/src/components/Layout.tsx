@@ -199,7 +199,7 @@ const Layout = () => {
           <a href="/">
             <div className="flex flex-row items-center gap-3">
               <img src={InesweeperLogo} alt="Inesweeper Logo" className="w-[40px] h-[40px] min-w-[40px] min-h-[40px]" />
-              <h2 className="hidden min-[410px]:block text-lg sm:text-2xl">Inesweeper</h2>
+              <h2 className="font-minesweeper hidden min-[510px]:block text-lg sm:text-2xl">Inesweeper</h2>
             </div>
           </a>
           <div className="flex flex-row gap-2">
