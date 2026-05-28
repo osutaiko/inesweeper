@@ -439,15 +439,15 @@ export const GameBoard: React.FC<{
                         compassNum ? (
                           <>
                             {compassNum.angleIndex === null ? (
-                              <Dot size={18} className="text-foreground" />
+                              <Dot size={18} className="text-foreground fill-foreground" />
                             ) : (
                               <>
                                 {compassNum.angleIndex % 2 === 1 && (
                                   <Dot
-                                    size={18}
-                                    className="pointer-events-none absolute left-1/2 top-1/2 text-game-number-3"
+                                    size={12}
+                                    className="pointer-events-none absolute left-1/2 top-1/2 text-game-number-3 fill-game-number-3"
                                     style={{
-                                      transform: `translate(-50%, -50%) rotate(${getNearestCompassRayAngle(compassNum.angleIndex)}rad) translateY(-12px)`,
+                                      transform: `translate(-50%, -50%) rotate(${getNearestCompassRayAngle(compassNum.angleIndex)}rad) translateY(-11px)`,
                                     }}
                                   />
                                 )}
