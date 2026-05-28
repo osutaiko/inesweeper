@@ -281,7 +281,8 @@ export const iterateNeighbors = (
 
 // Helper to convert given vector sum to arrow index
 const getCompassAngleIndex = (x: number, y: number): number | null => {
-  if (x === 0 && y === 0) return null;
+  const EPSILON = 1e-8
+  if (Math.abs(x) < EPSILON && Math.abs(y) < EPSILON) return null;
 
   // Vector to angle
   const angle = Math.atan2(y, x);
