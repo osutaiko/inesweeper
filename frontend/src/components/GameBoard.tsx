@@ -505,7 +505,7 @@ export const GameBoard: React.FC<{
           }}
           onClick={() => isGameOver ? handleReset() : setIsFlagToggled(!isFlagToggled)}
         >
-          {isGameOver ? (/* isGameOver === "win" ? <Laugh /> : */ <Skull />) : (isFlagToggled ? <span className="font-minesweeper text-2xl leading-none">`</span> : <Shovel />)}
+          {isGameOver ? (/* isGameOver === "win" ? <Laugh /> : */ <Skull />) : (isFlagToggled ? <span className="font-minesweeper leading-none" style={{ fontSize: `${flagButtonSize * 0.5}px` }}>`</span> : <Shovel />)}
         </Button>
       )}
     </>
