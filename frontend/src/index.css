@@ -29,6 +29,10 @@
   }
 }
 
+svg.lucide {
+  stroke-width: 3px;
+}
+
 body {
   font-family: "Geist", sans-serif;
 }
