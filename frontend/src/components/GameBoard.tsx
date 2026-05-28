@@ -482,7 +482,7 @@ export const GameBoard: React.FC<{
                       </div>
                     )}
                     {cell.state.type === "hidden" && isFlagToggled && (
-                      <Flag className="w-[18px] h-[18px]" stroke="red" fill="red" opacity={0.1} />
+                      <Flag className="w-[18px] h-[18px]" stroke="red" fill="red" opacity={0.15} />
                     )}
                   </div>
                 );
@@ -491,7 +491,7 @@ export const GameBoard: React.FC<{
           </div>
         </div>
       </div>
-      {isTouchscreen && (
+      {isTouchscreen && isGameOver !== "win" && (
         <Button
           className={`fixed p-0 [&_svg]:size-1/2 ${getFlagButtonPositionClass()} text-primary ${isFlagToggled ? "bg-destructive hover:bg-destructive/90" : "bg-game-button hover:bg-game-button/90"}`}
           style={{
@@ -500,7 +500,7 @@ export const GameBoard: React.FC<{
           }}
           onClick={() => isGameOver ? handleReset() : setIsFlagToggled(!isFlagToggled)}
         >
-          {isGameOver ? (isGameOver === "win" ? <Laugh /> : <Skull />) : (isFlagToggled ? <Flag /> : <Shovel />)}
+          {isGameOver ? (/* isGameOver === "win" ? <Laugh /> : */ <Skull />) : (isFlagToggled ? <Flag /> : <Shovel />)}
         </Button>
       )}
     </>
