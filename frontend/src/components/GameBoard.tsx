@@ -452,7 +452,7 @@ export const GameBoard: React.FC<{
                             )}
                           </>
                         ) : (
-                          <span className={`font-bold text-xl ${getNumberColorClass(cell.state.num)}`}>
+                          <span className={`font-minesweeper text-lg ${getNumberColorClass(cell.state.num)}`}>
                             {cell.state.num}
                           </span>
                         )

@@ -16,6 +16,19 @@
   font-style: normal;
 }
 
+@font-face {
+  font-family: 'MineSweeper';
+  src: url("/src/assets/fonts/mine-sweeper.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@layer utilities {
+  .font-minesweeper {
+    font-family: 'MineSweeper', sans-serif;
+  }
+}
+
 body {
   font-family: "Geist", sans-serif;
 }
