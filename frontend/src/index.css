@@ -43,25 +43,25 @@ body {
   :root {
     --radius: 0rem;
 
-    --background: oklch(100% 0.00 0);
-    --foreground: oklch(14% 0.00 0);
-    --card: oklch(100% 0.00 0);
-    --card-foreground: oklch(14% 0.00 0);
-    --popover: oklch(100% 0.00 0);
-    --popover-foreground: oklch(14% 0.00 0);
-    --primary: oklch(20% 0.00 0);
-    --primary-foreground: oklch(98% 0.00 0);
-    --secondary: oklch(97% 0.00 0);
-    --secondary-foreground: oklch(20% 0.00 0);
-    --muted: oklch(97% 0.00 0);
-    --muted-foreground: oklch(56% 0.00 0);
-    --accent: oklch(97% 0.00 0);
-    --accent-foreground: oklch(20% 0.00 0);
+    --background: oklch(100% 0 0);
+    --foreground: oklch(14% 0 0);
+    --card: oklch(100% 0 0);
+    --card-foreground: oklch(14% 0 0);
+    --popover: oklch(100% 0 0);
+    --popover-foreground: oklch(14% 0 0);
+    --primary: oklch(20% 0 0);
+    --primary-foreground: oklch(98% 0 0);
+    --secondary: oklch(97% 0 0);
+    --secondary-foreground: oklch(20% 0 0);
+    --muted: oklch(97% 0 0);
+    --muted-foreground: oklch(56% 0 0);
+    --accent: oklch(97% 0 0);
+    --accent-foreground: oklch(20% 0 0);
     --destructive: oklch(64% 0.21 25);
-    --destructive-foreground: oklch(98% 0.00 0);
-    --border: oklch(92% 0.00 0);
-    --input: oklch(92% 0.00 0);
-    --ring: oklch(14% 0.00 0);
+    --destructive-foreground: oklch(98% 0 0);
+    --border: oklch(92% 0 0);
+    --input: oklch(92% 0 0);
+    --ring: oklch(14% 0 0);
 
     --game-border: oklch(72% 0.02 248);
     --game-hidden: oklch(98% 0.00 248);
@@ -79,38 +79,38 @@ body {
     --game-number-4: oklch(28% 0.17 277);
     --game-number-5: oklch(41% 0.17 29);
     --game-number-6: oklch(56% 0.10 195);
-    --game-number-7: oklch(0% 0.00 0);
-    --game-number-8: oklch(60% 0.00 0);
-    --game-number-0: oklch(92% 0.00 0);
+    --game-number-7: oklch(0% 0 0);
+    --game-number-8: oklch(60% 0 0);
+    --game-number-0: oklch(92% 0 0);
     --game-number--1: oklch(97% 0.21 110);
     --game-number--2: oklch(77% 0.22 330);
     --game-number--3: oklch(86% 0.14 195);
     --game-number--4: oklch(95% 0.15 121);
     --game-number--5: oklch(92% 0.12 195);
     --game-number--6: oklch(74% 0.16 22);
-    --game-number--7: oklch(100% 0.00 0);
-    --game-number--8: oklch(60% 0.00 0);
+    --game-number--7: oklch(100% 0 0);
+    --game-number--8: oklch(60% 0 0);
   }
   .dark {
-    --background: oklch(14% 0.00 0);
-    --foreground: oklch(98% 0.00 0);
-    --card: oklch(14% 0.00 0);
-    --card-foreground: oklch(98% 0.00 0);
-    --popover: oklch(14% 0.00 0);
-    --popover-foreground: oklch(98% 0.00 0);
-    --primary: oklch(98% 0.00 0);
-    --primary-foreground: oklch(20% 0.00 0);
-    --secondary: oklch(27% 0.00 0);
-    --secondary-foreground: oklch(98% 0.00 0);
-    --muted: oklch(27% 0.00 0);
-    --muted-foreground: oklch(72% 0.00 0);
-    --accent: oklch(27% 0.00 0);
-    --accent-foreground: oklch(98% 0.00 0);
+    --background: oklch(14% 0 0);
+    --foreground: oklch(98% 0 0);
+    --card: oklch(14% 0 0);
+    --card-foreground: oklch(98% 0 0);
+    --popover: oklch(14% 0 0);
+    --popover-foreground: oklch(98% 0 0);
+    --primary: oklch(98% 0 0);
+    --primary-foreground: oklch(20% 0 0);
+    --secondary: oklch(27% 0 0);
+    --secondary-foreground: oklch(98% 0 0);
+    --muted: oklch(27% 0 0);
+    --muted-foreground: oklch(72% 0 0);
+    --accent: oklch(27% 0 0);
+    --accent-foreground: oklch(98% 0 0);
     --destructive: oklch(40% 0.13 26);
-    --destructive-foreground: oklch(98% 0.00 0);
-    --border: oklch(27% 0.00 0);
-    --input: oklch(27% 0.00 0);
-    --ring: oklch(87% 0.00 0);
+    --destructive-foreground: oklch(98% 0 0);
+    --border: oklch(27% 0 0);
+    --input: oklch(27% 0 0);
+    --ring: oklch(87% 0 0);
 
     --game-border: oklch(38% 0.02 248);
     --game-hidden: oklch(21% 0.01 248);
@@ -128,17 +128,17 @@ body {
     --game-number-4: oklch(49% 0.27 294);
     --game-number-5: oklch(53% 0.22 29);
     --game-number-6: oklch(62% 0.11 195);
-    --game-number-7: oklch(51% 0.00 0);
-    --game-number-8: oklch(68% 0.00 0);
-    --game-number-0: oklch(85% 0.00 0);
+    --game-number-7: oklch(51% 0 0);
+    --game-number-8: oklch(68% 0 0);
+    --game-number-0: oklch(85% 0 0);
     --game-number--1: oklch(89% 0.19 110);
     --game-number--2: oklch(77% 0.22 330);
     --game-number--3: oklch(86% 0.14 195);
     --game-number--4: oklch(95% 0.15 121);
     --game-number--5: oklch(92% 0.12 195);
     --game-number--6: oklch(74% 0.16 22);
-    --game-number--7: oklch(100% 0.00 0);
-    --game-number--8: oklch(60% 0.00 0);
+    --game-number--7: oklch(100% 0 0);
+    --game-number--8: oklch(60% 0 0);
   }
 }
 
