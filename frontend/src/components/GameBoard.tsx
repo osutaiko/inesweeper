@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Board, BoardConfig, Cell, TimeRecord } from "@/lib/types";
-import { COMPASS_ANGLES, createBoard, handleClick, handleChord, handleFlag, handleBeforeFirstClick as updateBoardBeforeFirstClick, isWin, isLoss, countRemainingFlags, extractMinesFromBoard, iterateNeighbors } from "@/lib/minesweeper";
+import { createBoard, handleClick, handleChord, handleFlag, handleBeforeFirstClick as updateBoardBeforeFirstClick, isWin, isLoss, countRemainingFlags, extractMinesFromBoard, iterateNeighbors } from "@/lib/minesweeper";
 import { formatTimeMs } from "@/lib/utils";
-import { Dot, Laugh, Meh, MoveUp, Shovel, Skull, Smile } from "lucide-react";
+import { Laugh, Meh, Shovel, Skull, Smile } from "lucide-react";
 import { Button } from "./ui/button";
+import { CompassArrow } from "./CompassArrow";
 
 export const GameBoard: React.FC<{
   config: BoardConfig;
@@ -252,22 +253,6 @@ export const GameBoard: React.FC<{
   }
 };
 
-  const getCompassColorClass = (angleIndex: number) => {
-    if (angleIndex % 4 === 0) {
-      return "text-foreground";
-    }
-
-    if (angleIndex % 2 === 0) {
-      return "text-game-number-1";
-    }
-
-    return "text-game-number-3";
-  };
-
-  const getNearestCompassRayAngle = (angleIndex: number) => {
-    return Math.round(angleIndex / 4) * Math.PI / 4;
-  };
-
   const getFlagButtonPositionClass = () => {
     switch (flagButtonPosition) {
       case "bottom-left": return "bottom-0 left-0 rounded-tl-none rounded-tr-md rounded-bl-none rounded-br-none";
@@ -437,24 +422,7 @@ export const GameBoard: React.FC<{
                             ))}
                         </div> : (
                         compassNum ? (
-                          <>
-                            {compassNum.angleIndex === null ? (
-                              <Dot size={18} className="text-foreground fill-foreground" />
-                            ) : (
-                              <>
-                                {compassNum.angleIndex % 2 === 1 && (
-                                  <Dot
-                                    size={12}
-                                    className="pointer-events-none absolute left-1/2 top-1/2 text-game-number-3 fill-game-number-3"
-                                    style={{
-                                      transform: `translate(-50%, -50%) rotate(${getNearestCompassRayAngle(compassNum.angleIndex)}rad) translateY(-11px)`,
-                                    }}
-                                  />
-                                )}
-                                <MoveUp className={getCompassColorClass(compassNum.angleIndex)} size={18} style={{ transform: `rotate(${COMPASS_ANGLES[compassNum.angleIndex]}rad)` }} />
-                              </>
-                            )}
-                          </>
+                          <CompassArrow angleIndex={compassNum.angleIndex} />
                         ) : (
                           <span
                             className={`inline-block origin-center ml-[2px] text-lg ${getNumberColorClass(cell.state.num)}`}

@@ -32,6 +32,7 @@
 svg.lucide {
   stroke-width: 3px;
   stroke-linejoin: miter;
+  stroke-linecap: square;
 }
 
 body {
