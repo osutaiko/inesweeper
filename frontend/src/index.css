@@ -17,6 +17,13 @@
 }
 
 @font-face {
+  font-family: 'KodeMono';
+  src: url("/src/assets/fonts/KodeMono-VariableFont_wght.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
   font-family: 'MineSweeper';
   src: url("/src/assets/fonts/mine-sweeper.otf") format("opentype");
   font-weight: normal;
@@ -36,7 +43,7 @@ svg.lucide {
 }
 
 body {
-  font-family: "GeistMono", sans-serif;
+  font-family: "KodeMono", sans-serif;
 }
 
 @layer base {
