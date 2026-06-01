@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Board, BoardConfig, Cell, TimeRecord } from "@/lib/types";
+import { createDemoBoard } from "@/lib/constants";
 import { createBoard, handleClick, handleChord, handleFlag, handleBeforeFirstClick as updateBoardBeforeFirstClick, isWin, isLoss, countRemainingFlags, extractMinesFromBoard, iterateNeighbors } from "@/lib/minesweeper";
 import { formatTimeMs } from "@/lib/utils";
+
 import { Laugh, Meh, Shovel, Skull, Smile } from "lucide-react";
 import { Button } from "./ui/button";
 import { CompassArrow } from "./CompassArrow";
@@ -14,7 +16,9 @@ export const GameBoard: React.FC<{
   isTouchscreen: boolean;
   addRecord: (record: TimeRecord) => void;
 }> = ({ config, zoom, flagButtonSize, flagButtonPosition, isTouchscreen, addRecord }) => {
-  const [board, setBoard] = useState<Board>(createBoard(config) || []);
+  const isDemoBoard = false;
+
+  const [board, setBoard] = useState<Board>(isDemoBoard ? createDemoBoard() : (createBoard(config) || []));
   const [isFirstClick, setIsFirstClick] = useState(true);
   const [isLmbDown, setIsLmbDown] = useState(false);
   const [isRmbDown, setIsRmbDown] = useState(false);

@@ -1,4 +1,4 @@
-import { BoardConfigLibrary, VariantGroupName, VariantName } from "./types";
+import { Board, BoardConfigLibrary, Cell, VariantGroupName, VariantName } from "./types";
 
 export type VariantOption = {
   value: VariantName;
@@ -123,4 +123,31 @@ export const difficultyMap = {
   beg: { full: "Beginner", short: "Beg" },
   int: { full: "Intermediate", short: "Int" },
   exp: { full: "Expert", short: "Exp" },
+};
+
+export const createDemoBoard = (): Board => {
+  const cells: Cell[] = [
+    ...Array.from({ length: 33 }, (_, index) => ({
+      state: { type: "revealed", num: index - 8 },
+      mineNum: 0,
+    }) as Cell),
+    ...Array.from({ length: 32 }, (_, index) => ({
+      state: { type: "revealed", num: { type: "compass", angleIndex: index } },
+      mineNum: 0,
+    }) as Cell),
+    ...[-1, 1, 2, 3].map((mineNum) => ({
+      state: { type: "revealed", num: null },
+      mineNum,
+    }) as Cell),
+    ...[-1, 1, 2, 3].map((flagNum) => ({
+      state: { type: "flagged", flagNum },
+      mineNum: 0,
+    }) as Cell),
+    ...Array.from({ length: 8 }, () => ({
+      state: { type: "hidden" },
+      mineNum: 0,
+    }) as Cell),
+  ];
+
+  return Array.from({ length: 9 }, (_, rowIndex) => cells.slice(rowIndex * 9, rowIndex * 9 + 9));
 };
