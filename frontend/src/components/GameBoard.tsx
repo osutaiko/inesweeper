@@ -16,7 +16,7 @@ export const GameBoard: React.FC<{
   isTouchscreen: boolean;
   addRecord: (record: TimeRecord) => void;
 }> = ({ config, zoom, flagButtonSize, flagButtonPosition, isTouchscreen, addRecord }) => {
-  const isDemoBoard = false;
+  const isDemoBoard = true;
 
   const [board, setBoard] = useState<Board>(isDemoBoard ? createDemoBoard() : (createBoard(config) || []));
   const [isFirstClick, setIsFirstClick] = useState(true);
