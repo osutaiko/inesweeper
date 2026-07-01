@@ -1,6 +1,21 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
-  <rect width="128" height="128" fill="#343131" rx="20" ry="20"/>
-  <circle cx="64" cy="64" r="50" fill="#e74c3c"/>
-  <path d="M64 14 L64 114 M14 64 L114 64 M29 29 L99 99 M29 99 L99 29" 
-        stroke="white" stroke-width="8" stroke-linecap="round"/>
+  <defs>
+    <clipPath id="squareClip">
+      <rect x="4" y="4" width="120" height="120"/>
+    </clipPath>
+  </defs>
+  <rect width="128" height="128" fill="#262626"/>
+  <circle cx="64" cy="64" r="40" fill="#e74c3c"/>
+  <g clip-path="url(#squareClip)">
+    <path d="M64 24 L64 104 M24 64 L104 64 M26 26 L102 102 M26 102 L102 26"
+          stroke="white" stroke-width="5" stroke-linecap="butt"/>
+    <rect x="58" y="18" width="12" height="12" fill="white"/>
+    <rect x="58" y="98" width="12" height="12" fill="white"/>
+    <rect x="18" y="58" width="12" height="12" fill="white"/>
+    <rect x="98" y="58" width="12" height="12" fill="white"/>
+    <rect x="18" y="18" width="12" height="12" fill="white"/>
+    <rect x="98" y="98" width="12" height="12" fill="white"/>
+    <rect x="18" y="98" width="12" height="12" fill="white"/>
+    <rect x="98" y="18" width="12" height="12" fill="white"/>
+  </g>
 </svg>
