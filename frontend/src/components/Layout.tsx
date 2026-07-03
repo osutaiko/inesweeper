@@ -30,6 +30,11 @@ import SettingsButton from "./layout-actions/SettingsButton";
 import StatsButton from "./layout-actions/StatsButton";
 
 const Layout = () => {
+  const DEFAULT_ZOOM = 100;
+  const DEFAULT_FLAG_BUTTON_SIZE = 72;
+  const DEFAULT_FLAG_BUTTON_POSITION = "bottom-right";
+  const DEFAULT_TOUCH_HOLD_DELAY = 200;
+
   // For conditional rendering of flag toggle
   const isDesktop = useMediaQuery("(min-width: 640px)");
   const isTouchscreen = useMediaQuery("(pointer: coarse) and (hover: none)");
@@ -41,10 +46,10 @@ const Layout = () => {
   const [difficulty, setDifficulty] = useState<DifficultyName>("beg");
 
   // Settings
-  const [zoom, setZoom] = useState(100);
-  const [flagButtonSize, setFlagButtonSize] = useState(72);
-  const [flagButtonPosition, setFlagButtonPosition] = useState("bottom-right");
-  const [touchHoldDelay, setTouchHoldDelay] = useState(200);
+  const [zoom, setZoom] = useState(DEFAULT_ZOOM);
+  const [flagButtonSize, setFlagButtonSize] = useState(DEFAULT_FLAG_BUTTON_SIZE);
+  const [flagButtonPosition, setFlagButtonPosition] = useState(DEFAULT_FLAG_BUTTON_POSITION);
+  const [touchHoldDelay, setTouchHoldDelay] = useState(DEFAULT_TOUCH_HOLD_DELAY);
 
   // Statistics
   const [records, setRecords] = useState<TimeRecord[]>([]);
@@ -140,6 +145,13 @@ const Layout = () => {
   useEffect(() => {
     localStorage.setItem("touchHoldDelay", touchHoldDelay.toString());
   }, [touchHoldDelay]);
+
+  const resetPreferences = () => {
+    setZoom(DEFAULT_ZOOM);
+    setFlagButtonSize(DEFAULT_FLAG_BUTTON_SIZE);
+    setFlagButtonPosition(DEFAULT_FLAG_BUTTON_POSITION);
+    setTouchHoldDelay(DEFAULT_TOUCH_HOLD_DELAY);
+  };
 
   // Center the board horizontally on initial load
   useEffect(() => {
@@ -245,6 +257,7 @@ const Layout = () => {
               setFlagButtonPosition={setFlagButtonPosition}
               touchHoldDelay={touchHoldDelay}
               setTouchHoldDelay={setTouchHoldDelay}
+              resetPreferences={resetPreferences}
             />
             <StatsButton
               isDesktop={isDesktop}

@@ -5,6 +5,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -27,6 +28,7 @@ type SettingsButtonProps = {
   setFlagButtonPosition: Dispatch<SetStateAction<string>>;
   touchHoldDelay: number;
   setTouchHoldDelay: Dispatch<SetStateAction<number>>;
+  resetPreferences: () => void;
 };
 
 const SettingsButton = ({
@@ -39,6 +41,7 @@ const SettingsButton = ({
   setFlagButtonPosition,
   touchHoldDelay,
   setTouchHoldDelay,
+  resetPreferences,
 }: SettingsButtonProps) => (
   <Dialog>
     <DialogTrigger asChild>
@@ -92,6 +95,11 @@ const SettingsButton = ({
           )}
         </div>
       </ScrollArea>
+      <DialogFooter>
+        <Button variant="destructive" onClick={resetPreferences}>
+          Reset to Default
+        </Button>
+      </DialogFooter>
     </DialogContent>
   </Dialog>
 );
