@@ -1,5 +1,5 @@
 ## [Inesweeper](https://inesweeper.vercel.app/) by osutaiko
-![Inesweeper Image](https://github.com/user-attachments/assets/c809b44f-fbd3-4aeb-9e37-554ebf62d4ee)
+<img width="2560" height="1500" alt="inesweeper" src="https://github.com/user-attachments/assets/7c966340-ea76-4c38-b40c-98cdcc0ff4f4" />
 
 A Collection of Interesting Minesweeper Variants.
 

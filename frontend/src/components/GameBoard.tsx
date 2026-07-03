@@ -13,9 +13,10 @@ export const GameBoard: React.FC<{
   zoom: number;
   flagButtonSize: number;
   flagButtonPosition: string;
+  touchHoldDelay: number;
   isTouchscreen: boolean;
   addRecord: (record: TimeRecord) => void;
-}> = ({ config, zoom, flagButtonSize, flagButtonPosition, isTouchscreen, addRecord }) => {
+}> = ({ config, zoom, flagButtonSize, flagButtonPosition, touchHoldDelay, isTouchscreen, addRecord }) => {
   const isDemoBoard = false;
 
   const [board, setBoard] = useState<Board>(isDemoBoard ? createDemoBoard() : (createBoard(config) || []));
@@ -34,6 +35,15 @@ export const GameBoard: React.FC<{
 
   const DRAG_THRESHOLD = 10;
   const animationFrameRef = useRef<number | null>(null);
+  const touchHoldTimerRef = useRef<number | null>(null);
+  const touchHoldFiredRef = useRef(false);
+
+  const clearTouchHoldTimer = () => {
+    if (touchHoldTimerRef.current !== null) {
+      window.clearTimeout(touchHoldTimerRef.current);
+      touchHoldTimerRef.current = null;
+    }
+  };
 
   const handleReset = () => {
     const newBoard = createBoard(config);
@@ -48,6 +58,8 @@ export const GameBoard: React.FC<{
     setHoveredCell(null);
     setExplodedCell(null);
     setIncorrectFlagCells(null);
+    clearTouchHoldTimer();
+    touchHoldFiredRef.current = false;
   };
 
   const handleBeforeFirstClick = (row: number, col: number) => {
@@ -139,7 +151,7 @@ export const GameBoard: React.FC<{
       setIsGameOver("loss");
       setExplodedCell(isLossValue);
 
-      let tempIncorrectFlagCells: { row: number; col: number }[] = [];
+      const tempIncorrectFlagCells: { row: number; col: number }[] = [];
       const updatedBoard = board.map((row, rowIndex) =>
         row.map((cell, colIndex) => {
           if (cell.state.type === "flagged" && cell.state.flagNum !== cell.mineNum ) {
@@ -159,18 +171,64 @@ export const GameBoard: React.FC<{
     }
   }, [JSON.stringify(board)]);
 
+  useEffect(() => {
+    return () => {
+      clearTouchHoldTimer();
+    };
+  }, []);
+
   const handleTouchStart = (e: React.TouchEvent, row: number, col: number) => {
     if (isGameOver || !isTouchscreen ) {
       return;
     }
 
+    clearTouchHoldTimer();
+    touchHoldFiredRef.current = false;
+
     const touch = e.touches[0];
     setTouchStartPos({ x: touch.clientX, y: touch.clientY });
+
+    touchHoldTimerRef.current = window.setTimeout(() => {
+      touchHoldFiredRef.current = true;
+
+      if (!isFlagToggled && board[row][col].state.type !== "revealed") {
+        setBoard(handleFlag(board, row, col, config));
+        return;
+      }
+
+      if (board[row][col].state.type !== "revealed") {
+        if (isFirstClick) {
+          handleBeforeFirstClick(row, col);
+        }
+        setBoard(handleClick(board, row, col, config));
+      }
+    }, touchHoldDelay);
+
     return;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (isGameOver || !isTouchscreen) {
+      return;
+    }
+
+    const touch = e.touches[0];
+    const dx = Math.abs(touch.clientX - touchStartPos.x);
+    const dy = Math.abs(touch.clientY - touchStartPos.y);
+    if (dx > DRAG_THRESHOLD || dy > DRAG_THRESHOLD) {
+      clearTouchHoldTimer();
+    }
   };
 
   const handleTouchEnd = (e: React.TouchEvent, row: number, col: number) => {
     if (isGameOver || !isTouchscreen) {
+      return;
+    }
+
+    clearTouchHoldTimer();
+
+    if (touchHoldFiredRef.current) {
+      touchHoldFiredRef.current = false;
       return;
     }
 
@@ -395,6 +453,7 @@ export const GameBoard: React.FC<{
                     onMouseDown={(e) => handleMouseDown(e, rowIndex, colIndex)}
                     onMouseUp={(e) => handleMouseUp(e, rowIndex, colIndex)}
                     onTouchStart={(e) => handleTouchStart(e, rowIndex, colIndex)}
+                    onTouchMove={handleTouchMove}
                     onTouchEnd={(e) => handleTouchEnd(e, rowIndex, colIndex)}
                     onMouseEnter={() => setHoveredCell({ row: rowIndex, col: colIndex })}
                     onMouseLeave={() => setHoveredCell(null)}
