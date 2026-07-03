@@ -5,6 +5,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -25,6 +26,9 @@ type SettingsButtonProps = {
   setFlagButtonSize: Dispatch<SetStateAction<number>>;
   flagButtonPosition: string;
   setFlagButtonPosition: Dispatch<SetStateAction<string>>;
+  touchHoldDelay: number;
+  setTouchHoldDelay: Dispatch<SetStateAction<number>>;
+  resetPreferences: () => void;
 };
 
 const SettingsButton = ({
@@ -35,6 +39,9 @@ const SettingsButton = ({
   setFlagButtonSize,
   flagButtonPosition,
   setFlagButtonPosition,
+  touchHoldDelay,
+  setTouchHoldDelay,
+  resetPreferences,
 }: SettingsButtonProps) => (
   <Dialog>
     <DialogTrigger asChild>
@@ -63,6 +70,10 @@ const SettingsButton = ({
             <>
               <Separator className="my-2" />
               <div className="flex flex-row justify-between items-center gap-3">
+                <span className="w-1/2">Hold to flag time: {touchHoldDelay} ms</span>
+                <Slider className="w-1/2" value={[touchHoldDelay]} onValueChange={(value) => setTouchHoldDelay(value[0])} min={100} max={500} step={20} />
+              </div>
+              <div className="flex flex-row justify-between items-center gap-3">
                 <span className="w-1/2">Flag toggle button size: {flagButtonSize} px</span>
                 <Slider className="w-1/2" value={[flagButtonSize]} onValueChange={(value) => setFlagButtonSize(value[0])} min={20} max={160} step={4} />
               </div>
@@ -84,6 +95,11 @@ const SettingsButton = ({
           )}
         </div>
       </ScrollArea>
+      <DialogFooter>
+        <Button variant="destructive" onClick={resetPreferences}>
+          Reset to Default
+        </Button>
+      </DialogFooter>
     </DialogContent>
   </Dialog>
 );
