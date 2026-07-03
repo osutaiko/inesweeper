@@ -13,9 +13,10 @@ export const GameBoard: React.FC<{
   zoom: number;
   flagButtonSize: number;
   flagButtonPosition: string;
+  touchHoldDelay: number;
   isTouchscreen: boolean;
   addRecord: (record: TimeRecord) => void;
-}> = ({ config, zoom, flagButtonSize, flagButtonPosition, isTouchscreen, addRecord }) => {
+}> = ({ config, zoom, flagButtonSize, flagButtonPosition, touchHoldDelay, isTouchscreen, addRecord }) => {
   const isDemoBoard = false;
 
   const [board, setBoard] = useState<Board>(isDemoBoard ? createDemoBoard() : (createBoard(config) || []));
@@ -33,7 +34,6 @@ export const GameBoard: React.FC<{
   const [touchStartPos, setTouchStartPos] = useState({ x: 0, y: 0 });
 
   const DRAG_THRESHOLD = 10;
-  const TOUCH_HOLD_DELAY = 200;
   const animationFrameRef = useRef<number | null>(null);
   const touchHoldTimerRef = useRef<number | null>(null);
   const touchHoldFiredRef = useRef(false);
@@ -202,7 +202,7 @@ export const GameBoard: React.FC<{
         }
         setBoard(handleClick(board, row, col, config));
       }
-    }, TOUCH_HOLD_DELAY);
+    }, touchHoldDelay);
 
     return;
   };

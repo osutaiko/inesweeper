@@ -44,6 +44,7 @@ const Layout = () => {
   const [zoom, setZoom] = useState(100);
   const [flagButtonSize, setFlagButtonSize] = useState(72);
   const [flagButtonPosition, setFlagButtonPosition] = useState("bottom-right");
+  const [touchHoldDelay, setTouchHoldDelay] = useState(200);
 
   // Statistics
   const [records, setRecords] = useState<TimeRecord[]>([]);
@@ -60,12 +61,14 @@ const Layout = () => {
     const savedZoom = localStorage.getItem("zoom");
     const savedFlagButtonSize = localStorage.getItem("flagButtonSize");
     const savedFlagButtonPosition = localStorage.getItem("flagButtonPosition");
+    const savedTouchHoldDelay = localStorage.getItem("touchHoldDelay");
 
     if (savedRecords) setRecords(JSON.parse(savedRecords));
     if (savedGuestBestRecords) setGuestBestRecords(JSON.parse(savedGuestBestRecords));
     if (savedZoom) setZoom(Number(savedZoom));
     if (savedFlagButtonSize) setFlagButtonSize(Number(savedFlagButtonSize));
     if (savedFlagButtonPosition) setFlagButtonPosition(savedFlagButtonPosition);
+    if (savedTouchHoldDelay) setTouchHoldDelay(Number(savedTouchHoldDelay));
   }, []);
 
   // Load current auth user once and keep in sync (subscribe)
@@ -134,6 +137,9 @@ const Layout = () => {
   useEffect(() => {
     localStorage.setItem("flagButtonPosition", flagButtonPosition);
   }, [flagButtonPosition]);
+  useEffect(() => {
+    localStorage.setItem("touchHoldDelay", touchHoldDelay.toString());
+  }, [touchHoldDelay]);
 
   // Center the board horizontally on initial load
   useEffect(() => {
@@ -237,6 +243,8 @@ const Layout = () => {
               setFlagButtonSize={setFlagButtonSize}
               flagButtonPosition={flagButtonPosition}
               setFlagButtonPosition={setFlagButtonPosition}
+              touchHoldDelay={touchHoldDelay}
+              setTouchHoldDelay={setTouchHoldDelay}
             />
             <StatsButton
               isDesktop={isDesktop}
@@ -262,6 +270,7 @@ const Layout = () => {
               zoom={zoom}
               flagButtonSize={flagButtonSize}
               flagButtonPosition={flagButtonPosition}
+              touchHoldDelay={touchHoldDelay}
               isTouchscreen={isTouchscreen}
               addRecord={addRecord}
             />

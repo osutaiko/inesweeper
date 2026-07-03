@@ -25,6 +25,8 @@ type SettingsButtonProps = {
   setFlagButtonSize: Dispatch<SetStateAction<number>>;
   flagButtonPosition: string;
   setFlagButtonPosition: Dispatch<SetStateAction<string>>;
+  touchHoldDelay: number;
+  setTouchHoldDelay: Dispatch<SetStateAction<number>>;
 };
 
 const SettingsButton = ({
@@ -35,6 +37,8 @@ const SettingsButton = ({
   setFlagButtonSize,
   flagButtonPosition,
   setFlagButtonPosition,
+  touchHoldDelay,
+  setTouchHoldDelay,
 }: SettingsButtonProps) => (
   <Dialog>
     <DialogTrigger asChild>
@@ -62,6 +66,10 @@ const SettingsButton = ({
           {isTouchscreen && (
             <>
               <Separator className="my-2" />
+              <div className="flex flex-row justify-between items-center gap-3">
+                <span className="w-1/2">Hold to flag time: {touchHoldDelay} ms</span>
+                <Slider className="w-1/2" value={[touchHoldDelay]} onValueChange={(value) => setTouchHoldDelay(value[0])} min={100} max={500} step={20} />
+              </div>
               <div className="flex flex-row justify-between items-center gap-3">
                 <span className="w-1/2">Flag toggle button size: {flagButtonSize} px</span>
                 <Slider className="w-1/2" value={[flagButtonSize]} onValueChange={(value) => setFlagButtonSize(value[0])} min={20} max={160} step={4} />
