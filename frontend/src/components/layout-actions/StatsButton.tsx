@@ -113,7 +113,7 @@ const StatsButton = ({
           Log in to save your times online, and qualify for the global Hi-scores!
         </DialogDescription>
       </DialogHeader>
-      <Tabs defaultValue="me" className="px-6">
+      <Tabs defaultValue="me">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="me">Me</TabsTrigger>
           <TabsTrigger value="global">Global</TabsTrigger>
