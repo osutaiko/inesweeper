@@ -20,6 +20,7 @@ import { formatTimeMs } from "@/lib/utils";
 type StatsButtonProps = {
   isDesktop: boolean;
   displayedRecords: TimeRecord[];
+  globalRecords: TimeRecord[];
   isAuthed: boolean;
 };
 
@@ -74,7 +75,12 @@ const ScoreTable = ({ isDesktop, records }: ScoreTableProps) => (
   </Table>
 );
 
-const StatsButton = ({ isDesktop, displayedRecords, isAuthed }: StatsButtonProps) => (
+const StatsButton = ({
+  isDesktop,
+  displayedRecords,
+  globalRecords,
+  isAuthed,
+}: StatsButtonProps) => (
   <Dialog>
     <DialogTrigger asChild>
       <Button variant="secondary" size="icon">
@@ -100,7 +106,7 @@ const StatsButton = ({ isDesktop, displayedRecords, isAuthed }: StatsButtonProps
         </TabsContent>
         <TabsContent value="global" className="mt-4">
           <ScrollArea className="max-h-[calc(100vh-150px)]">
-            <ScoreTable isDesktop={isDesktop} records={[]} />
+            <ScoreTable isDesktop={isDesktop} records={globalRecords} />
           </ScrollArea>
         </TabsContent>
       </Tabs>

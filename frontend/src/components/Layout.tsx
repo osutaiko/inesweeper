@@ -23,7 +23,11 @@ import {
 import { ScrollArea, ScrollBar } from "./ui/scroll-area";
 
 import InesweeperLogo from "@/assets/images/inesweeper-logo.svg";
-import { loadLoggedInBestTimes, recordLoggedInGameLog } from "@/lib/game-log";
+import {
+  loadGlobalBestTimes,
+  loadLoggedInBestTimes,
+  recordLoggedInGameLog,
+} from "@/lib/game-log";
 import AuthButton from "./layout-actions/AuthButton";
 import InfoButton from "./layout-actions/InfoButton";
 import SettingsButton from "./layout-actions/SettingsButton";
@@ -54,6 +58,7 @@ const Layout = () => {
   // Statistics
   const [records, setRecords] = useState<TimeRecord[]>([]);
   const [guestBestRecords, setGuestBestRecords] = useState<TimeRecord[]>([]);
+  const [globalRecords, setGlobalRecords] = useState<TimeRecord[]>([]);
 
   // Authentication
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
@@ -74,6 +79,29 @@ const Layout = () => {
     if (savedFlagButtonSize) setFlagButtonSize(Number(savedFlagButtonSize));
     if (savedFlagButtonPosition) setFlagButtonPosition(savedFlagButtonPosition);
     if (savedTouchHoldDelay) setTouchHoldDelay(Number(savedTouchHoldDelay));
+  }, []);
+
+  // Load anonymous global hi-scores
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const loadGlobalHiScores = async () => {
+      try {
+        const bestTimes = await loadGlobalBestTimes();
+
+        if (!controller.signal.aborted) {
+          setGlobalRecords(bestTimes);
+        }
+      } catch {
+        if (!controller.signal.aborted) {
+          setGlobalRecords([]);
+        }
+      }
+    };
+
+    loadGlobalHiScores();
+
+    return () => controller.abort();
   }, []);
 
   // Load current auth user once and keep in sync (subscribe)
@@ -262,6 +290,7 @@ const Layout = () => {
             <StatsButton
               isDesktop={isDesktop}
               displayedRecords={displayedRecords}
+              globalRecords={globalRecords}
               isAuthed={Boolean(authUser)}
             />
             <InfoButton />

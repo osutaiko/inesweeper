@@ -35,7 +35,7 @@ export const recordLoggedInGameLog = async (run: LoggedInGameLog) => {
 type BestTimeRow = {
   variant: VariantName;
   difficulty: DifficultyName;
-  best_time_ms: number;
+  best_time_ms: number | null;
   updated_at: string;
 };
 
@@ -58,4 +58,25 @@ export const loadLoggedInBestTimes = async () => {
     date: new Date(row.updated_at).getTime(),
     mineArray: [],
   }));
+};
+
+export const loadGlobalBestTimes = async () => {
+  const response = await fetch(`${getBackendUrl()}/game-logs/global-best-times`);
+
+  if (!response.ok) {
+    throw new Error("Failed to load global best times");
+  }
+
+  const rows = (await response.json()) as BestTimeRow[];
+
+  return rows
+    .filter((row): row is BestTimeRow & { best_time_ms: number } =>
+      Number.isFinite(row.best_time_ms),
+    )
+    .map<TimeRecord>((row) => ({
+      boardConfig: boardConfigLibrary[row.variant][row.difficulty],
+      timeElapsed: row.best_time_ms,
+      date: new Date(row.updated_at).getTime(),
+      mineArray: [],
+    }));
 };

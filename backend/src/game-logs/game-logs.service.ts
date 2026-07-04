@@ -18,7 +18,7 @@ type BestTimeInput = {
 type BestTimeRow = {
   variant: string;
   difficulty: string;
-  best_time_ms: number;
+  best_time_ms: number | null;
   updated_at: string;
 };
 
@@ -150,5 +150,35 @@ export class GameLogsService {
     }
 
     return data as BestTimeRow[];
+  }
+
+  async getGlobalBestTimes() {
+    const supabase = this.authService.createServiceRoleClient();
+
+    const { data, error } = await supabase
+      .from('best_times')
+      .select('variant, difficulty, best_time_ms, updated_at')
+      .order('best_time_ms', { ascending: true })
+      .order('updated_at', { ascending: true });
+
+    if (error || !data) {
+      throw new BadRequestException(error?.message ?? 'Unable to load global best times');
+    }
+
+    const bestTimesByBoard = new Map<string, BestTimeRow>();
+
+    for (const row of data as BestTimeRow[]) {
+      if (!Number.isFinite(row.best_time_ms)) {
+        continue;
+      }
+
+      const key = `${row.variant}:${row.difficulty}`;
+
+      if (!bestTimesByBoard.has(key)) {
+        bestTimesByBoard.set(key, row);
+      }
+    }
+
+    return Array.from(bestTimesByBoard.values());
   }
 }
