@@ -79,7 +79,7 @@ const ScoreTable = ({ isDesktop, records, compareRecords }: ScoreTableProps) => 
                 <span
                   className={
                     isRecordHolder
-                      ? "font-medium underline decoration-wavy decoration-emerald-500 underline-offset-4"
+                      ? "font-medium underline decoration-amber-500 decoration-2 underline-offset-4 underline-"
                       : undefined
                   }
                 >
