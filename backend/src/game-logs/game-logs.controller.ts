@@ -12,6 +12,12 @@ export class GameLogsController {
     return res.json(result);
   }
 
+  @Get('global-best-times')
+  async getGlobalBestTimes(@Res() res: Response) {
+    const result = await this.gameLogsService.getGlobalBestTimes();
+    return res.json(result);
+  }
+
   @Post()
   async recordCompletedGame(
     @Req() req: Request,

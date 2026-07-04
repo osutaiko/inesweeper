@@ -6,6 +6,23 @@ import type { Request } from 'express';
 export class AuthService {
   private readonly supabaseUrl = process.env.SUPABASE_URL;
   private readonly supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+  private readonly supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  private assertSupabaseConfig() {
+    if (!this.supabaseUrl || !this.supabaseAnonKey) {
+      throw new BadRequestException(
+        'SUPABASE_URL and SUPABASE_ANON_KEY must be set',
+      );
+    }
+  }
+
+  private assertServiceRoleConfig() {
+    if (!this.supabaseUrl || !this.supabaseServiceRoleKey) {
+      throw new BadRequestException(
+        'SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set',
+      );
+    }
+  }
 
   private getBearerToken(req: Request) {
     const authorizationHeader = req.headers.authorization;
@@ -25,13 +42,9 @@ export class AuthService {
       throw new UnauthorizedException('Login required');
     }
 
-    if (!this.supabaseUrl || !this.supabaseAnonKey) {
-      throw new BadRequestException(
-        'SUPABASE_URL and SUPABASE_ANON_KEY must be set',
-      );
-    }
+    this.assertSupabaseConfig();
 
-    return createClient(this.supabaseUrl, this.supabaseAnonKey, {
+    return createClient(this.supabaseUrl!, this.supabaseAnonKey!, {
       auth: {
         autoRefreshToken: false,
         persistSession: false,
@@ -44,6 +57,18 @@ export class AuthService {
       },
     });
   };
+
+  createServiceRoleClient() {
+    this.assertServiceRoleConfig();
+
+    return createClient(this.supabaseUrl!, this.supabaseServiceRoleKey!, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+        detectSessionInUrl: false,
+      },
+    });
+  }
 
   async getCurrentUser(req: Request) {
     const supabase = this.createBearerClient(req);
