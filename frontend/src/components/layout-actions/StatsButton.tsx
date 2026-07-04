@@ -27,9 +27,10 @@ type StatsButtonProps = {
 type ScoreTableProps = {
   isDesktop: boolean;
   records: TimeRecord[];
+  compareRecords: TimeRecord[];
 };
 
-const ScoreTable = ({ isDesktop, records }: ScoreTableProps) => (
+const ScoreTable = ({ isDesktop, records, compareRecords }: ScoreTableProps) => (
   <Table>
     <TableHeader>
       <TableRow>
@@ -48,24 +49,42 @@ const ScoreTable = ({ isDesktop, records }: ScoreTableProps) => (
             {variantMap[mode as keyof typeof variantMap]}
           </TableCell>
           {Object.keys(difficultyMap).map((difficultyKey) => {
-            const filteredRecords = records.filter(
-              (record) =>
-                JSON.stringify(record.boardConfig) ===
-                JSON.stringify(
-                  boardConfigLibrary[mode as keyof typeof boardConfigLibrary][
-                    difficultyKey as keyof typeof difficultyMap
-                  ],
-                ),
+            const boardConfig =
+              boardConfigLibrary[mode as keyof typeof boardConfigLibrary][
+                difficultyKey as keyof typeof difficultyMap
+              ];
+
+            const recordsForBoard = records.filter(
+              (record) => JSON.stringify(record.boardConfig) === JSON.stringify(boardConfig),
+            );
+            const compareRecordForBoard = compareRecords.filter(
+              (record) => JSON.stringify(record.boardConfig) === JSON.stringify(boardConfig),
             );
 
-            const bestTime = filteredRecords.reduce(
+            const bestTime = recordsForBoard.reduce(
               (min, record) => (record.timeElapsed < min ? record.timeElapsed : min),
               Infinity,
             );
+            const compareBestTime = compareRecordForBoard.reduce(
+              (min, record) => (record.timeElapsed < min ? record.timeElapsed : min),
+              Infinity,
+            );
+            const isRecordHolder =
+              bestTime !== Infinity &&
+              compareBestTime !== Infinity &&
+              bestTime === compareBestTime;
 
             return (
               <TableCell key={difficultyKey} className="p-2 text-center">
-                {bestTime === Infinity ? "-" : formatTimeMs(bestTime)}
+                <span
+                  className={
+                    isRecordHolder
+                      ? "font-medium underline decoration-wavy decoration-emerald-500 underline-offset-4"
+                      : undefined
+                  }
+                >
+                  {bestTime === Infinity ? "-" : formatTimeMs(bestTime)}
+                </span>
               </TableCell>
             );
           })}
@@ -101,12 +120,20 @@ const StatsButton = ({
         </TabsList>
         <TabsContent value="me" className="mt-4">
           <ScrollArea className="max-h-[calc(100vh-150px)]">
-            <ScoreTable isDesktop={isDesktop} records={displayedRecords} />
+            <ScoreTable
+              isDesktop={isDesktop}
+              records={displayedRecords}
+              compareRecords={globalRecords}
+            />
           </ScrollArea>
         </TabsContent>
         <TabsContent value="global" className="mt-4">
           <ScrollArea className="max-h-[calc(100vh-150px)]">
-            <ScoreTable isDesktop={isDesktop} records={globalRecords} />
+            <ScoreTable
+              isDesktop={isDesktop}
+              records={globalRecords}
+              compareRecords={displayedRecords}
+            />
           </ScrollArea>
         </TabsContent>
       </Tabs>
