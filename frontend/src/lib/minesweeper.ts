@@ -10,6 +10,30 @@ export const COMPASS_ANGLES = Array.from({ length: 32 }, (_, index) => {
 // Shallow copy board helper
 const cloneBoard = (board: Board) => board.map(row => [...row]);  
 
+const canPlaceColorMine = (board: Board, row: number, col: number, color: number) => {
+  for (let dRow = -1; dRow <= 1; dRow++) {
+    for (let dCol = -1; dCol <= 1; dCol++) {
+      if (dRow === 0 && dCol === 0) continue;
+      const neighborRow = row + dRow;
+      const neighborCol = col + dCol;
+      const neighbor = board[neighborRow]?.[neighborCol];
+
+      if (!neighbor || neighbor.mineNum !== 0) continue;
+
+      for (let sRow = -1; sRow <= 1; sRow++) {
+        for (let sCol = -1; sCol <= 1; sCol++) {
+          if (sRow === 0 && sCol === 0) continue;
+          if (board[neighborRow + sRow]?.[neighborCol + sCol]?.mineNum === color) {
+            return false;
+          }
+        }
+      }
+    }
+  }
+
+  return true;
+};
+
 // Randomly generate minefield from empty board
 const placeMines = (board: Board, config: BoardConfig) => {
   let placedPosMines = 0;
@@ -18,6 +42,26 @@ const placeMines = (board: Board, config: BoardConfig) => {
   const maxMinesPerCell = config.maxMinesPerCell;
 
   const tilesWithMines: number[][] = [];
+
+  //#region placeMines::Colors
+  if (config.mineTypeDeviant === "rgb") {
+    let nextColor: 1 | 2 | 3 = 1;
+    let placedColorMines = 0;
+
+    while (placedColorMines < totalTilesWithMines) {
+      const row = Math.floor(Math.random() * config.height);
+      const col = Math.floor(Math.random() * config.width);
+
+      if (board[row][col].mineNum || !canPlaceColorMine(board, row, col, nextColor)) continue;
+
+      board[row][col].mineNum = nextColor;
+      placedColorMines++;
+      nextColor = nextColor === 3 ? 1 : ((nextColor + 1) as 1 | 2 | 3);
+    }
+
+    return;
+  }
+  //#endregion
 
   //#region placeMines::Domino
   if (config.mineGenDeviant === "domino") {
@@ -185,7 +229,7 @@ export const handleBeforeFirstClick = (board: Board, row: number, col: number, c
 
   // Only if first click is a mine
   if (board[row][col].mineNum !== 0) {
-    let newBoard = [...board];
+    const newBoard = [...board];
     
     //#region handleBeforeFirstClick::Domino
     if (config.mineGenDeviant === "domino") {
@@ -235,6 +279,35 @@ export const handleBeforeFirstClick = (board: Board, row: number, col: number, c
           newBoard[row][col].mineNum = mines[0];
           newBoard[pi][pj].mineNum = mines[1];
         }
+      }
+    }
+    //#endregion
+
+    //#region handleBeforeFirstClick::Colors
+    else if (config.mineTypeDeviant === "rgb") {
+      const mine = newBoard[row][col].mineNum;
+      newBoard[row][col].mineNum = 0;
+
+      const emptySquares = [];
+
+      for (let i = 0; i < config.height; i++) {
+        for (let j = 0; j < config.width; j++) {
+          if (
+            !newBoard[i][j].mineNum &&
+            (i !== row || j !== col) &&
+            canPlaceColorMine(newBoard, i, j, mine)
+          ) {
+            emptySquares.push({ i, j });
+          }
+        }
+      }
+
+      const randomSquare = emptySquares[Math.floor(Math.random() * emptySquares.length)];
+
+      if (randomSquare) {
+        newBoard[randomSquare.i][randomSquare.j].mineNum = mine;
+      } else {
+        newBoard[row][col].mineNum = mine;
       }
     }
     //#endregion
@@ -338,6 +411,20 @@ const iterateCompassNeighbors = (
 
 // Calculate cell number by looking up neighbor mines
 export const getCellNumber = (board: Board, row: number, col: number, config: BoardConfig): number | { type: "compass"; angleIndex: number | null } | { type: "nearest2"; distances: [number, number] } | null => {
+  //#region getCellNumber::Colors
+  if (config.mineTypeDeviant === "rgb") {
+    let colorMask = 0;
+
+    iterateNeighbors(board, row, col, config, (_, __, neighbor) => {
+      if (neighbor.mineNum === 1) colorMask |= 1;
+      else if (neighbor.mineNum === 2) colorMask |= 2;
+      else if (neighbor.mineNum === 3) colorMask |= 4;
+    });
+
+    return colorMask ? { type: "colors", mask: colorMask } : null;
+  }
+  //#endregion
+
   //#region getCellNumber::Compass
   // Vector sum of neighboring mines
   // Treat all neighbors with equal weight - normalize with *SQRT1_2 for diagonals
@@ -465,14 +552,28 @@ export const getNeighborCounts = (board: Board, row: number, col: number, config
   let surroundingHiddens = 0;
   let surroundingRedHiddens = 0;
   let surroundingBlueHiddens = 0;
+  let surroundingRedFlags = 0;
+  let surroundingYellowFlags = 0;
+  let surroundingBlueFlags = 0;
 
   iterateNeighbors(board, row, col, config, (nx, ny, neighbor) => {
     if (neighbor.state.type === "flagged") {
       // Count considering cell modifications (amplified/contrast) at this step
       // to make chording check as easy as possible
 
+      if (config.mineTypeDeviant === "rgb") {
+        surroundingFlags++;
+        if (neighbor.state.flagNum === 1) {
+          surroundingRedFlags++;
+        } else if (neighbor.state.flagNum === 2) {
+          surroundingYellowFlags++;
+        } else if (neighbor.state.flagNum === 3) {
+          surroundingBlueFlags++;
+        }
+      }
+      
       //#region getNeighborCounts::Amplified
-      if (config.cellNumberDeviant === "amplified") {
+      else if (config.cellNumberDeviant === "amplified") {
         if ((nx + ny) % 2 === 1) {
           surroundingFlags += neighbor.state.flagNum * 2;
         } else {
@@ -510,7 +611,7 @@ export const getNeighborCounts = (board: Board, row: number, col: number, config
     surroundingFlags = Math.abs(surroundingFlags);
   }
 
-  return { flags: surroundingFlags, hiddens: surroundingHiddens, redHiddens: surroundingRedHiddens, blueHiddens: surroundingBlueHiddens };
+  return { flags: surroundingFlags, hiddens: surroundingHiddens, redHiddens: surroundingRedHiddens, blueHiddens: surroundingBlueHiddens, redFlags: surroundingRedFlags, yellowFlags: surroundingYellowFlags, blueFlags: surroundingBlueFlags };
 };
 
 // Chord action
@@ -574,6 +675,28 @@ export const handleChord = (board: Board, row: number, col: number, config: Boar
 
     return updatedBoard;
   }
+  //#endregion
+
+  //#region handleChord::Colors
+  if (cell.state.num && typeof cell.state.num === "object" && cell.state.num.type === "colors") {
+    const neighborCounts = getNeighborCounts(board, row, col, config);
+    const expectedRed = cell.state.num.mask & 1 ? 1 : 0;
+    const expectedYellow = cell.state.num.mask & 2 ? 1 : 0;
+    const expectedBlue = cell.state.num.mask & 4 ? 1 : 0;
+
+    if (
+      neighborCounts.flags === expectedRed + expectedYellow + expectedBlue &&
+      neighborCounts.redFlags === expectedRed &&
+      neighborCounts.yellowFlags === expectedYellow &&
+      neighborCounts.blueFlags === expectedBlue
+    ) {
+      revealSurroundingHiddens();
+    }
+
+    return updatedBoard;
+  }
+  //#endregion
+
   if (typeof cell.state.num !== "number") return updatedBoard;
   //#endregion
 
@@ -628,6 +751,16 @@ export const handleFlag = (board: Board, row: number, col: number, config: Board
 
   if (cell.state.type === "revealed") return board;
 
+  if (config.mineTypeDeviant === "rgb") {
+    if (cell.state.type === "hidden") {
+      cell.state = { type: "flagged", flagNum: 1 };
+    } else if (cell.state.type === "flagged") {
+      cell.state = cell.state.flagNum === 3 ? { type: "hidden" } : { type: "flagged", flagNum: cell.state.flagNum + 1 };
+    }
+
+    return updatedBoard;
+  }
+
   // Most variants: hid -> flag -> hid -> ...
   // * Omega: hid -> + -> - -> hid -> ...
   // * Multimines: hid -> 1 -> 2 -> 3 -> hid -> ...
@@ -664,43 +797,66 @@ export const handleFlag = (board: Board, row: number, col: number, config: Board
 };
 
 // Get remaining unflagged tile (mine) stats for display in GameBoard header
-export const countRemainingFlags = (board: Board): { remainingPosFlags: number; remainingNegFlags: number; remainingFlagTiles: number } => {
-  let totalPosMines = 0;
-  let totalNegMines = 0;
-  let totalMineTiles = 0;
-  let placedPosFlags = 0;
-  let placedNegFlags = 0;
-  let placedFlagTiles = 0;
+export const countRemainingFlags = (board: Board): {
+  remainingPosFlags: number;
+  remainingNegFlags: number;
+  remainingFlagTiles: number;
+  remainingRedFlags: number;
+  remainingYellowFlags: number;
+  remainingBlueFlags: number;
+} => {
+  const totals = { pos: 0, neg: 0, tiles: 0, red: 0, yellow: 0, blue: 0 };
+  const placed = { pos: 0, neg: 0, tiles: 0, red: 0, yellow: 0, blue: 0 };
 
   for (const row of board) {
     for (const cell of row) {
       if (cell.mineNum > 0) {
-        totalPosMines += cell.mineNum;
-        totalMineTiles++;
+        totals.pos += cell.mineNum;
+        totals.tiles++;
+        if (cell.mineNum === 1) {
+          totals.red++;
+        } else if (cell.mineNum === 2) {
+          totals.yellow++;
+        } else if (cell.mineNum === 3) {
+          totals.blue++;
+        }
       } else if (cell.mineNum < 0) {
-        totalNegMines += Math.abs(cell.mineNum);
-        totalMineTiles++;
+        totals.neg += Math.abs(cell.mineNum);
+        totals.tiles++;
       }
 
       if (cell.state.type === "flagged") {
-        placedFlagTiles++;
+        placed.tiles++;
         if (cell.state.flagNum > 0) {
-          placedPosFlags += cell.state.flagNum;
+          placed.pos += cell.state.flagNum;
+          if (cell.state.flagNum === 1) {
+            placed.red++;
+          } else if (cell.state.flagNum === 2) {
+            placed.yellow++;
+          } else if (cell.state.flagNum === 3) {
+            placed.blue++;
+          }
         } else {
-          placedNegFlags += Math.abs(cell.state.flagNum);
+          placed.neg += Math.abs(cell.state.flagNum);
         }
       }
     }
   }
 
-  const remainingPosFlags = totalPosMines - placedPosFlags;
-  const remainingNegFlags = totalNegMines - placedNegFlags;
-  const remainingFlagTiles = totalMineTiles - placedFlagTiles;
+  const remainingPosFlags = totals.pos - placed.pos;
+  const remainingNegFlags = totals.neg - placed.neg;
+  const remainingFlagTiles = totals.tiles - placed.tiles;
+  const remainingRedFlags = totals.red - placed.red;
+  const remainingYellowFlags = totals.yellow - placed.yellow;
+  const remainingBlueFlags = totals.blue - placed.blue;
 
   return {
     remainingPosFlags: remainingPosFlags,
     remainingNegFlags: remainingNegFlags,
     remainingFlagTiles: remainingFlagTiles,
+    remainingRedFlags: remainingRedFlags,
+    remainingYellowFlags: remainingYellowFlags,
+    remainingBlueFlags: remainingBlueFlags,
   };
 };
 

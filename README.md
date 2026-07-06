@@ -15,6 +15,7 @@ A Collection of Interesting Minesweeper Variants.
 |---|---|---|
 | **Multimines** | Up to three mines in a single cell | [Minesweeper Reborn](https://coding4rtist.itch.io/minesweeper-reborn), [mine.js](https://sinseiki.github.io/mine.js/) |
 | **Omega** | Positive and negative mines | [Omegasweeper](https://duncanacnud.itch.io/omegasweeper), [Advent Calendar day 16](https://heptaveegesimal.com/2018/advent-calendar/) |
+| **Colorful** | Red, yellow, and blue mines with mixed neighboring mine colors as clues | [Colorsweeper](https://nerdsweeper.com/) |
 
 ### Different number scheme
 | Variant | Description | (Main) Inspirations |

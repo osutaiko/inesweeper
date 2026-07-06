@@ -50,6 +50,11 @@ const InfoButton = () => (
                 <p>There can be either a positive mine (red flag), or a negative mine (blue flag) on a cell.</p>
                 <small>Note: As a special rule, all cells neighboring 0&apos;s are automatically revealed if they contain no mines. This means each unrevealed cell neighboring an explicit 0 is guaranteed to contain a mine (either positive or negative).</small>
               </div>
+              <div className="flex flex-col gap-1">
+                <h4 className="font-medium">Colorful</h4>
+                <p>Mines can be red, yellow, or blue. Instead of numbers, cells show the mixed color of neighboring mines.</p>
+                <small>Note: Mines are generated such that each safe cell doesn't have more than one neighboring mines of the same color.</small>
+              </div>
             </div>
           </TabsContent>
           <TabsContent value="number-scheme" className="mt-4">
