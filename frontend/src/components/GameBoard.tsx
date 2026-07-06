@@ -397,26 +397,26 @@ export const GameBoard: React.FC<{
             className="bg-game-border border-t-[9px] border-x-[9px] border-game-border"
           >
               <div className="relative flex justify-between p-2 bg-game-hidden rounded-sm">
-                <div className={`flex flex-col h-[40px] justify-center px-3 gap-0 -space-y-0.5 rounded-md overflow-hidden [&_svg]:size-auto bg-game-button`}>
+                <div className="flex content-center items-center justify-center h-[40px] px-3 gap-x-2 overflow-hidden whitespace-nowrap [&_svg]:size-auto bg-game-button">
                   {config.mineTypeDeviant === "rgb" ? (
-                    <>
+                    <div className="flex flex-wrap content-center items-center justify-center gap-x-2 w-[80px]">
                       {[{ color: 1, remaining: remainingRedFlags }, { color: 2, remaining: remainingYellowFlags }, { color: 3, remaining: remainingBlueFlags }].map(({ color, remaining }) => (
-                        <div key={color} className="flex flex-row items-center gap-2.5">
+                        <span key={color} className="inline-flex items-center gap-1 leading-none">
                           <span className={`font-minesweeper text-[15px] ${getColorClass(color)}`}>
                             `
                           </span>
                           <span className="font-bold text-sm">{remaining}</span>
-                        </div>
+                        </span>
                       ))}
-                    </>
+                    </div>
                   ) : (
                     <>
                       {config.posMineCount > 0 && (
-                        <div className="flex flex-row items-center gap-2.5">
+                        <div className="flex flex-row items-center gap-1.5">
                           <span className={`font-minesweeper ${config.negMineCount > 0 ? "text-[15px]" : "text-[20px]"} text-red-500`}>
                             `
                           </span>
-                          <span className={`font-bold ${config.negMineCount > 0 ? "text-sm" : "text-xl"}`}>
+                          <span className="font-bold text-xl">
                             {remainingPosFlags}
                             {config.maxMinesPerCell > 1 && (
                               <span className="text-muted-foreground text-xs">/{remainingFlagTiles}</span>
@@ -425,11 +425,11 @@ export const GameBoard: React.FC<{
                         </div>
                       )}
                       {config.negMineCount > 0 && (
-                        <div className="flex flex-row items-center gap-2.5">
+                        <div className="flex flex-row items-center gap-2">
                           <span className={`font-minesweeper ${config.posMineCount > 0 ? "text-[15px]" : "text-[20px]"} text-blue-500 rotate-180`}>
                             `
                           </span>
-                          <span className={`font-bold ${config.posMineCount > 0 ? "text-sm" : "text-xl"}`}>{remainingNegFlags}</span>
+                          <span className="font-bold text-xl">{remainingNegFlags}</span>
                         </div>
                       )}
                     </>
