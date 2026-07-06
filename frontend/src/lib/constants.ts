@@ -27,6 +27,11 @@ export const boardConfigLibrary: BoardConfigLibrary = {
     "int": { width: 16, height: 16, mineTileCount: 40, posMineCount: 20, negMineCount: 20, maxMinesPerCell: 1, cellNumberDeviant: null },
     "exp": { width: 30, height: 16, mineTileCount: 90, posMineCount: 45, negMineCount: 45, maxMinesPerCell: 1, cellNumberDeviant: null },
   },
+  "colors": {
+    "beg": { width: 9, height: 9, mineTileCount: 12, posMineCount: 12, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: null, mineTypeDeviant: "rgb" },
+    "int": { width: 16, height: 16, mineTileCount: 45, posMineCount: 45, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: null, mineTypeDeviant: "rgb" },
+    "exp": { width: 30, height: 16, mineTileCount: 99, posMineCount: 99, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: null, mineTypeDeviant: "rgb" },
+  },
   "liar": {
     "beg": { width: 9, height: 9, mineTileCount: 10, posMineCount: 10, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "lie" },
     "int": { width: 16, height: 16, mineTileCount: 40, posMineCount: 40, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "lie" },
@@ -57,6 +62,11 @@ export const boardConfigLibrary: BoardConfigLibrary = {
     "int": { width: 16, height: 16, mineTileCount: 50, posMineCount: 50, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "compass" },
     "exp": { width: 30, height: 16, mineTileCount: 125, posMineCount: 125, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "compass" },
   },
+  nearest2: {
+    beg: { width: 9, height: 9, mineTileCount: 10, posMineCount: 10, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "nearest2" },
+    int: { width: 16, height: 16, mineTileCount: 40, posMineCount: 40, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "nearest2" },
+    exp: { width: 30, height: 16, mineTileCount: 99, posMineCount: 99, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "nearest2" },
+  },
   "domino": {
     "beg": { width: 9, height: 9, mineTileCount: 14, posMineCount: 14, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: null, mineGenDeviant: "domino" },
     "int": { width: 16, height: 16, mineTileCount: 60, posMineCount: 60, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: null, mineGenDeviant: "domino" },
@@ -73,12 +83,14 @@ export const variantMap: Record<VariantName, string> = {
   classic: "Classic",
   multimines: "Multimines",
   omega: "Omega",
+  colors: "Colorful",
   liar: "Liar",
   amplified: "Amplified",
   contrast: "Contrast",
   crossed: "Crossed",
   knight: "Knight's Path",
   compass: "Compass",
+  nearest2: "Nearest-2",
   domino: "Domino",
   scattered: "Scattered",
 };
@@ -95,6 +107,7 @@ export const variantGroups: VariantGroup[] = [
     items: [
       { value: "multimines", label: variantMap.multimines },
       { value: "omega", label: variantMap.omega },
+      { value: "colors", label: variantMap.colors },
     ],
   },
   {
@@ -107,6 +120,7 @@ export const variantGroups: VariantGroup[] = [
       { value: "crossed", label: variantMap.crossed },
       { value: "knight", label: variantMap.knight },
       { value: "compass", label: variantMap.compass },
+      { value: "nearest2", label: variantMap.nearest2 },
     ],
   },
   {

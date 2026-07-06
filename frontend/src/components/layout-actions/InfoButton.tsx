@@ -50,6 +50,11 @@ const InfoButton = () => (
                 <p>There can be either a positive mine (red flag), or a negative mine (blue flag) on a cell.</p>
                 <small>Note: As a special rule, all cells neighboring 0&apos;s are automatically revealed if they contain no mines. This means each unrevealed cell neighboring an explicit 0 is guaranteed to contain a mine (either positive or negative).</small>
               </div>
+              <div className="flex flex-col gap-1">
+                <h4 className="font-medium">Colorful</h4>
+                <p>Mines can be red, yellow, or blue. Instead of numbers, cells show the mixed color of neighboring mines.</p>
+                <small>Note: Mines are generated such that each safe cell doesn't have more than one neighboring mines of the same color.</small>
+              </div>
             </div>
           </TabsContent>
           <TabsContent value="number-scheme" className="mt-4">
@@ -81,6 +86,11 @@ const InfoButton = () => (
                 <p>Numbers are replaced by arrows pointing toward the average direction of mines in the neighboring eight cells.</p>
                 <small>Note: A dot means nearby mines cancel out.</small>
                 <small>Arrows are color coded. White arrows for main 8 directions (N, NE, E, SE, S, SW, W, NW), blue arrows for 22.5° half-steps, and red for in-between angles.</small>
+              </div>
+              <div className="flex flex-col gap-1">
+                <h4 className="font-medium">Nearest-2</h4>
+                <p>The number on a cell indicates the distance to the second nearest mine.</p>
+                <small>Note: The distance to a mine is given by the Chebychev distance, which treats both orthogonal and diagonal moves equally as distance 1.</small>
               </div>
             </div>
           </TabsContent>

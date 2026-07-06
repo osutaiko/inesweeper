@@ -4,7 +4,7 @@ import { createDemoBoard } from "@/lib/constants";
 import { createBoard, handleClick, handleChord, handleFlag, handleBeforeFirstClick as updateBoardBeforeFirstClick, isWin, isLoss, countRemainingFlags, extractMinesFromBoard, iterateNeighbors } from "@/lib/minesweeper";
 import { formatTimeMs } from "@/lib/utils";
 
-import { Laugh, Meh, Shovel, Skull, Smile } from "lucide-react";
+import { Laugh, Meh, Shovel, Skull, Smile, Square } from "lucide-react";
 import { Button } from "./ui/button";
 import { CompassArrow } from "./CompassArrow";
 
@@ -18,6 +18,7 @@ export const GameBoard: React.FC<{
   addRecord: (record: TimeRecord) => void;
 }> = ({ config, zoom, flagButtonSize, flagButtonPosition, touchHoldDelay, isTouchscreen, addRecord }) => {
   const isDemoBoard = false;
+  const isColorsVariant = config.mineTypeDeviant === "rgb";
 
   const [board, setBoard] = useState<Board>(isDemoBoard ? createDemoBoard() : (createBoard(config) || []));
   const [isFirstClick, setIsFirstClick] = useState(true);
@@ -296,7 +297,14 @@ export const GameBoard: React.FC<{
     }
   };
 
-  const { remainingPosFlags, remainingNegFlags, remainingFlagTiles } = countRemainingFlags(board);
+  const {
+    remainingPosFlags,
+    remainingNegFlags,
+    remainingFlagTiles,
+    remainingRedFlags,
+    remainingYellowFlags,
+    remainingBlueFlags,
+  } = countRemainingFlags(board);
 
   const getNumberColorClass = (num: number | null) => {
   ["text-game-number-1", "text-game-number-2", "text-game-number-3", "text-game-number-4", "text-game-number-5", "text-game-number-6", "text-game-number-7", "text-game-number-8", "text-game-number-0", "text-game-number--1", "text-game-number--2", "text-game-number--3", "text-game-number--4", "text-game-number--5", "text-game-number--6", "text-game-number--7", "text-game-number--8"];
@@ -314,6 +322,22 @@ export const GameBoard: React.FC<{
     return `text-game-number--${(-num % 8 === 0 ? 8 : -num % 8)}`;
   }
 };
+
+  const getColorClass = (mineNum: number) => {
+    if (mineNum === 1) return "text-red-500";
+    if (mineNum === 2) return "text-yellow-500";
+    return "text-blue-500";
+  };
+
+  const getColorMixClass = (mask: number) => {
+    if (mask === 1) return "text-red-500";
+    if (mask === 2) return "text-yellow-500";
+    if (mask === 3) return "text-orange-500";
+    if (mask === 4) return "text-blue-500";
+    if (mask === 5) return "text-purple-500";
+    if (mask === 6) return "text-green-500";
+    return "text-stone-500";
+  };
 
   const getFlagButtonPositionClass = () => {
     switch (flagButtonPosition) {
@@ -338,6 +362,27 @@ export const GameBoard: React.FC<{
 
     if (board[row][col].state.type === "revealed") {
       const updatedShadedCells: { row: number, col: number }[] = [];
+      const specialNum = typeof board[row][col].state.num === "object" ? board[row][col].state.num : null;
+
+      if (config.cellNumberDeviant === "nearest2" && specialNum?.type === "nearest2") {
+        const distance = specialNum.distances[1];
+
+        for (let dRow = -distance; dRow <= distance; dRow++) {
+          for (let dCol = -distance; dCol <= distance; dCol++) {
+            if (Math.max(Math.abs(dRow), Math.abs(dCol)) !== distance) continue;
+
+            const nx = row + dRow;
+            const ny = col + dCol;
+
+            if (nx >= 0 && nx < config.height && ny >= 0 && ny < config.width) {
+              updatedShadedCells.push({ row: nx, col: ny });
+            }
+          }
+        }
+
+        setShadedCells(updatedShadedCells);
+        return;
+      }
 
       iterateNeighbors(board, row, col, config, (nx, ny, neighbor) => {
         if (neighbor.state.type !== "revealed") {
@@ -372,30 +417,45 @@ export const GameBoard: React.FC<{
           <div
             className="bg-game-border border-t-[9px] border-x-[9px] border-game-border"
           >
-            <div className="relative flex justify-between p-2 bg-game-hidden rounded-sm">
-              <div className="flex flex-col h-[40px] justify-center px-3 gap-0 -space-y-0.5 rounded-md overflow-hidden [&_svg]:size-auto bg-game-button">
-                {config.posMineCount > 0 && 
-                  <div className="flex flex-row items-center gap-2.5">
-                    <span className={`font-minesweeper ${config.negMineCount > 0 ? "text-[15px]" : "text-[20px]"} text-red-500`}>
-                      `
-                    </span>
-                    <span className={`font-bold ${config.negMineCount > 0 ? "text-sm" : "text-xl"}`}>
-                      {remainingPosFlags}
-                      {config.maxMinesPerCell > 1 && (
-                        <span className="text-muted-foreground text-xs">/{remainingFlagTiles}</span>
+              <div className="relative flex justify-between p-2 bg-game-hidden rounded-sm">
+                <div className="flex content-center items-center justify-center h-[40px] px-3 gap-x-2 overflow-hidden whitespace-nowrap [&_svg]:size-auto bg-game-button">
+                  {config.mineTypeDeviant === "rgb" ? (
+                    <div className="flex flex-wrap content-center items-center justify-center gap-x-2 w-[80px]">
+                      {[{ color: 1, remaining: remainingRedFlags }, { color: 2, remaining: remainingYellowFlags }, { color: 3, remaining: remainingBlueFlags }].map(({ color, remaining }) => (
+                        <span key={color} className="inline-flex items-center gap-1 leading-none">
+                          <span className={`font-minesweeper text-[15px] ${getColorClass(color)}`}>
+                            `
+                          </span>
+                          <span className="font-bold text-sm">{remaining}</span>
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <>
+                      {config.posMineCount > 0 && (
+                        <div className="flex flex-row items-center gap-1.5">
+                          <span className={`font-minesweeper ${config.negMineCount > 0 ? "text-[15px]" : "text-[20px]"} text-red-500`}>
+                            `
+                          </span>
+                          <span className="font-bold text-xl">
+                            {remainingPosFlags}
+                            {config.maxMinesPerCell > 1 && (
+                              <span className="text-muted-foreground text-xs">/{remainingFlagTiles}</span>
+                            )}
+                          </span>
+                        </div>
                       )}
-                    </span>
-                  </div>
-                }
-                {config.negMineCount > 0 && 
-                  <div className="flex flex-row items-center gap-2.5">
-                    <span className={`font-minesweeper ${config.posMineCount > 0 ? "text-[15px]" : "text-[20px]"} text-blue-500 rotate-180`}>
-                      `
-                    </span>
-                    <span className={`font-bold ${config.posMineCount > 0 ? "text-sm" : "text-xl"}`}>{remainingNegFlags}</span>
-                  </div>
-                }
-              </div>
+                      {config.negMineCount > 0 && (
+                        <div className="flex flex-row items-center gap-2">
+                          <span className={`font-minesweeper ${config.posMineCount > 0 ? "text-[15px]" : "text-[20px]"} text-blue-500 rotate-180`}>
+                            `
+                          </span>
+                          <span className="font-bold text-xl">{remainingNegFlags}</span>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
               <Button
                 className="absolute top-0 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-game-button" size="icon" variant="secondary"
                 onClick={handleReset}
@@ -404,7 +464,7 @@ export const GameBoard: React.FC<{
                 {isGameOver === "win" && <Laugh />}
                 {isGameOver === "loss" && <Skull />}
               </Button>
-              <div className="flex h-[40px] justify-center items-center px-3 rounded-md overflow-hidden bg-game-button">
+                <div className={`flex h-[40px] justify-center items-center px-3 rounded-md overflow-hidden bg-game-button`}>
                 <span className="font-bold text-xl">
                   {isGameOver ? formatTimeMs(timeElapsed) : Math.floor(timeElapsed / 1000)}
                 </span>
@@ -423,7 +483,7 @@ export const GameBoard: React.FC<{
           >
             {board.map((row, rowIndex) =>
               row.map((cell, colIndex) => {
-                const compassNum = cell.state.type === "revealed" && typeof cell.state.num === "object" ? cell.state.num : null;
+                const specialNum = cell.state.type === "revealed" && typeof cell.state.num === "object" ? cell.state.num : null;
                 const getBgClass = () => {
                   if (cell.state.type === "revealed") {
                     if (isGameOver === "loss" && explodedCell && explodedCell.row === rowIndex && explodedCell.col === colIndex) {
@@ -471,21 +531,38 @@ export const GameBoard: React.FC<{
                       </div> : <></>
                     }
                     {cell.state.type === "revealed" && (
-                      cell.mineNum ? 
-                        <div
-                          className="flex flex-wrap justify-center items-center"
-                        >
-                            {Array.from({ length: Math.abs(cell.mineNum) }).map((_, idx) => (
-                              <span
-                                key={`bomb-${idx}`}
-                                className={`${Math.abs(cell.mineNum) > 1 ? "text-[9px]" : "mt-[2px] ml-[2px] text-[18px]"} leading-[11.5px] ${cell.mineNum > 0 ? "text-black" : "text-white"}`}
-                              >
-                                *
-                              </span>
-                            ))}
-                        </div> : (
-                        compassNum ? (
-                          <CompassArrow angleIndex={compassNum.angleIndex} />
+                      cell.mineNum ? (
+                        (() => {
+                          const mineNum = cell.mineNum;
+                          const mineCount = isColorsVariant ? 1 : Math.abs(mineNum);
+                          const mineClass = `${mineCount > 1 ? "text-[9px]" : "mt-[2px] ml-[2px] text-[18px]"} leading-[11.5px] ${isColorsVariant ? getColorClass(mineNum) : mineNum > 0 ? "text-black" : "text-white"}`;
+
+                          return (
+                            <div className="flex flex-wrap justify-center items-center">
+                              {Array.from({ length: mineCount }).map((_, idx) => (
+                                <span
+                                  key={`bomb-${idx}`}
+                                  className={mineClass}
+                                >
+                                  *
+                                </span>
+                              ))}
+                            </div>
+                          );
+                        })()
+                      ) : (
+                        specialNum?.type === "colors" ? (
+                          <Square className={`size-[18px] ${getColorMixClass(specialNum.mask)}`} fill="currentColor" />
+                        ) : specialNum?.type === "compass" ? (
+                          <CompassArrow angleIndex={specialNum.angleIndex} />
+                        ) : specialNum?.type === "nearest2" ? (
+                          <span
+                            className={`${
+                              specialNum.distances[0] === 1 ? "text-[16px]" : "text-[8px]"
+                            } ${getNumberColorClass(specialNum.distances[1])}`}
+                          >
+                            {specialNum.distances[1]}
+                          </span>
                         ) : (
                           <span
                             className={`inline-block origin-center ml-[2px] text-lg ${getNumberColorClass(cell.state.num)}`}
@@ -497,23 +574,27 @@ export const GameBoard: React.FC<{
                       )
                     )}
                     {cell.state.type === "flagged" && (
-                      <div
-                        className="flex flex-wrap pt-[1px] gap-y-[1px] justify-center items-center"
-                      >
-                        {(() => {
-                          const flagNum = cell.state.flagNum;
-                          return Array.from({ length: Math.abs(flagNum) }).map((_, idx) => (
-                            <span
-                              key={`flag-${idx}`}
-                              className={`${
-                                flagNum < 0 ? "rotate-180 text-blue-500 mr-[2px]" : "text-red-500 ml-[2px] leading-none"
-                              } ${Math.abs(flagNum) > 1 ? "text-[10px]" : "text-[18px]"}`}
-                            >
-                              `
-                            </span>
-                          ));
-                        })()}
-                      </div>
+                      isColorsVariant ? (
+                        <span className={`font-minesweeper leading-none ${getColorClass(cell.state.flagNum)} text-[18px]`}>
+                          `
+                        </span>
+                      ) : (
+                        <div className="flex flex-wrap pt-[1px] gap-y-[1px] justify-center items-center">
+                          {(() => {
+                            const flagNum = cell.state.flagNum;
+                            return Array.from({ length: Math.abs(flagNum) }).map((_, idx) => (
+                              <span
+                                key={`flag-${idx}`}
+                                className={`${
+                                  flagNum < 0 ? "rotate-180 text-blue-500 mr-[2px]" : "text-red-500 ml-[2px] leading-none"
+                                } ${Math.abs(flagNum) > 1 ? "text-[10px]" : "text-[18px]"}`}
+                              >
+                                `
+                              </span>
+                            ));
+                          })()}
+                        </div>
+                      )
                     )}
                     {cell.state.type === "hidden" && isFlagToggled && (
                       <span className="text-[18px] ml-[2px] leading-none opacity-15">

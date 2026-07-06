@@ -15,6 +15,7 @@ A Collection of Interesting Minesweeper Variants.
 |---|---|---|
 | **Multimines** | Up to three mines in a single cell | [Minesweeper Reborn](https://coding4rtist.itch.io/minesweeper-reborn), [mine.js](https://sinseiki.github.io/mine.js/) |
 | **Omega** | Positive and negative mines | [Omegasweeper](https://duncanacnud.itch.io/omegasweeper), [Advent Calendar day 16](https://heptaveegesimal.com/2018/advent-calendar/) |
+| **Colorful** | Red, yellow, and blue mines with mixed neighboring mine colors as clues | [Nerd(Color)sweeper](https://nerdsweeper.com/) |
 
 ### Different number scheme
 | Variant | Description | (Main) Inspirations |
@@ -25,6 +26,7 @@ A Collection of Interesting Minesweeper Variants.
 | **Crossed** | The numbers indicate the number of mines in a cross-shaped region within distance 2 | [14MV[X]](https://store.steampowered.com/app/1865060/14_Minesweeper_Variants/) |
 | **Knight's Path** | The numbers indicate the number of mines in a chess knight's path | [Advent Calendar day 4/8](https://heptaveegesimal.com/2018/advent-calendar/) |
 | **Compass** | Numbers are replaced by arrows pointing toward the average direction of mines in neighboring cells | Original |
+| **Nearest-2** | The numbers indicate the distance to the second nearest mine | [Nerd(Distance)sweeper](https://nerdsweeper.com/) |
 
 ### Different mine generation
 | Variant | Description | (Main) Inspirations |
