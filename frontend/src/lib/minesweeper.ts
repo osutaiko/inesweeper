@@ -698,6 +698,7 @@ export const handleChord = (board: Board, row: number, col: number, config: Boar
   //#endregion
 
   //#region handleChord::Nearest-2
+  /* 
   if (typeof cell.state.num === "object" && cell.state.num?.type === "nearest2") {
     let canChord = true;
 
@@ -712,7 +713,8 @@ export const handleChord = (board: Board, row: number, col: number, config: Boar
     }
 
     return updatedBoard;
-  }
+  } 
+  */
   //#endregion
 
   if (typeof cell.state.num !== "number") return updatedBoard;

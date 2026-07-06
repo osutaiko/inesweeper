@@ -62,10 +62,10 @@ export const boardConfigLibrary: BoardConfigLibrary = {
     "int": { width: 16, height: 16, mineTileCount: 50, posMineCount: 50, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "compass" },
     "exp": { width: 30, height: 16, mineTileCount: 125, posMineCount: 125, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "compass" },
   },
-  nearest2: {
-    beg: { width: 9, height: 9, mineTileCount: 10, posMineCount: 10, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "nearest2" },
-    int: { width: 16, height: 16, mineTileCount: 40, posMineCount: 40, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "nearest2" },
-    exp: { width: 30, height: 16, mineTileCount: 99, posMineCount: 99, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "nearest2" },
+  "nearest2": {
+    beg: { width: 9, height: 9, mineTileCount: 8, posMineCount: 8, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "nearest2" },
+    int: { width: 16, height: 16, mineTileCount: 36, posMineCount: 36, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "nearest2" },
+    exp: { width: 30, height: 16, mineTileCount: 90, posMineCount: 90, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "nearest2" },
   },
   "domino": {
     "beg": { width: 9, height: 9, mineTileCount: 14, posMineCount: 14, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: null, mineGenDeviant: "domino" },
