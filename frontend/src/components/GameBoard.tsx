@@ -362,6 +362,27 @@ export const GameBoard: React.FC<{
 
     if (board[row][col].state.type === "revealed") {
       const updatedShadedCells: { row: number, col: number }[] = [];
+      const specialNum = typeof board[row][col].state.num === "object" ? board[row][col].state.num : null;
+
+      if (config.cellNumberDeviant === "nearest2" && specialNum?.type === "nearest2") {
+        const distance = specialNum.distances[1];
+
+        for (let dRow = -distance; dRow <= distance; dRow++) {
+          for (let dCol = -distance; dCol <= distance; dCol++) {
+            if (Math.max(Math.abs(dRow), Math.abs(dCol)) !== distance) continue;
+
+            const nx = row + dRow;
+            const ny = col + dCol;
+
+            if (nx >= 0 && nx < config.height && ny >= 0 && ny < config.width) {
+              updatedShadedCells.push({ row: nx, col: ny });
+            }
+          }
+        }
+
+        setShadedCells(updatedShadedCells);
+        return;
+      }
 
       iterateNeighbors(board, row, col, config, (nx, ny, neighbor) => {
         if (neighbor.state.type !== "revealed") {
