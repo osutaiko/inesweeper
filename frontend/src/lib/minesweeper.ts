@@ -697,24 +697,6 @@ export const handleChord = (board: Board, row: number, col: number, config: Boar
   }
   //#endregion
 
-  //#region handleChord::Nearest-2
-  if (typeof cell.state.num === "object" && cell.state.num?.type === "nearest2") {
-    let canChord = true;
-
-    iterateNeighbors(updatedBoard, row, col, config, (_, __, neighbor) => {
-      if (neighbor.mineNum !== 0 && neighbor.state.type !== "flagged") {
-        canChord = false;
-      }
-    });
-
-    if (canChord) {
-      revealSurroundingHiddens();
-    }
-
-    return updatedBoard;
-  }
-  //#endregion
-
   if (typeof cell.state.num !== "number") return updatedBoard;
   //#endregion
 
