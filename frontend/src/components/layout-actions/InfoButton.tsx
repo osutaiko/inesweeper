@@ -87,6 +87,11 @@ const InfoButton = () => (
                 <small>Note: A dot means nearby mines cancel out.</small>
                 <small>Arrows are color coded. White arrows for main 8 directions (N, NE, E, SE, S, SW, W, NW), blue arrows for 22.5° half-steps, and red for in-between angles.</small>
               </div>
+              <div className="flex flex-col gap-1">
+                <h4 className="font-medium">Nearest-2</h4>
+                <p>The number on a cell indicates the distance to the second nearest mine.</p>
+                <small>Note: The distance to a mine is given by the Chebychev distance, which treats both orthogonal and diagonal moves equally as distance 1.</small>
+              </div>
             </div>
           </TabsContent>
           <TabsContent value="mine-calculation" className="mt-4">
