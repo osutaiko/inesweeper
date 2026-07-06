@@ -114,6 +114,31 @@ const placeMines = (board: Board, config: BoardConfig) => {
   }
 };
 
+// Chebyshev distance helper for Nearest-2 mode
+const getChebyshevDistance = (fromRow: number, fromCol: number, toRow: number, toCol: number) =>
+  Math.max(Math.abs(fromRow - toRow), Math.abs(fromCol - toCol));
+
+// List of distances helper for Nearest-2 mode
+const getNearestMineDistances = (board: Board, row: number, col: number): [number, number] | null => {
+  const distances: number[] = [];
+
+  for (let i = 0; i < board.length; i++) {
+    for (let j = 0; j < board[i].length; j++) {
+      if (board[i][j].mineNum !== 0) {
+        distances.push(getChebyshevDistance(row, col, i, j));
+      }
+    }
+  }
+
+  distances.sort((a, b) => a - b);
+
+  if (distances.length < 2) {
+    return null;
+  }
+
+  return [distances[0], distances[1]];
+};
+
 // Prepare board ready for play
 export const createBoard = (config: BoardConfig): Cell[][] | undefined => {
   const board: Board = Array.from({ length: config.height }, () =>
@@ -312,7 +337,7 @@ const iterateCompassNeighbors = (
 };
 
 // Calculate cell number by looking up neighbor mines
-export const getCellNumber = (board: Board, row: number, col: number, config: BoardConfig): number | { type: "compass"; angleIndex: number | null } | null => {
+export const getCellNumber = (board: Board, row: number, col: number, config: BoardConfig): number | { type: "compass"; angleIndex: number | null } | { type: "nearest2"; distances: [number, number] } | null => {
   //#region getCellNumber::Compass
   // Vector sum of neighboring mines
   // Treat all neighbors with equal weight - normalize with *SQRT1_2 for diagonals
@@ -342,6 +367,13 @@ export const getCellNumber = (board: Board, row: number, col: number, config: Bo
     // Compass angle bins as indices, from vector sum
     // 0 = 0°, 1 = 9.74°, ..., 4 = 45°, ..., 8 = 90°, ..., 31 = 348.75°
     return { type: "compass", angleIndex: getCompassAngleIndex(x, y) };
+  }
+  //#endregion
+
+  //#region getCellNumber::Nearest-2
+  if (config.cellNumberDeviant === "nearest2") {
+    const distances = getNearestMineDistances(board, row, col);
+    return distances ? { type: "nearest2", distances } : null;
   }
   //#endregion
 
@@ -407,7 +439,15 @@ export const handleClick = (board: Board, row: number, col: number, config: Boar
 
   // If clicked on a safe file, check if num===null (opening)
   // Also treat explicit zeros as an opening for most modes
-  if (cell.state.num === null || (cell.state.num === 0 && (config.cellNumberDeviant !== "lie"))) {
+  const canAutoOpen =
+    cell.state.num === null ||
+    (cell.state.num === 0 && config.cellNumberDeviant !== "lie") ||
+    (config.cellNumberDeviant === "nearest2" &&
+      typeof cell.state.num === "object" &&
+      cell.state.num.type === "nearest2" &&
+      cell.state.num.distances[0] > 1);
+
+  if (canAutoOpen) {
     // Recursively reveal all neighbors of null tiles
     iterateNeighbors(updatedBoard, row, col, config, (nx, ny, neighbor) => {
       if (neighbor.mineNum === 0) {

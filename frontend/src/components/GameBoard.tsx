@@ -423,7 +423,7 @@ export const GameBoard: React.FC<{
           >
             {board.map((row, rowIndex) =>
               row.map((cell, colIndex) => {
-                const compassNum = cell.state.type === "revealed" && typeof cell.state.num === "object" ? cell.state.num : null;
+                const specialNum = cell.state.type === "revealed" && typeof cell.state.num === "object" ? cell.state.num : null;
                 const getBgClass = () => {
                   if (cell.state.type === "revealed") {
                     if (isGameOver === "loss" && explodedCell && explodedCell.row === rowIndex && explodedCell.col === colIndex) {
@@ -484,8 +484,16 @@ export const GameBoard: React.FC<{
                               </span>
                             ))}
                         </div> : (
-                        compassNum ? (
-                          <CompassArrow angleIndex={compassNum.angleIndex} />
+                        specialNum?.type === "compass" ? (
+                          <CompassArrow angleIndex={specialNum.angleIndex} />
+                        ) : specialNum?.type === "nearest2" ? (
+                          <span
+                            className={`${
+                              specialNum.distances[0] === 1 ? "text-[16px]" : "text-[8px]"
+                            } ${getNumberColorClass(specialNum.distances[1])}`}
+                          >
+                            {specialNum.distances[1]}
+                          </span>
                         ) : (
                           <span
                             className={`inline-block origin-center ml-[2px] text-lg ${getNumberColorClass(cell.state.num)}`}
