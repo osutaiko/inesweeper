@@ -28,9 +28,9 @@ export const boardConfigLibrary: BoardConfigLibrary = {
     "exp": { width: 30, height: 16, mineTileCount: 90, posMineCount: 45, negMineCount: 45, maxMinesPerCell: 1, cellNumberDeviant: null },
   },
   "colors": {
-    "beg": { width: 9, height: 9, mineTileCount: 12, posMineCount: 12, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: null, mineTypeDeviant: "rgb" },
-    "int": { width: 16, height: 16, mineTileCount: 45, posMineCount: 45, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: null, mineTypeDeviant: "rgb" },
-    "exp": { width: 30, height: 16, mineTileCount: 99, posMineCount: 99, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: null, mineTypeDeviant: "rgb" },
+    "beg": { width: 9, height: 9, mineTileCount: 9, posMineCount: 9, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: null, mineTypeDeviant: "rgb" },
+    "int": { width: 16, height: 16, mineTileCount: 36, posMineCount: 36, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: null, mineTypeDeviant: "rgb" },
+    "exp": { width: 30, height: 16, mineTileCount: 96, posMineCount: 96, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: null, mineTypeDeviant: "rgb" },
   },
   "liar": {
     "beg": { width: 9, height: 9, mineTileCount: 10, posMineCount: 10, negMineCount: 0, maxMinesPerCell: 1, cellNumberDeviant: "lie" },
