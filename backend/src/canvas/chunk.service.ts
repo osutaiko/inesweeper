@@ -278,18 +278,12 @@ export class ChunkService {
   }
 
   async getChunkArea(
-    req: Request,
     fromChunkX: number,
     fromChunkY: number,
     toChunkX: number,
     toChunkY: number,
   ) {
-    const client = this.authService.createBearerClient(req);
-    const user = await this.requireUser(req);
-
-    if (!user) {
-      throw new UnauthorizedException('Login required');
-    }
+    const client = this.authService.createServiceRoleClient();
 
     const startX = Math.min(fromChunkX, toChunkX);
     const endX = Math.max(fromChunkX, toChunkX);

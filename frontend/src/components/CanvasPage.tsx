@@ -177,13 +177,6 @@ const CanvasPage = () => {
     let isActive = true;
 
     const loadArea = async () => {
-      if (!authUser) {
-        setChunkArea(null);
-        setIsLoading(false);
-        setError(null);
-        return;
-      }
-
       setIsLoading(true);
       setError(null);
 
@@ -219,7 +212,6 @@ const CanvasPage = () => {
       isActive = false;
     };
   }, [
-    authUser?.id,
     loadFromChunkX,
     loadFromChunkY,
     loadToChunkX,

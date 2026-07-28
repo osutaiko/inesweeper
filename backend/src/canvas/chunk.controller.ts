@@ -9,14 +9,12 @@ export class ChunkController {
 
   @Get('area/:fromChunkX/:fromChunkY/:toChunkX/:toChunkY')
   async getChunkArea(
-    @Req() req: Request,
     @Param('fromChunkX', ParseIntPipe) fromChunkX: number,
     @Param('fromChunkY', ParseIntPipe) fromChunkY: number,
     @Param('toChunkX', ParseIntPipe) toChunkX: number,
     @Param('toChunkY', ParseIntPipe) toChunkY: number,
   ) {
     return this.chunkService.getChunkArea(
-      req,
       fromChunkX,
       fromChunkY,
       toChunkX,
