@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
+import { CanvasModule } from './canvas/canvas.module';
 import { GameLogsModule } from './game-logs/game-logs.module';
 
 @Module({
@@ -10,6 +11,7 @@ import { GameLogsModule } from './game-logs/game-logs.module';
       envFilePath: '.env',
     }),
     AuthModule,
+    CanvasModule,
     GameLogsModule,
   ],
 })

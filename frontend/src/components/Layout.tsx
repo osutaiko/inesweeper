@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
 import { ThemeProvider } from "./theme-provider";
 import { DifficultyName, TimeRecord, VariantName } from "@/lib/types";
 import { boardConfigLibrary, difficultyMap, variantGroups } from "@/lib/constants";
@@ -21,6 +23,7 @@ import {
   SelectValue,
 } from "./ui/select";
 import { ScrollArea, ScrollBar } from "./ui/scroll-area";
+import { Button } from "./ui/button";
 
 import InesweeperLogo from "@/assets/images/inesweeper-logo.svg";
 import {
@@ -275,6 +278,12 @@ const Layout = () => {
             </div>
           </a>
           <div className="flex flex-row gap-2">
+            <Button asChild variant="secondary" className="pr-3">
+              <Link to="/canvas">
+                Multiplayer
+                <ArrowRight />
+              </Link>
+            </Button>
             <SettingsButton
               isTouchscreen={isTouchscreen}
               zoom={zoom}

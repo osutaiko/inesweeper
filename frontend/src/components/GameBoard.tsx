@@ -307,8 +307,6 @@ export const GameBoard: React.FC<{
   } = countRemainingFlags(board);
 
   const getNumberColorClass = (num: number | null) => {
-  ["text-game-number-1", "text-game-number-2", "text-game-number-3", "text-game-number-4", "text-game-number-5", "text-game-number-6", "text-game-number-7", "text-game-number-8", "text-game-number-0", "text-game-number--1", "text-game-number--2", "text-game-number--3", "text-game-number--4", "text-game-number--5", "text-game-number--6", "text-game-number--7", "text-game-number--8"];
-  
   if (num === null) {
     return "";
   }
