@@ -1,5 +1,3 @@
-import { Flag } from "lucide-react";
-
 import { CHUNK_SIZE } from "@/lib/coordinates";
 import {
   decodeMineBitmap,
@@ -103,21 +101,19 @@ const CanvasChunk = ({
             return (
               <div
                 key={`${chunkId}:${localX}:${localY}`}
-                className={`relative z-10 flex justify-center items-center border border-game-border ${
+                className={`relative z-10 flex justify-center items-center font-minesweeper border border-game-border ${
                   isMine ? "bg-game-hidden" : "bg-game-revealed"
                 } rounded-sm overflow-hidden`}
               >
                 {isMine ? (
                   <div className="flex flex-wrap pt-[1px] gap-y-[1px] justify-center items-center">
-                    <Flag
-                      className="w-[18px] h-[18px]"
-                      stroke="red"
-                      fill="red"
-                    />
+                    <span className="text-red-500 ml-[2px] leading-none text-[18px]">
+                      `
+                    </span>
                   </div>
                 ) : neighborCount ? (
                   <span
-                    className={`font-bold text-xl ${getNumberColorClass(
+                    className={`inline-block origin-center ml-[2px] text-lg ${getNumberColorClass(
                       neighborCount,
                     )}`}
                   >
