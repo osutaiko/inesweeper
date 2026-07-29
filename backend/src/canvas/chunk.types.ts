@@ -25,11 +25,9 @@ export type ChunkRecord = {
   chunkY: number;
   state: Chunk['state'];
   lockedByUserId: string | null;
-  lockedByName: string | null;
   lockedAt: string | null;
   lockedUntil: string | null;
   solverUserId: string | null;
-  solverName: string | null;
   solvedAt: string | null;
 };
 

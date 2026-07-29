@@ -226,7 +226,7 @@ const CanvasPage = () => {
         (chunk) => `${chunk.chunkX}:${chunk.chunkY}` === selectedChunkId,
       ) ?? null
     : null;
-  const selectedChunkOwner =
+  const selectedChunkOwnerName =
     selectedChunk?.state === "locked"
       ? selectedChunk.lockedByName
       : selectedChunk?.state === "solved"
@@ -290,7 +290,7 @@ const CanvasPage = () => {
                 {selectedChunk.state === 'solved' &&
                   <>
                     <span className="text-muted-foreground">
-                      Owner: {selectedChunkOwner ?? "None"}
+                      Owner: {selectedChunkOwnerName ?? "None"}
                     </span>
                     <span className="text-muted-foreground">
                       Claimed: {formatChunkDate(selectedChunkAt)}

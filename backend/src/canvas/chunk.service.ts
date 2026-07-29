@@ -19,12 +19,15 @@ type ChunkRow = {
   chunk_y: number;
   state: ChunkRecord['state'];
   locked_by_user_id: string | null;
-  locked_by_name: string | null;
   locked_at: string | null;
   locked_until: string | null;
   solver_user_id: string | null;
-  solver_name: string | null;
   solved_at: string | null;
+};
+
+type UserProfileNameRow = {
+  user_id: string;
+  nickname: string;
 };
 
 @Injectable()
@@ -50,11 +53,9 @@ export class ChunkService {
       chunkY: row.chunk_y,
       state: row.state,
       lockedByUserId: row.locked_by_user_id,
-      lockedByName: row.locked_by_name,
       lockedAt: row.locked_at,
       lockedUntil: row.locked_until,
       solverUserId: row.solver_user_id,
-      solverName: row.solver_name,
       solvedAt: row.solved_at,
     };
   }
@@ -90,11 +91,9 @@ export class ChunkService {
           chunk_y: chunk.chunkY,
           state: chunk.state,
           locked_by_user_id: chunk.lockedByUserId,
-          locked_by_name: chunk.lockedByName,
           locked_at: chunk.lockedAt,
           locked_until: chunk.lockedUntil,
           solver_user_id: chunk.solverUserId,
-          solver_name: chunk.solverName,
           solved_at: chunk.solvedAt,
         },
         {
@@ -161,11 +160,9 @@ export class ChunkService {
       chunkY,
       state: 'open',
       lockedByUserId: null,
-      lockedByName: null,
       lockedAt: null,
       lockedUntil: null,
       solverUserId: null,
-      solverName: null,
       solvedAt: null,
     } satisfies ChunkRecord;
   }
@@ -177,14 +174,20 @@ export class ChunkService {
   private withChunkMineBitmap(
     chunk: ChunkRecord,
     userId: string | null,
+    userName: string | null,
   ): Chunk {
     const canRevealBoard =
       chunk.state === 'solved' ||
       (chunk.state === 'locked' && chunk.lockedByUserId === userId);
+    const names = {
+      lockedByName: chunk.lockedByUserId === userId ? userName : null,
+      solverName: chunk.solverUserId === userId ? userName : null,
+    };
 
     if (!canRevealBoard) {
       return {
         ...chunk,
+        ...names,
         mineBitmap: null,
       };
     }
@@ -193,6 +196,7 @@ export class ChunkService {
 
     return {
       ...chunk,
+      ...names,
       mineBitmap: mineBitmap.mineBitmap,
     };
   }
@@ -302,9 +306,39 @@ export class ChunkService {
       throw new BadRequestException(error.message ?? 'Unable to read chunks');
     }
 
+    const rows = (data ?? []) as ChunkRow[];
+    const userIds = new Set<string>();
+
+    for (const row of rows) {
+      if (row.locked_by_user_id) {
+        userIds.add(row.locked_by_user_id);
+      }
+      if (row.solver_user_id) {
+        userIds.add(row.solver_user_id);
+      }
+    }
+
+    const nameByUserId = new Map<string, string>();
+    if (userIds.size > 0) {
+      const { data: profiles, error: profileError } = await client
+        .from('user_profiles')
+        .select('user_id, nickname')
+        .in('user_id', Array.from(userIds));
+
+      if (profileError) {
+        throw new BadRequestException(
+          profileError.message ?? 'Unable to read user names',
+        );
+      }
+
+      for (const profile of (profiles ?? []) as UserProfileNameRow[]) {
+        nameByUserId.set(profile.user_id, profile.nickname);
+      }
+    }
+
     const chunkMap = new Map<string, ChunkRecord>();
 
-    for (const row of (data ?? []) as ChunkRow[]) {
+    for (const row of rows) {
       if (
         row.state === 'locked' &&
         row.locked_until &&
@@ -328,15 +362,19 @@ export class ChunkService {
             chunkY,
             state: 'open',
             lockedByUserId: null,
-            lockedByName: null,
             lockedAt: null,
             lockedUntil: null,
             solverUserId: null,
-            solverName: null,
             solvedAt: null,
           } satisfies ChunkRecord);
         chunks.push({
           ...chunk,
+          lockedByName: chunk.lockedByUserId
+            ? nameByUserId.get(chunk.lockedByUserId) ?? null
+            : null,
+          solverName: chunk.solverUserId
+            ? nameByUserId.get(chunk.solverUserId) ?? null
+            : null,
           mineBitmap: this.getChunkMineBitmap(chunk.chunkX, chunk.chunkY)
             .mineBitmap,
         });
@@ -378,7 +416,7 @@ export class ChunkService {
       activeLock.chunkX === chunkX &&
       activeLock.chunkY === chunkY
     ) {
-      return activeLock;
+      return this.withChunkMineBitmap(activeLock, user.id, user.nickname);
     }
 
     if (!(await this.hasSolvedCardinalNeighbor(client, chunkX, chunkY))) {
@@ -407,15 +445,13 @@ export class ChunkService {
       ...chunk,
       state: 'locked',
       lockedByUserId: user.id,
-      lockedByName: user.name,
       lockedAt: lockedAt.toISOString(),
       solverUserId: null,
-      solverName: null,
       solvedAt: null,
       lockedUntil: lockedUntil.toISOString(),
     });
 
-    return this.withChunkMineBitmap(saved, user.id);
+    return this.withChunkMineBitmap(saved, user.id, user.nickname);
   }
 
   async solveChunk(req: Request, chunkX: number, chunkY: number) {
@@ -441,11 +477,10 @@ export class ChunkService {
       ...chunk,
       state: 'solved',
       solverUserId: user.id,
-      solverName: user.name,
       solvedAt: solvedAt.toISOString(),
       lockedUntil: null,
     });
 
-    return this.withChunkMineBitmap(saved, user.id);
+    return this.withChunkMineBitmap(saved, user.id, user.nickname);
   }
 }
