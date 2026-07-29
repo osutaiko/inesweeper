@@ -28,7 +28,7 @@ const CanvasHeader = ({ authUser }: CanvasHeaderProps) => (
       <Button asChild variant="secondary" className="pr-3">
         <Link to="/">
           <ArrowLeft />
-          Back to Singleplayer
+          Singleplayer
         </Link>
       </Button>
       <AuthButton authUser={authUser} />

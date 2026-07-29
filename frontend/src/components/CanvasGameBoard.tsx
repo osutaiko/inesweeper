@@ -110,8 +110,7 @@ const CanvasGameBoard = ({ chunk, chunkArea }: CanvasGameBoardProps) => {
   const seconds = String(remainingSeconds % 60).padStart(2, "0");
 
   return (
-    <div className="flex h-full w-full items-center justify-center overflow-auto p-4 select-none">
-      <div className="flex h-min w-min flex-col overflow-hidden rounded-md">
+    <div className="flex h-min w-min select-none flex-col overflow-hidden rounded-md">
         <div className="border-x-[9px] border-t-[9px] border-game-border bg-game-border">
           <div className="relative flex items-center justify-between rounded-sm bg-game-hidden p-2">
             <div className="flex size-[40px] shrink-0 items-center justify-center bg-game-button text-xl font-bold">
@@ -173,7 +172,6 @@ const CanvasGameBoard = ({ chunk, chunkArea }: CanvasGameBoardProps) => {
             }}
           />
         </div>
-      </div>
     </div>
   );
 };
