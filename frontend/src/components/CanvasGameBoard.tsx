@@ -7,24 +7,28 @@ import {
   type CanvasChunkAreaResponse,
 } from "@/lib/canvas";
 import { CHUNK_SIZE } from "@/lib/coordinates";
+import { useMinesweeperControls } from "@/hooks/useMinesweeperControls";
+import {
+  handleChord,
+  handleClick,
+  handleFlag,
+} from "@/lib/minesweeper";
 import type { Board, BoardConfig } from "@/lib/types";
 
 const CONTEXT_SIZE = 4;
 const SOLVER_SIZE = CHUNK_SIZE + CONTEXT_SIZE * 2;
 const FADE_SIZE_PX = 60;
 
-const solverConfig: BoardConfig = {
+const SOLVER_CONFIG: BoardConfig = {
   width: SOLVER_SIZE,
   height: SOLVER_SIZE,
   maxMinesPerCell: 1,
   mineTileCount: 0,
-  posMineCount: 0,
+  posMineCount: 1,
   negMineCount: 0,
   cellNumberDeviant: null,
   mineGenDeviant: null,
 };
-
-const noop = () => {};
 
 type CanvasGameBoardProps = {
   chunk: CanvasChunk;
@@ -49,21 +53,15 @@ const CanvasGameBoard = ({ chunk, chunkArea }: CanvasGameBoardProps) => {
   const maxWorldY =
     chunk.chunkY * CHUNK_SIZE + CHUNK_SIZE - 1 + CONTEXT_SIZE;
 
-  const board: Board = Array.from({ length: SOLVER_SIZE }, (_, row) =>
+  const initialBoard: Board = Array.from({ length: SOLVER_SIZE }, (_, row) =>
     Array.from({ length: SOLVER_SIZE }, (_, col) => {
       const worldX = minWorldX + col;
       const worldY = maxWorldY - row;
-      const isTargetCell =
-        col >= CONTEXT_SIZE &&
-        col < CONTEXT_SIZE + CHUNK_SIZE &&
-        row >= CONTEXT_SIZE &&
-        row < CONTEXT_SIZE + CHUNK_SIZE;
       const cellChunkX = Math.floor(worldX / CHUNK_SIZE);
       const cellChunkY = Math.floor(worldY / CHUNK_SIZE);
       const isSolvedContext =
         chunkByCoord.get(`${cellChunkX}:${cellChunkY}`)?.state === "solved";
-      const mineNum =
-        (isTargetCell || isSolvedContext) && mineLookup(worldX, worldY) ? 1 : 0;
+      const mineNum = mineLookup(worldX, worldY) ? 1 : 0;
       let neighborCount = 0;
 
       if (isSolvedContext && !mineNum) {
@@ -92,6 +90,49 @@ const CanvasGameBoard = ({ chunk, chunkArea }: CanvasGameBoardProps) => {
       };
     }),
   );
+  const [board, setBoard] = useState<Board>(initialBoard);
+
+  const isInsideTargetChunk = (row: number, col: number) =>
+    col >= CONTEXT_SIZE &&
+    col < CONTEXT_SIZE + CHUNK_SIZE &&
+    row >= CONTEXT_SIZE &&
+    row < CONTEXT_SIZE + CHUNK_SIZE;
+
+  const applyBoardAction = (action: (currentBoard: Board) => Board) => {
+    setBoard((currentBoard) =>
+      action(currentBoard).map((row, rowIndex) =>
+        row.map((cell, colIndex) =>
+          isInsideTargetChunk(rowIndex, colIndex) ||
+          initialBoard[rowIndex][colIndex].state.type !== "hidden"
+            ? cell
+            : {
+                ...cell,
+                state: { type: "hidden" as const },
+              },
+        ),
+      ),
+    );
+  };
+  const { onMouseDown, onMouseUp } = useMinesweeperControls({
+    canReveal: isInsideTargetChunk,
+    canFlag: isInsideTargetChunk,
+    canChord: () => true,
+    onReveal: (row, col) => {
+      applyBoardAction((currentBoard) =>
+        handleClick(currentBoard, row, col, SOLVER_CONFIG),
+      );
+    },
+    onFlag: (row, col) => {
+      applyBoardAction((currentBoard) =>
+        handleFlag(currentBoard, row, col, SOLVER_CONFIG),
+      );
+    },
+    onChord: (row, col) => {
+      applyBoardAction((currentBoard) =>
+        handleChord(currentBoard, row, col, SOLVER_CONFIG),
+      );
+    },
+  });
 
   useEffect(() => {
     const updateRemainingSeconds = () => {
@@ -136,18 +177,31 @@ const CanvasGameBoard = ({ chunk, chunkArea }: CanvasGameBoardProps) => {
         >
           <GameBoardGrid
             board={board}
-            config={solverConfig}
+            config={SOLVER_CONFIG}
             isGameOver={null}
             explodedCell={null}
             incorrectFlagCells={null}
             shadedCells={[]}
             isFlagToggled={false}
-            onMouseDown={noop}
-            onMouseUp={noop}
-            onTouchStart={noop}
-            onTouchMove={noop}
-            onTouchEnd={noop}
-            onHoveredCellChange={noop}
+            onMouseDown={onMouseDown}
+            onMouseUp={onMouseUp}
+            onTouchStart={() => {}}
+            onTouchMove={() => {}}
+            onTouchEnd={(_, row, col) => {
+              if (
+                !isInsideTargetChunk(row, col) ||
+                board[row][col].state.type === "revealed"
+              ) {
+                applyBoardAction((currentBoard) =>
+                  handleChord(currentBoard, row, col, SOLVER_CONFIG),
+                );
+              } else if (isInsideTargetChunk(row, col)) {
+                applyBoardAction((currentBoard) =>
+                  handleClick(currentBoard, row, col, SOLVER_CONFIG),
+                );
+              }
+            }}
+            onHoveredCellChange={() => {}}
             getCellClassName={(row, col) => {
               const classes = [];
 
