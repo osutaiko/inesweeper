@@ -82,7 +82,9 @@ const CanvasGameBoard = ({ chunk, chunkArea }: CanvasGameBoardProps) => {
       return {
         mineNum,
         state: isSolvedContext
-          ? {
+          ? mineNum
+            ? { type: "flagged" as const, flagNum: 1 }
+            : {
               type: "revealed" as const,
               num: neighborCount || null,
             }
