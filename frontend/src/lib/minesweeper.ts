@@ -628,6 +628,11 @@ export const handleChord = (board: Board, row: number, col: number, config: Boar
 
   if (cell.state.type !== "revealed") return board;
 
+  if (cell.state.num === null) {
+    revealSurroundingHiddens();
+    return updatedBoard;
+  }
+
   //#region handleChord::Compass
   // Chord if: out of all possible mine arrangements in neighboring hidden cells,
   // only the case of all-safe results in the same arrow
