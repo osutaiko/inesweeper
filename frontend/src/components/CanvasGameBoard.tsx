@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import { GameBoardGrid } from "./GameBoardGrid";
@@ -212,10 +213,16 @@ const CanvasGameBoard = ({ chunk, chunkArea }: CanvasGameBoardProps) => {
     <div className="flex h-min w-min select-none flex-col overflow-hidden rounded-md">
         <div className="border-x-[9px] border-t-[9px] border-game-border bg-game-border">
           <div className="relative flex items-center justify-between rounded-sm bg-game-hidden p-2">
-            <div className="flex size-[40px] shrink-0 items-center justify-center bg-game-button text-xl font-bold">
-              ?
-            </div>
-            <div className="px-4 text-lg font-bold">
+            <Button
+              className="bg-game-button"
+              size="icon"
+              onClick={() => navigate("/place")}
+              title="Return to Map"
+              variant="secondary"
+            >
+              <ArrowLeft />
+            </Button>
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 px-4 text-lg font-bold">
               Chunk (X={chunk.chunkX}, Y={chunk.chunkY})
             </div>
             <div className="flex h-[40px] min-w-[80px] items-center justify-center rounded-md bg-game-button px-3 text-xl font-bold">
