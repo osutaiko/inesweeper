@@ -11,19 +11,18 @@ type CanvasHeaderProps = {
 };
 
 const CanvasHeader = ({ authUser }: CanvasHeaderProps) => (
-  <header className="flex w-full flex-row items-center justify-between gap-4 overflow-x-auto border-b px-3 py-2 sm:px-8 sm:py-4">
-    <Link to="/">
+  <header className="flex flex-row w-full gap-4 px-3 sm:px-8 py-2 sm:py-4 justify-between items-center border-b overflow-x-auto">
+    <a href="/">
       <div className="flex flex-row items-center gap-3">
-        <img
-          src={InesweeperLogo}
-          alt="Inesweeper Logo"
-          className="h-[40px] min-h-[40px] w-[40px] min-w-[40px]"
-        />
-        <h2 className="hidden text-lg min-[410px]:block sm:text-2xl">
-          Inesweeper
+        <img src={InesweeperLogo} alt="Inesweeper Logo" className="w-[40px] h-[40px] min-w-[40px] min-h-[40px]" />
+        <h2 className="font-minesweeper hidden min-[510px]:block text-lg sm:text-2xl">
+          <span className="text-red-500">I</span>
+          <span className="text-green-500">N</span>
+          <span className="text-blue-500">E</span>
+          sweeper World
         </h2>
       </div>
-    </Link>
+    </a>
     <div className="flex flex-row gap-2">
       <Button asChild variant="secondary" className="pr-3">
         <Link to="/">
