@@ -284,16 +284,15 @@ const CanvasPage = () => {
           {selectedChunk ? (
             <Card className="px-4 py-3 absolute left-4 top-4 z-50 shadow-lg backdrop-blur">
               <div className="flex flex-col gap-1 text-sm">
-                <h3 className="font-semibold text-foreground font-mono mb-1">
-                  Chunk ({selectedChunk.chunkX}, {selectedChunk.chunkY})
-                </h3>
+                {selectedChunkOwnerName &&
+                  <h3 className="font-semibold text-foreground font-mono mb-1">
+                    {selectedChunkOwnerName}
+                  </h3>
+                }
                 {selectedChunk.state === 'solved' &&
                   <>
                     <span className="text-muted-foreground">
-                      Owner: {selectedChunkOwnerName ?? "None"}
-                    </span>
-                    <span className="text-muted-foreground">
-                      Claimed: {formatChunkDate(selectedChunkAt)}
+                      {formatChunkDate(selectedChunkAt)}
                     </span>
                   </>
                 }
@@ -302,6 +301,9 @@ const CanvasPage = () => {
                     Locked until: {formatChunkDate(selectedChunkAt)}
                   </span>
                 }
+                <span className="text-muted-foreground">
+                  (X={selectedChunk.chunkX}, Y={selectedChunk.chunkY})
+                </span>
               </div>
             </Card>
           ) : null}
