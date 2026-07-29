@@ -300,8 +300,8 @@ const CanvasPage = () => {
           className="relative flex w-full overflow-hidden bg-background h-[calc(100vh-57px)] sm:h-[calc(100vh-73px)]"
         >
           {selectedChunk ? (
-            <Card className="px-4 py-3 absolute bottom-4 left-1/2 -translate-x-1/2 z-50 shadow-lg backdrop-blur rounded-none py-4">
-              <div className="flex flex-col gap-1 text-sm">
+            <Card className="px-4 py-3 absolute bottom-4 left-1/2 -translate-x-1/2 z-50 text-center w-max max-w-[calc(100%-2rem)] shadow-lg rounded-none py-4">
+              <div className="flex flex-col gap-1 whitespace-nowrap text-sm">
                 {selectedChunkOwnerName &&
                   <h3 className="font-semibold text-foreground font-mono mb-1">
                     {selectedChunkOwnerName}
