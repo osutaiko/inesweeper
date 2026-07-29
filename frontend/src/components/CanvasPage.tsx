@@ -17,6 +17,7 @@ import { loadCurrentAuthUser, subscribeToAuthUser, type AuthUser } from "@/lib/a
 import {
   buildCanvasMineLookup,
   getCanvasChunkArea,
+  lockCanvasChunk,
   type CanvasChunkAreaResponse,
   type CanvasChunkMineLookup,
 } from "@/lib/canvas";
@@ -117,6 +118,7 @@ const CanvasPage = () => {
   const [viewCenterChunkY] = useState(0);
   const [chunkArea, setChunkArea] = useState<CanvasChunkAreaResponse | null>(null);
   const [selectedChunkId, setSelectedChunkId] = useState<string | null>(null);
+  const [lockingChunkId, setLockingChunkId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const gestureRef = useRef({
@@ -227,6 +229,51 @@ const CanvasPage = () => {
       : selectedChunk?.state === "solved"
         ? selectedChunk.solvedAt
         : null;
+  const hasActiveLock = authUser
+    ? (chunkArea?.chunks ?? []).some(
+        (chunk) =>
+          chunk.state === "locked" &&
+          chunk.lockedByUserId === authUser.id,
+      )
+    : false;
+  const canStartSolving =
+    Boolean(authUser) &&
+    selectedChunk?.state === "open" &&
+    !hasActiveLock &&
+    (chunkArea?.chunks ?? []).some(
+      (chunk) =>
+        chunk.state === "solved" &&
+        ((chunk.chunkX === selectedChunk.chunkX &&
+          Math.abs(chunk.chunkY - selectedChunk.chunkY) === 1) ||
+          (chunk.chunkY === selectedChunk.chunkY &&
+            Math.abs(chunk.chunkX - selectedChunk.chunkX) === 1)),
+    );
+
+  const handleStartSolving = async (chunkX: number, chunkY: number) => {
+    const chunkId = `${chunkX}:${chunkY}`;
+    setLockingChunkId(chunkId);
+    setError(null);
+
+    try {
+      const lockedChunk = await lockCanvasChunk(chunkX, chunkY);
+      setChunkArea((currentArea) =>
+        currentArea
+          ? {
+              ...currentArea,
+              chunks: currentArea.chunks.map((chunk) =>
+                chunk.chunkX === chunkX && chunk.chunkY === chunkY
+                  ? lockedChunk
+                  : chunk,
+              ),
+            }
+          : currentArea,
+      );
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Unable to lock chunk");
+    } finally {
+      setLockingChunkId(null);
+    }
+  };
 
   const formatChunkDate = (value: string | null) => {
     if (!value) {
@@ -293,6 +340,21 @@ const CanvasPage = () => {
                 <span className="text-muted-foreground">
                   (X={selectedChunk.chunkX}, Y={selectedChunk.chunkY})
                 </span>
+                {canStartSolving && (
+                  <Button
+                    className="mt-2"
+                    disabled={lockingChunkId !== null}
+                    size="lg"
+                    onClick={() =>
+                      void handleStartSolving(
+                        selectedChunk.chunkX,
+                        selectedChunk.chunkY,
+                      )
+                    }
+                  >
+                    Start Solving!
+                  </Button>
+                )}
               </div>
             </Card>
           ) : null}

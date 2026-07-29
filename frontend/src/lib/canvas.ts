@@ -116,3 +116,29 @@ export const getCanvasChunkArea = async (
 
   return (await response.json()) as CanvasChunkAreaResponse;
 };
+
+export const lockCanvasChunk = async (chunkX: number, chunkY: number) => {
+  const accessToken = await getAuthAccessToken();
+  if (!accessToken) {
+    throw new Error("Login required");
+  }
+
+  const response = await fetch(
+    `${getBackendUrl()}/canvas/chunks/${chunkX}/${chunkY}/lock`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+  );
+
+  if (!response.ok) {
+    const body = (await response.json().catch(() => null)) as {
+      message?: string;
+    } | null;
+    throw new Error(body?.message ?? "Unable to lock chunk");
+  }
+
+  return (await response.json()) as CanvasChunk;
+};
