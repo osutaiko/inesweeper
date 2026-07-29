@@ -23,6 +23,7 @@ type GameBoardGridProps = {
   onTouchMove: (event: React.TouchEvent) => void;
   onTouchEnd: (event: React.TouchEvent, row: number, col: number) => void;
   onHoveredCellChange: (cell: CellPosition | null) => void;
+  getCellClassName?: (row: number, col: number) => string;
 };
 
 const getNumberColorClass = (num: number | null) => {
@@ -72,6 +73,7 @@ export const GameBoardGrid = ({
   onTouchMove,
   onTouchEnd,
   onHoveredCellChange,
+  getCellClassName,
 }: GameBoardGridProps) => {
   const isColorsVariant = config.mineTypeDeviant === "rgb";
 
@@ -130,7 +132,7 @@ export const GameBoardGrid = ({
           return (
             <div
               key={`${rowIndex}-${colIndex}`}
-              className={`relative flex justify-center items-center font-minesweeper border border-game-border ${getBgClass()} rounded-sm overflow-hidden`}
+              className={`relative flex justify-center items-center font-minesweeper border border-game-border ${getBgClass()} rounded-sm overflow-hidden ${getCellClassName?.(rowIndex, colIndex) ?? ""}`}
               onMouseDown={(event) => onMouseDown(event, rowIndex, colIndex)}
               onMouseUp={(event) => onMouseUp(event, rowIndex, colIndex)}
               onTouchStart={(event) => onTouchStart(event, rowIndex, colIndex)}

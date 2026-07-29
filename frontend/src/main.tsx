@@ -4,6 +4,7 @@ import "./index.css";
 
 import Layout from "./components/Layout";
 import CanvasPage from "./components/CanvasPage";
+import CanvasSolvePage from "./components/CanvasSolvePage";
 import PrivacyPolicy from "./components/PrivacyPolicy";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
@@ -13,6 +14,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <Routes>
       <Route path="/" element={<Layout />} />
       <Route path="/canvas" element={<CanvasPage />} />
+      <Route path="/canvas/solve" element={<CanvasSolvePage />} />
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

@@ -142,3 +142,29 @@ export const lockCanvasChunk = async (chunkX: number, chunkY: number) => {
 
   return (await response.json()) as CanvasChunk;
 };
+
+export const getActiveCanvasLock = async () => {
+  const accessToken = await getAuthAccessToken();
+  if (!accessToken) {
+    return null;
+  }
+
+  const response = await fetch(
+    `${getBackendUrl()}/canvas/chunks/active-lock`,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+  );
+
+  if (response.status === 401) {
+    return null;
+  }
+
+  if (!response.ok) {
+    throw new Error("Unable to load active lock");
+  }
+
+  return (await response.json()) as CanvasChunk | null;
+};

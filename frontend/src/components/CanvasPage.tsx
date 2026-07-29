@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
@@ -10,9 +9,9 @@ import {
 } from "react-zoom-pan-pinch";
 
 import { ThemeProvider } from "./theme-provider";
+import CanvasHeader from "./CanvasHeader";
 import StatusToast from "./StatusToast";
 import CanvasChunk from "./CanvasChunk";
-import InesweeperLogo from "@/assets/images/inesweeper-logo.svg";
 import { loadCurrentAuthUser, subscribeToAuthUser, type AuthUser } from "@/lib/auth";
 import {
   buildCanvasMineLookup,
@@ -21,7 +20,6 @@ import {
   type CanvasChunkAreaResponse,
   type CanvasChunkMineLookup,
 } from "@/lib/canvas";
-import AuthButton from "./layout-actions/AuthButton";
 
 type CanvasViewportProps = {
   fromChunkX: number;
@@ -113,6 +111,7 @@ const CanvasViewport = ({
 };
 
 const CanvasPage = () => {
+  const navigate = useNavigate();
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [viewCenterChunkX] = useState(0);
   const [viewCenterChunkY] = useState(0);
@@ -268,6 +267,7 @@ const CanvasPage = () => {
             }
           : currentArea,
       );
+      navigate("/canvas/solve");
     } catch (error) {
       setError(error instanceof Error ? error.message : "Unable to lock chunk");
     } finally {
@@ -294,25 +294,7 @@ const CanvasPage = () => {
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
       <div className="flex flex-col items-center min-h-screen overflow-hidden touch-none">
-        <header
-          className="flex flex-row w-full gap-4 px-3 sm:px-8 py-2 sm:py-4 justify-between items-center border-b overflow-x-auto"
-        >
-          <Link to="/">
-            <div className="flex flex-row items-center gap-3">
-              <img src={InesweeperLogo} alt="Inesweeper Logo" className="w-[40px] h-[40px] min-w-[40px] min-h-[40px]" />
-              <h2 className="hidden min-[410px]:block text-lg sm:text-2xl">Inesweeper</h2>
-            </div>
-          </Link>
-          <div className="flex flex-row gap-2">
-            <Button asChild variant="secondary" className="pr-3">
-              <Link to="/">
-                <ArrowLeft />
-                Back to Singleplayer
-              </Link>
-            </Button>
-            <AuthButton authUser={authUser} />
-          </div>
-        </header>
+        <CanvasHeader authUser={authUser} />
 
         <main
           className="relative flex w-full overflow-hidden bg-background h-[calc(100vh-57px)] sm:h-[calc(100vh-73px)]"
@@ -352,7 +334,7 @@ const CanvasPage = () => {
                       )
                     }
                   >
-                    Start Solving!
+                    Attempt Claim!
                   </Button>
                 )}
               </div>
