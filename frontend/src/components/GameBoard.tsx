@@ -3,6 +3,7 @@ import { Board, BoardConfig, Cell, TimeRecord } from "@/lib/types";
 import { createDemoBoard } from "@/lib/constants";
 import { createBoard, handleClick, handleChord, handleFlag, handleBeforeFirstClick as updateBoardBeforeFirstClick, isWin, isLoss, countRemainingFlags, extractMinesFromBoard, iterateNeighbors } from "@/lib/minesweeper";
 import { formatTimeMs } from "@/lib/utils";
+import { useMinesweeperControls } from "@/hooks/useMinesweeperControls";
 
 import { Laugh, Meh, Shovel, Skull, Smile } from "lucide-react";
 import { Button } from "./ui/button";
@@ -20,8 +21,6 @@ export const GameBoard: React.FC<{
   const isDemoBoard = false;
   const [board, setBoard] = useState<Board>(isDemoBoard ? createDemoBoard() : (createBoard(config) || []));
   const [isFirstClick, setIsFirstClick] = useState(true);
-  const [isLmbDown, setIsLmbDown] = useState(false);
-  const [isRmbDown, setIsRmbDown] = useState(false);
   const [isFlagToggled, setIsFlagToggled] = useState(false);
   const [isGameOver, setIsGameOver] = useState<"win" | "loss" | null>(null);
   const [startTime, setStartTime] = useState<number | null>(null);
@@ -48,8 +47,7 @@ export const GameBoard: React.FC<{
     const newBoard = createBoard(config);
     setBoard(newBoard || []);
     setIsFirstClick(true);
-    setIsLmbDown(false);
-    setIsRmbDown(false);
+    resetControls();
     setIsFlagToggled(false);
     setIsGameOver(null);
     setStartTime(null);
@@ -255,45 +253,29 @@ export const GameBoard: React.FC<{
     return;
   };
 
-  const handleMouseDown = (e: React.MouseEvent, row: number, col: number) => {
-    if (isGameOver || isTouchscreen) {
-      return;
-    }
-
-    if (e.button === 0) {
-      setIsLmbDown(true);
-    } else if (e.button === 2) {
-      setIsRmbDown(true);
-      if (!isLmbDown) {
-        setBoard(handleFlag(board, row, col, config));
+  const {
+    isLmbDown,
+    onMouseDown: handleMouseDown,
+    onMouseUp: handleMouseUp,
+    resetControls,
+  } = useMinesweeperControls({
+    disabled: Boolean(isGameOver) || isTouchscreen,
+    canReveal: () => true,
+    canFlag: () => true,
+    canChord: () => true,
+    onReveal: (row, col) => {
+      if (isFirstClick) {
+        handleBeforeFirstClick(row, col);
       }
-    }
-  };
-
-  const handleMouseUp = (e: React.MouseEvent, row: number, col: number) => {
-    if (isGameOver || isTouchscreen) {
-      return;
-    }
-
-    if (e.button === 0) {
-      setIsLmbDown(false);
-      if (isRmbDown) {
-        setBoard(handleChord(board, row, col, config));
-      } else {
-        if (isFirstClick) {
-          handleBeforeFirstClick(row, col);
-        }
-        setBoard(handleClick(board, row, col, config));
-      }
-    } else if (e.button === 1) {
+      setBoard(handleClick(board, row, col, config));
+    },
+    onFlag: (row, col) => {
+      setBoard(handleFlag(board, row, col, config));
+    },
+    onChord: (row, col) => {
       setBoard(handleChord(board, row, col, config));
-    } else if (e.button === 2) {
-      setIsRmbDown(false);
-      if (isLmbDown) {
-        setBoard(handleChord(board, row, col, config));
-      }
-    }
-  };
+    },
+  });
 
   const {
     remainingPosFlags,
