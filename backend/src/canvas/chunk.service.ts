@@ -390,6 +390,21 @@ export class ChunkService {
     };
   }
 
+  async getActiveLock(req: Request) {
+    const user = await this.requireUser(req);
+
+    if (!user) {
+      throw new UnauthorizedException('Login required');
+    }
+
+    const client = this.authService.createBearerClient(req);
+    const activeLock = await this.getActiveLockForUser(client, user.id);
+
+    return activeLock
+      ? this.withChunkMineBitmap(activeLock, user.id, user.nickname)
+      : null;
+  }
+
   async lockChunk(req: Request, chunkX: number, chunkY: number) {
     const user = await this.requireUser(req);
 
