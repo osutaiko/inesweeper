@@ -267,7 +267,7 @@ const CanvasPage = () => {
             }
           : currentArea,
       );
-      navigate("/canvas/solve");
+      navigate("/place/solve");
     } catch (error) {
       setError(error instanceof Error ? error.message : "Unable to lock chunk");
     } finally {

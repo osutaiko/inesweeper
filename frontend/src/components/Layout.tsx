@@ -279,7 +279,7 @@ const Layout = () => {
           </a>
           <div className="flex flex-row gap-2">
             <Button asChild variant="secondary" className="pr-3">
-              <Link to="/canvas">
+              <Link to="/place">
                 Place
                 <ArrowRight />
               </Link>

@@ -100,7 +100,7 @@ export const getCanvasChunkArea = async (
   const accessToken = await getAuthAccessToken();
 
   const response = await fetch(
-    `${getBackendUrl()}/canvas/chunks/area/${fromChunkX}/${fromChunkY}/${toChunkX}/${toChunkY}`,
+    `${getBackendUrl()}/place/chunks/area/${fromChunkX}/${fromChunkY}/${toChunkX}/${toChunkY}`,
     {
       headers: accessToken
         ? {
@@ -124,7 +124,7 @@ export const lockCanvasChunk = async (chunkX: number, chunkY: number) => {
   }
 
   const response = await fetch(
-    `${getBackendUrl()}/canvas/chunks/${chunkX}/${chunkY}/lock`,
+    `${getBackendUrl()}/place/chunks/${chunkX}/${chunkY}/lock`,
     {
       method: "POST",
       headers: {
@@ -150,7 +150,7 @@ export const getActiveCanvasLock = async () => {
   }
 
   const response = await fetch(
-    `${getBackendUrl()}/canvas/chunks/active-lock`,
+    `${getBackendUrl()}/place/chunks/active-lock`,
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,

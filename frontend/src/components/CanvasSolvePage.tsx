@@ -39,7 +39,7 @@ const CanvasSolvePage = () => {
         ]);
 
         if (!chunk || !user) {
-          navigate("/canvas", { replace: true });
+          navigate("/place", { replace: true });
           return;
         }
 
@@ -56,7 +56,7 @@ const CanvasSolvePage = () => {
         }
       } catch {
         if (isActive) {
-          navigate("/canvas", { replace: true });
+          navigate("/place", { replace: true });
         }
       }
     };

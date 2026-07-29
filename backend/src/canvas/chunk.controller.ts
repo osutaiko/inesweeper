@@ -3,7 +3,7 @@ import type { Request } from 'express';
 
 import { ChunkService } from './chunk.service';
 
-@Controller('canvas/chunks')
+@Controller('place/chunks')
 export class ChunkController {
   constructor(private readonly chunkService: ChunkService) {}
 
