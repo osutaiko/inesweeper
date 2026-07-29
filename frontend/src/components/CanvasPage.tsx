@@ -93,10 +93,9 @@ const CanvasViewport = ({
                 colorClassName={
                   chunk.state === "solved"
                     ? "bg-game-border"
-                    : hasSolvedNeighbor(chunk.chunkX, chunk.chunkY)
-                      ? chunk.state === "locked"
-                        ? "bg-game-chunklocked"
-                        : "bg-game-chunkopen"
+                    : chunk.state === "locked" &&
+                        hasSolvedNeighbor(chunk.chunkX, chunk.chunkY)
+                      ? "bg-game-chunklocked"
                       : ""
                 }
                 mineBitmap={chunk.mineBitmap}

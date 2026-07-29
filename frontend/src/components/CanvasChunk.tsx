@@ -64,7 +64,7 @@ const CanvasChunk = ({
     <div
       id={`chunk-${chunkId}`}
       className={`relative grid ${colorClassName} ${
-        isSelected ? "ring-4 ring-inset ring-ring" : ""
+        isSelected ? "z-30 ring-4 ring-ring" : ""
       }`}
       onClick={onClick}
       style={{
