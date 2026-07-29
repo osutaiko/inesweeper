@@ -73,7 +73,7 @@ const CanvasChunk = ({
         gridTemplateRows: `repeat(${CHUNK_SIZE}, 30px)`,
       }}
     >
-      <div className="pointer-events-none absolute inset-0 z-20 border-2 border-foreground" />
+      <div className="pointer-events-none absolute inset-0 z-20 border border-foreground" />
       {state === "locked" && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <LockKeyhole size={80} />

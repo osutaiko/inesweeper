@@ -150,16 +150,16 @@ const CanvasGameBoard = ({ chunk, chunkArea }: CanvasGameBoardProps) => {
               const classes = [];
 
               if (row === CONTEXT_SIZE) {
-                classes.push("border-t-2 border-t-foreground");
+                classes.push("border-t border-t-foreground");
               }
               if (row === CONTEXT_SIZE + CHUNK_SIZE - 1) {
-                classes.push("border-b-2 border-b-foreground");
+                classes.push("border-b border-b-foreground");
               }
               if (col === CONTEXT_SIZE) {
-                classes.push("border-l-2 border-l-foreground");
+                classes.push("border-l border-l-foreground");
               }
               if (col === CONTEXT_SIZE + CHUNK_SIZE - 1) {
-                classes.push("border-r-2 border-r-foreground");
+                classes.push("border-r border-r-foreground");
               }
 
               return classes.join(" ");
