@@ -4,9 +4,9 @@ import { createDemoBoard } from "@/lib/constants";
 import { createBoard, handleClick, handleChord, handleFlag, handleBeforeFirstClick as updateBoardBeforeFirstClick, isWin, isLoss, countRemainingFlags, extractMinesFromBoard, iterateNeighbors } from "@/lib/minesweeper";
 import { formatTimeMs } from "@/lib/utils";
 
-import { Laugh, Meh, Shovel, Skull, Smile, Square } from "lucide-react";
+import { Laugh, Meh, Shovel, Skull, Smile } from "lucide-react";
 import { Button } from "./ui/button";
-import { CompassArrow } from "./CompassArrow";
+import { GameBoardGrid, getColorClass } from "./GameBoardGrid";
 
 export const GameBoard: React.FC<{
   config: BoardConfig;
@@ -18,8 +18,6 @@ export const GameBoard: React.FC<{
   addRecord: (record: TimeRecord) => void;
 }> = ({ config, zoom, flagButtonSize, flagButtonPosition, touchHoldDelay, isTouchscreen, addRecord }) => {
   const isDemoBoard = false;
-  const isColorsVariant = config.mineTypeDeviant === "rgb";
-
   const [board, setBoard] = useState<Board>(isDemoBoard ? createDemoBoard() : (createBoard(config) || []));
   const [isFirstClick, setIsFirstClick] = useState(true);
   const [isLmbDown, setIsLmbDown] = useState(false);
@@ -306,39 +304,6 @@ export const GameBoard: React.FC<{
     remainingBlueFlags,
   } = countRemainingFlags(board);
 
-  const getNumberColorClass = (num: number | null) => {
-  void ["text-game-number-1", "text-game-number-2", "text-game-number-3", "text-game-number-4", "text-game-number-5", "text-game-number-6", "text-game-number-7", "text-game-number-8", "text-game-number-0", "text-game-number--1", "text-game-number--2", "text-game-number--3", "text-game-number--4", "text-game-number--5", "text-game-number--6", "text-game-number--7", "text-game-number--8"];
-
-  if (num === null) {
-    return "";
-  }
-  if (num === 0) {
-    return "text-game-number-0";
-  }
-
-  if (num > 0) {
-    return `text-game-number-${num % 8 === 0 ? 8 : num % 8}`;
-  } else {
-    return `text-game-number--${(-num % 8 === 0 ? 8 : -num % 8)}`;
-  }
-};
-
-  const getColorClass = (mineNum: number) => {
-    if (mineNum === 1) return "text-red-500";
-    if (mineNum === 2) return "text-yellow-500";
-    return "text-blue-500";
-  };
-
-  const getColorMixClass = (mask: number) => {
-    if (mask === 1) return "text-red-500";
-    if (mask === 2) return "text-yellow-500";
-    if (mask === 3) return "text-orange-500";
-    if (mask === 4) return "text-blue-500";
-    if (mask === 5) return "text-purple-500";
-    if (mask === 6) return "text-green-500";
-    return "text-stone-500";
-  };
-
   const getFlagButtonPositionClass = () => {
     switch (flagButtonPosition) {
       case "bottom-left": return "bottom-0 left-0 rounded-tl-none rounded-tr-md rounded-bl-none rounded-br-none";
@@ -481,130 +446,21 @@ export const GameBoard: React.FC<{
             }}
             onContextMenu={(e) => e.preventDefault()}
           >
-            {board.map((row, rowIndex) =>
-              row.map((cell, colIndex) => {
-                const specialNum = cell.state.type === "revealed" && typeof cell.state.num === "object" ? cell.state.num : null;
-                const getBgClass = () => {
-                  if (cell.state.type === "revealed") {
-                    if (isGameOver === "loss" && explodedCell && explodedCell.row === rowIndex && explodedCell.col === colIndex) {
-                      return "bg-game-explodedmine";
-                    }
-                    return "bg-game-revealed";
-                  } else if (cell.state.type === "flagged") {
-                    if (isGameOver === "loss" && incorrectFlagCells!.some(({ row: r, col: c }) => r === rowIndex && c === colIndex)) {
-                      return "bg-game-wrongflag";
-                    }
-                    if (shadedCells.some(({ row: shadedRow, col: shadedCol }) => shadedRow === rowIndex && shadedCol === colIndex)) {
-                      return "bg-game-hover";
-                    }
-                    return "bg-game-hidden";
-                  } else {
-                    if (shadedCells.some(({ row: shadedRow, col: shadedCol }) => shadedRow === rowIndex && shadedCol === colIndex)) {
-                      return "bg-game-hover";
-                    }
-                    return "bg-game-hidden";
-                  }
-                };
-
-                return (
-                  <div
-                    key={`${rowIndex}-${colIndex}`}
-                    className={`relative flex justify-center items-center font-minesweeper border border-game-border ${getBgClass()} rounded-sm overflow-hidden`}
-                    onMouseDown={(e) => handleMouseDown(e, rowIndex, colIndex)}
-                    onMouseUp={(e) => handleMouseUp(e, rowIndex, colIndex)}
-                    onTouchStart={(e) => handleTouchStart(e, rowIndex, colIndex)}
-                    onTouchMove={handleTouchMove}
-                    onTouchEnd={(e) => handleTouchEnd(e, rowIndex, colIndex)}
-                    onMouseEnter={() => setHoveredCell({ row: rowIndex, col: colIndex })}
-                    onMouseLeave={() => setHoveredCell(null)}
-                  >
-                    {((config.cellNumberDeviant === "amplified" || config.cellNumberDeviant === "contrast") && (!(cell.state.type === "revealed" && cell.mineNum === 0)) && ((rowIndex + colIndex) % 2 === 1)) ?
-                      <div className="pointer-events-none absolute inset-0">
-                        <div className="absolute left-0 top-0 h-[14px] w-[5px] rounded-br-md bg-game-redborder" />
-                        <div className="absolute left-0 top-0 h-[5px] w-[14px] rounded-br-md bg-game-redborder" />
-                      </div> : <></>
-                    }
-                    {((config.cellNumberDeviant === "contrast") && (!(cell.state.type === "revealed" && cell.mineNum === 0)) && ((rowIndex + colIndex) % 2 === 0)) ?
-                      <div className="pointer-events-none absolute inset-0">
-                        <div className="absolute right-0 top-0 h-[14px] w-[5px] rounded-bl-md bg-game-blueborder" />
-                        <div className="absolute right-0 top-0 h-[5px] w-[14px] rounded-bl-md bg-game-blueborder" />
-                      </div> : <></>
-                    }
-                    {cell.state.type === "revealed" && (
-                      cell.mineNum ? (
-                        (() => {
-                          const mineNum = cell.mineNum;
-                          const mineCount = isColorsVariant ? 1 : Math.abs(mineNum);
-                          const mineClass = `${mineCount > 1 ? "text-[9px]" : "mt-[2px] ml-[2px] text-[18px]"} leading-[11.5px] ${isColorsVariant ? getColorClass(mineNum) : mineNum > 0 ? "text-black" : "text-white"}`;
-
-                          return (
-                            <div className="flex flex-wrap justify-center items-center">
-                              {Array.from({ length: mineCount }).map((_, idx) => (
-                                <span
-                                  key={`bomb-${idx}`}
-                                  className={mineClass}
-                                >
-                                  *
-                                </span>
-                              ))}
-                            </div>
-                          );
-                        })()
-                      ) : (
-                        specialNum?.type === "colors" ? (
-                          <Square className={`size-[18px] ${getColorMixClass(specialNum.mask)}`} fill="currentColor" />
-                        ) : specialNum?.type === "compass" ? (
-                          <CompassArrow angleIndex={specialNum.angleIndex} />
-                        ) : specialNum?.type === "nearest2" ? (
-                          <span
-                            className={`${
-                              specialNum.distances[0] === 1 ? "text-[16px]" : "text-[8px]"
-                            } ${getNumberColorClass(specialNum.distances[1])}`}
-                          >
-                            {specialNum.distances[1]}
-                          </span>
-                        ) : (
-                          <span
-                            className={`inline-block origin-center ml-[2px] text-lg ${getNumberColorClass(cell.state.num)}`}
-                            style={typeof cell.state.num === "number" && (Math.abs(cell.state.num) >= 10 || cell.state.num < 0) ? { transform: "scaleX(0.75)" } : undefined}
-                          >
-                            {cell.state.num}
-                          </span>
-                        )
-                      )
-                    )}
-                    {cell.state.type === "flagged" && (
-                      isColorsVariant ? (
-                        <span className={`font-minesweeper leading-none ${getColorClass(cell.state.flagNum)} text-[18px]`}>
-                          `
-                        </span>
-                      ) : (
-                        <div className="flex flex-wrap pt-[1px] gap-y-[1px] justify-center items-center">
-                          {(() => {
-                            const flagNum = cell.state.flagNum;
-                            return Array.from({ length: Math.abs(flagNum) }).map((_, idx) => (
-                              <span
-                                key={`flag-${idx}`}
-                                className={`${
-                                  flagNum < 0 ? "rotate-180 text-blue-500 mr-[2px]" : "text-red-500 ml-[2px] leading-none"
-                                } ${Math.abs(flagNum) > 1 ? "text-[10px]" : "text-[18px]"}`}
-                              >
-                                `
-                              </span>
-                            ));
-                          })()}
-                        </div>
-                      )
-                    )}
-                    {cell.state.type === "hidden" && isFlagToggled && (
-                      <span className="text-[18px] ml-[2px] leading-none opacity-15">
-                        `
-                      </span>
-                    )}
-                  </div>
-                );
-              })
-            )}
+            <GameBoardGrid
+              board={board}
+              config={config}
+              isGameOver={isGameOver}
+              explodedCell={explodedCell}
+              incorrectFlagCells={incorrectFlagCells}
+              shadedCells={shadedCells}
+              isFlagToggled={isFlagToggled}
+              onMouseDown={handleMouseDown}
+              onMouseUp={handleMouseUp}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              onHoveredCellChange={setHoveredCell}
+            />
           </div>
         </div>
       </div>
