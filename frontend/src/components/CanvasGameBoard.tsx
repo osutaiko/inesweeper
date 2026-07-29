@@ -171,6 +171,15 @@ const CanvasGameBoard = ({ chunk, chunkArea }: CanvasGameBoardProps) => {
               background: `linear-gradient(to right, var(--game-border), transparent ${FADE_SIZE_PX}px, transparent calc(100% - ${FADE_SIZE_PX}px), var(--game-border)), linear-gradient(to bottom, var(--game-border), transparent ${FADE_SIZE_PX}px, transparent calc(100% - ${FADE_SIZE_PX}px), var(--game-border))`,
             }}
           />
+          <div
+            className="pointer-events-none absolute z-20 ring-4 ring-destructive"
+            style={{
+              left: CONTEXT_SIZE * 30,
+              top: CONTEXT_SIZE * 30,
+              width: CHUNK_SIZE * 30,
+              height: CHUNK_SIZE * 30,
+            }}
+          />
         </div>
     </div>
   );
