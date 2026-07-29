@@ -38,6 +38,12 @@ const CanvasGameBoard = ({ chunk, chunkArea }: CanvasGameBoardProps) => {
       ? chunk
       : areaChunk,
   );
+  const chunkByCoord = new Map(
+    chunks.map((areaChunk) => [
+      `${areaChunk.chunkX}:${areaChunk.chunkY}`,
+      areaChunk,
+    ]),
+  );
   const mineLookup = buildCanvasMineLookup(chunks);
   const minWorldX = chunk.chunkX * CHUNK_SIZE - CONTEXT_SIZE;
   const maxWorldY =
@@ -52,10 +58,15 @@ const CanvasGameBoard = ({ chunk, chunkArea }: CanvasGameBoardProps) => {
         col < CONTEXT_SIZE + CHUNK_SIZE &&
         row >= CONTEXT_SIZE &&
         row < CONTEXT_SIZE + CHUNK_SIZE;
-      const mineNum = mineLookup(worldX, worldY) ? 1 : 0;
+      const cellChunkX = Math.floor(worldX / CHUNK_SIZE);
+      const cellChunkY = Math.floor(worldY / CHUNK_SIZE);
+      const isSolvedContext =
+        chunkByCoord.get(`${cellChunkX}:${cellChunkY}`)?.state === "solved";
+      const mineNum =
+        (isTargetCell || isSolvedContext) && mineLookup(worldX, worldY) ? 1 : 0;
       let neighborCount = 0;
 
-      if (!isTargetCell && !mineNum) {
+      if (isSolvedContext && !mineNum) {
         for (let deltaY = -1; deltaY <= 1; deltaY += 1) {
           for (let deltaX = -1; deltaX <= 1; deltaX += 1) {
             if (
@@ -70,12 +81,12 @@ const CanvasGameBoard = ({ chunk, chunkArea }: CanvasGameBoardProps) => {
 
       return {
         mineNum,
-        state: isTargetCell
-          ? { type: "hidden" as const }
-          : {
+        state: isSolvedContext
+          ? {
               type: "revealed" as const,
               num: neighborCount || null,
-            },
+            }
+          : { type: "hidden" as const },
       };
     }),
   );
@@ -107,7 +118,7 @@ const CanvasGameBoard = ({ chunk, chunkArea }: CanvasGameBoardProps) => {
               ?
             </div>
             <div className="px-4 text-lg font-bold">
-              (X={chunk.chunkX}, Y={chunk.chunkY})
+              Chunk (X={chunk.chunkX}, Y={chunk.chunkY})
             </div>
             <div className="flex h-[40px] min-w-[80px] items-center justify-center rounded-md bg-game-button px-3 text-xl font-bold">
               {minutes}:{seconds}
