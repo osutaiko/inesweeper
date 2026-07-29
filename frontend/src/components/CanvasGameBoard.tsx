@@ -1,6 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { GameBoardGrid } from "./GameBoardGrid";
+import { Button } from "./ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "./ui/dialog";
 import {
   buildCanvasMineLookup,
   type CanvasChunk,
@@ -12,6 +22,7 @@ import {
   handleChord,
   handleClick,
   handleFlag,
+  isLoss,
 } from "@/lib/minesweeper";
 import type { Board, BoardConfig } from "@/lib/types";
 
@@ -36,7 +47,17 @@ type CanvasGameBoardProps = {
 };
 
 const CanvasGameBoard = ({ chunk, chunkArea }: CanvasGameBoardProps) => {
+  const navigate = useNavigate();
   const [remainingSeconds, setRemainingSeconds] = useState(0);
+  const [gameOverReason, setGameOverReason] = useState<
+    "mine" | "expired" | null
+  >(null);
+  const [isGameOverDialogOpen, setIsGameOverDialogOpen] = useState(false);
+  const [explodedCell, setExplodedCell] = useState<{
+    row: number;
+    col: number;
+  } | null>(null);
+  const isGameOverRef = useRef(false);
   const chunks = chunkArea.chunks.map((areaChunk) =>
     areaChunk.chunkX === chunk.chunkX && areaChunk.chunkY === chunk.chunkY
       ? chunk
@@ -98,22 +119,42 @@ const CanvasGameBoard = ({ chunk, chunkArea }: CanvasGameBoardProps) => {
     row >= CONTEXT_SIZE &&
     row < CONTEXT_SIZE + CHUNK_SIZE;
 
+  const doAfterLoss = (reason: "mine" | "expired") => {
+    if (isGameOverRef.current) {
+      return;
+    }
+
+    isGameOverRef.current = true;
+    setGameOverReason(reason);
+    setIsGameOverDialogOpen(true);
+  };
+
   const applyBoardAction = (action: (currentBoard: Board) => Board) => {
-    setBoard((currentBoard) =>
-      action(currentBoard).map((row, rowIndex) =>
-        row.map((cell, colIndex) =>
-          isInsideTargetChunk(rowIndex, colIndex) ||
-          initialBoard[rowIndex][colIndex].state.type !== "hidden"
-            ? cell
-            : {
-                ...cell,
-                state: { type: "hidden" as const },
-              },
-        ),
+    if (isGameOverRef.current) {
+      return;
+    }
+
+    const updatedBoard = action(board).map((boardRow, rowIndex) =>
+      boardRow.map((cell, colIndex) =>
+        isInsideTargetChunk(rowIndex, colIndex) ||
+        initialBoard[rowIndex][colIndex].state.type !== "hidden"
+          ? cell
+          : {
+              ...cell,
+              state: { type: "hidden" as const },
+            },
       ),
     );
+    const loss = isLoss(updatedBoard);
+
+    setBoard(updatedBoard);
+    if (loss) {
+      setExplodedCell(loss);
+      doAfterLoss("mine");
+    }
   };
   const { onMouseDown, onMouseUp } = useMinesweeperControls({
+    disabled: gameOverReason !== null,
     canReveal: isInsideTargetChunk,
     canFlag: isInsideTargetChunk,
     canChord: () => true,
@@ -135,18 +176,33 @@ const CanvasGameBoard = ({ chunk, chunkArea }: CanvasGameBoardProps) => {
   });
 
   useEffect(() => {
+    const lockedUntil = chunk.lockedUntil
+      ? new Date(chunk.lockedUntil).getTime()
+      : Date.now();
     const updateRemainingSeconds = () => {
-      const lockedUntil = chunk.lockedUntil
-        ? new Date(chunk.lockedUntil).getTime()
-        : Date.now();
       setRemainingSeconds(
         Math.max(0, Math.ceil((lockedUntil - Date.now()) / 1000)),
       );
     };
+    const expireLock = () => {
+      setRemainingSeconds(0);
+      if (!isGameOverRef.current) {
+        isGameOverRef.current = true;
+        setGameOverReason("expired");
+        setIsGameOverDialogOpen(true);
+      }
+    };
 
     updateRemainingSeconds();
     const intervalId = window.setInterval(updateRemainingSeconds, 1000);
-    return () => window.clearInterval(intervalId);
+    const timeoutId = window.setTimeout(
+      expireLock,
+      Math.max(0, lockedUntil - Date.now()),
+    );
+    return () => {
+      window.clearInterval(intervalId);
+      window.clearTimeout(timeoutId);
+    };
   }, [chunk.lockedUntil]);
 
   const minutes = Math.floor(remainingSeconds / 60);
@@ -163,7 +219,7 @@ const CanvasGameBoard = ({ chunk, chunkArea }: CanvasGameBoardProps) => {
               Chunk (X={chunk.chunkX}, Y={chunk.chunkY})
             </div>
             <div className="flex h-[40px] min-w-[80px] items-center justify-center rounded-md bg-game-button px-3 text-xl font-bold">
-              {minutes}:{seconds}
+              {minutes}:{seconds} Left
             </div>
           </div>
         </div>
@@ -178,9 +234,9 @@ const CanvasGameBoard = ({ chunk, chunkArea }: CanvasGameBoardProps) => {
           <GameBoardGrid
             board={board}
             config={SOLVER_CONFIG}
-            isGameOver={null}
-            explodedCell={null}
-            incorrectFlagCells={null}
+            isGameOver={gameOverReason === "mine" ? "loss" : null}
+            explodedCell={explodedCell}
+            incorrectFlagCells={[]}
             shadedCells={[]}
             isFlagToggled={false}
             onMouseDown={onMouseDown}
@@ -188,6 +244,10 @@ const CanvasGameBoard = ({ chunk, chunkArea }: CanvasGameBoardProps) => {
             onTouchStart={() => {}}
             onTouchMove={() => {}}
             onTouchEnd={(_, row, col) => {
+              if (isGameOverRef.current) {
+                return;
+              }
+
               if (
                 !isInsideTargetChunk(row, col) ||
                 board[row][col].state.type === "revealed"
@@ -237,6 +297,36 @@ const CanvasGameBoard = ({ chunk, chunkArea }: CanvasGameBoardProps) => {
             }}
           />
         </div>
+        <Dialog
+          open={isGameOverDialogOpen}
+          onOpenChange={setIsGameOverDialogOpen}
+        >
+          <DialogContent
+            className="max-w-sm"
+            onInteractOutside={(event) => event.preventDefault()}
+          >
+            <DialogHeader>
+              <DialogTitle>Game Over</DialogTitle>
+              <DialogDescription>
+                {gameOverReason === "mine"
+                  ? "You revealed a mine!"
+                  : "Your claim attempt time expired!"}
+              </DialogDescription>
+            </DialogHeader>
+            You may attempt to claim a chunk again in 5 minutes.
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setIsGameOverDialogOpen(false)}
+              >
+                View Chunk
+              </Button>
+              <Button onClick={() => navigate("/place")}>
+                Return to Map
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
     </div>
   );
 };
