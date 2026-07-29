@@ -280,7 +280,7 @@ const Layout = () => {
           <div className="flex flex-row gap-2">
             <Button asChild variant="secondary" className="pr-3">
               <Link to="/canvas">
-                Multiplayer
+                Place
                 <ArrowRight />
               </Link>
             </Button>

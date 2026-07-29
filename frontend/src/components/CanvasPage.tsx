@@ -188,7 +188,7 @@ const CanvasPage = () => {
           return;
         }
 
-        setError(error instanceof Error ? error.message : "Failed to load canvas");
+        setError(error instanceof Error ? error.message : "Failed to load Place");
       } finally {
         if (isActive) {
           setIsLoading(false);

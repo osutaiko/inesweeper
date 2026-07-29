@@ -19,7 +19,8 @@ const CanvasHeader = ({ authUser }: CanvasHeaderProps) => (
           <span className="text-red-500">I</span>
           <span className="text-green-500">N</span>
           <span className="text-blue-500">E</span>
-          sweeper World
+          sweeper{' '}
+          <span className="text-muted-foreground">Place</span>
         </h2>
       </div>
     </a>
