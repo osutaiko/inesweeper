@@ -79,8 +79,8 @@ body {
     --game-wrongflag: oklch(86% 0.17 92);
     --game-redborder: oklch(71% 0.15 22);
     --game-blueborder: oklch(85% 0.14 195);
-    --game-chunkopen: 120 35% 92%;
-    --game-chunklocked: 0 55% 93%;
+    --game-chunkopen: oklch(95% 0.02 145);
+    --game-chunklocked: oklch(93% 0.02 18);
     
     --game-number-1: oklch(48% 0.30 275);
     --game-number-2: oklch(55% 0.18 143);
@@ -130,8 +130,8 @@ body {
     --game-wrongflag: oklch(72% 0.15 91);
     --game-redborder: oklch(39% 0.13 25);
     --game-blueborder: oklch(43% 0.07 195);
-    --game-chunkopen: 120 20% 16%;
-    --game-chunklocked: 0 35% 18%;
+    --game-chunkopen: oklch(29% 0.04 145);
+    --game-chunklocked: oklch(28% 0.05 21);
     
     --game-number-1: oklch(63% 0.20 274);
     --game-number-2: oklch(64% 0.21 143);
