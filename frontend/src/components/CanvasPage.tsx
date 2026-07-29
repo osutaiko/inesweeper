@@ -29,10 +29,7 @@ type CanvasViewportProps = {
   toChunkY: number;
   neighborMineLookup: CanvasChunkMineLookup | null;
   chunkArea: CanvasChunkAreaResponse | null;
-  hoveredChunkId: string | null;
   selectedChunkId: string | null;
-  onChunkHover: (chunkId: string) => void;
-  onChunkUnhover: () => void;
   onChunkClick: (chunkId: string) => void;
 };
 
@@ -43,10 +40,7 @@ const CanvasViewport = ({
   toChunkY,
   neighborMineLookup,
   chunkArea,
-  hoveredChunkId,
   selectedChunkId,
-  onChunkHover,
-  onChunkUnhover,
   onChunkClick,
 }: CanvasViewportProps) => {
   const chunkByCoord = new Map(
@@ -107,11 +101,8 @@ const CanvasViewport = ({
                 }
                 mineBitmap={chunk.mineBitmap}
                 neighborMineLookup={neighborMineLookup}
-                isHovered={hoveredChunkId === `${chunk.chunkX}:${chunk.chunkY}`}
                 isSelected={selectedChunkId === `${chunk.chunkX}:${chunk.chunkY}`}
                 onClick={() => onChunkClick(`${chunk.chunkX}:${chunk.chunkY}`)}
-                onMouseEnter={() => onChunkHover(`${chunk.chunkX}:${chunk.chunkY}`)}
-                onMouseLeave={onChunkUnhover}
               />
             );
           });
@@ -126,7 +117,6 @@ const CanvasPage = () => {
   const [viewCenterChunkX] = useState(0);
   const [viewCenterChunkY] = useState(0);
   const [chunkArea, setChunkArea] = useState<CanvasChunkAreaResponse | null>(null);
-  const [hoveredChunkId, setHoveredChunkId] = useState<string | null>(null);
   const [selectedChunkId, setSelectedChunkId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -377,10 +367,7 @@ const CanvasPage = () => {
                   toChunkY={toChunkY}
                   neighborMineLookup={neighborMineLookup}
                   chunkArea={chunkArea}
-                  hoveredChunkId={hoveredChunkId}
                   selectedChunkId={selectedChunkId}
-                  onChunkHover={setHoveredChunkId}
-                  onChunkUnhover={() => setHoveredChunkId(null)}
                   onChunkClick={(chunkId) => {
                     if (gestureRef.current.dragged) {
                       gestureRef.current.dragged = false;

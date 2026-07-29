@@ -12,11 +12,8 @@ type CanvasChunkProps = {
   colorClassName: string;
   mineBitmap: string | null;
   neighborMineLookup: CanvasChunkMineLookup | null;
-  isHovered: boolean;
   isSelected: boolean;
   onClick: () => void;
-  onMouseEnter: () => void;
-  onMouseLeave: () => void;
 };
 
 const getNumberColorClass = (num: number) => {
@@ -56,11 +53,8 @@ const CanvasChunk = ({
   colorClassName,
   mineBitmap,
   neighborMineLookup,
-  isHovered,
   isSelected,
   onClick,
-  onMouseEnter,
-  onMouseLeave,
 }: CanvasChunkProps) => {
   const chunkId = `${chunkX}:${chunkY}`;
   const renderCells = state === "solved";
@@ -69,20 +63,15 @@ const CanvasChunk = ({
   return (
     <div
       id={`chunk-${chunkId}`}
-      className={`relative grid ${colorClassName}`}
+      className={`relative grid ${colorClassName} ${
+        isSelected ? "ring-4 ring-inset ring-ring" : ""
+      }`}
       onClick={onClick}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
       style={{
         gridTemplateColumns: `repeat(${CHUNK_SIZE}, 30px)`,
         gridTemplateRows: `repeat(${CHUNK_SIZE}, 30px)`,
       }}
     >
-      <div
-        className={`pointer-events-none absolute inset-0 z-20 ${
-          (isHovered || isSelected) ? "bg-gray-500/20" : "bg-transparent"
-        }`}
-      />
       {renderCells &&
         Array.from({ length: CHUNK_SIZE }).flatMap((_, displayRow) => {
           const localY = CHUNK_SIZE - 1 - displayRow;
