@@ -4,6 +4,7 @@ import {
   isMineInBitmap,
   type CanvasChunkMineLookup,
 } from "@/lib/canvas";
+import { LockKeyhole } from "lucide-react";
 
 type CanvasChunkProps = {
   chunkX: number;
@@ -72,6 +73,11 @@ const CanvasChunk = ({
         gridTemplateRows: `repeat(${CHUNK_SIZE}, 30px)`,
       }}
     >
+      {state === "locked" && (
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <LockKeyhole size={80} />
+        </div>
+      )}
       {renderCells &&
         Array.from({ length: CHUNK_SIZE }).flatMap((_, displayRow) => {
           const localY = CHUNK_SIZE - 1 - displayRow;
