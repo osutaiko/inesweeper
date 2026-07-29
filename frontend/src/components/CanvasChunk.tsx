@@ -65,7 +65,7 @@ const CanvasChunk = ({
     <div
       id={`chunk-${chunkId}`}
       className={`relative grid ${colorClassName} ${
-        isSelected ? "z-30 ring-4 ring-ring" : ""
+        isSelected ? "z-30 ring-8 ring-destructive" : ""
       }`}
       onClick={onClick}
       style={{
@@ -73,6 +73,7 @@ const CanvasChunk = ({
         gridTemplateRows: `repeat(${CHUNK_SIZE}, 30px)`,
       }}
     >
+      <div className="pointer-events-none absolute inset-0 z-20 border-2 border-foreground" />
       {state === "locked" && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <LockKeyhole size={80} />
