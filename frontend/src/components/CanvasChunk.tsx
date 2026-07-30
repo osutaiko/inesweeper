@@ -4,7 +4,8 @@ import {
   isMineInBitmap,
   type CanvasChunkMineLookup,
 } from "@/lib/canvas";
-import { LockKeyhole } from "lucide-react";
+import { LockKeyhole, MapPin } from "lucide-react";
+import { useTransformComponent } from "react-zoom-pan-pinch";
 
 type CanvasChunkProps = {
   chunkX: number;
@@ -60,6 +61,7 @@ const CanvasChunk = ({
   const chunkId = `${chunkX}:${chunkY}`;
   const renderCells = state === "solved";
   const mineBitmapBytes = renderCells ? decodeMineBitmap(mineBitmap) : null;
+  const scale = useTransformComponent(({ state }) => state.scale);
 
   return (
     <div
@@ -74,6 +76,17 @@ const CanvasChunk = ({
       }}
     >
       <div className="pointer-events-none absolute inset-0 z-20 border border-foreground" />
+      {isSelected && (
+        <div
+          className="pointer-events-none absolute bottom-full left-1/2 z-40 size-[50px] text-destructive"
+          style={{
+            transform: `translateX(-50%) scale(${1 / scale})`,
+            transformOrigin: "bottom center",
+          }}
+        >
+          <MapPin className="size-full fill-foreground" />
+        </div>
+      )}
       {state === "locked" && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <LockKeyhole size={80} />
