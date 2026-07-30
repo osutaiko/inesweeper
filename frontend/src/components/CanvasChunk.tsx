@@ -188,7 +188,6 @@ const CanvasChunk = ({
         height: CHUNK_PIXEL_SIZE,
       }}
     >
-      <div className="pointer-events-none absolute inset-0 z-20 border border-foreground" />
       {isSelected && !renderDetails && (
         <div
           className="pointer-events-none absolute bottom-full left-1/2 z-40 size-[50px] text-destructive"

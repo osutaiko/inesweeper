@@ -22,11 +22,28 @@ import {
   type CanvasChunkMineLookup,
 } from "@/lib/canvas";
 
+const CHUNK_PIXEL_SIZE = 480;
+const CHUNK_ORIGIN_OFFSET = -CHUNK_PIXEL_SIZE / 2;
+
+type ChunkGridTransform = {
+  scale: number;
+  positionX: number;
+  positionY: number;
+};
+
+const updateChunkGrid = (
+  element: HTMLDivElement,
+  { scale, positionX, positionY }: ChunkGridTransform,
+) => {
+  const spacing = CHUNK_PIXEL_SIZE * scale;
+  const offsetX = positionX + CHUNK_ORIGIN_OFFSET * scale;
+  const offsetY = positionY + CHUNK_ORIGIN_OFFSET * scale;
+
+  element.style.backgroundSize = `${spacing}px ${spacing}px`;
+  element.style.backgroundPosition = `${offsetX}px ${offsetY}px`;
+};
+
 type CanvasViewportProps = {
-  fromChunkX: number;
-  fromChunkY: number;
-  toChunkX: number;
-  toChunkY: number;
   neighborMineLookup: CanvasChunkMineLookup | null;
   chunkArea: CanvasChunkAreaResponse | null;
   selectedChunkId: string | null;
@@ -34,10 +51,6 @@ type CanvasViewportProps = {
 };
 
 const CanvasViewport = ({
-  fromChunkX,
-  fromChunkY,
-  toChunkX,
-  toChunkY,
   neighborMineLookup,
   chunkArea,
   selectedChunkId,
@@ -60,53 +73,35 @@ const CanvasViewport = ({
   };
 
   return (
-    <div className="relative w-max bg-background">
-      <div
-        className="grid w-max"
-        style={{
-          gridTemplateColumns: `repeat(${toChunkX - fromChunkX + 1}, max-content)`,
-          gridTemplateRows: `repeat(${toChunkY - fromChunkY + 1}, max-content)`,
-        }}
-      >
-        {Array.from({ length: toChunkY - fromChunkY + 1 }).flatMap((_, row) => {
-          const chunkY = toChunkY - row;
-
-          return Array.from({ length: toChunkX - fromChunkX + 1 }).map((__, col) => {
-            const chunkX = fromChunkX + col;
-            const chunk = chunkByCoord.get(`${chunkX}:${chunkY}`);
-
-            if (!chunk) {
-              return (
-                <div
-                  key={`${chunkX}:${chunkY}`}
-                  className="w-[480px] h-[480px] bg-game-border"
-                />
-              );
+    <div className="relative size-px">
+      {(chunkArea?.chunks ?? []).map((chunk) => (
+        <div
+          key={`${chunk.chunkX}:${chunk.chunkY}`}
+          className="absolute"
+          style={{
+            left: chunk.chunkX * CHUNK_PIXEL_SIZE + CHUNK_ORIGIN_OFFSET,
+            top: -chunk.chunkY * CHUNK_PIXEL_SIZE + CHUNK_ORIGIN_OFFSET,
+          }}
+        >
+          <CanvasChunk
+            chunkX={chunk.chunkX}
+            chunkY={chunk.chunkY}
+            state={chunk.state}
+            colorClassName={
+              chunk.state === "solved"
+                ? "bg-game-border"
+                : chunk.state === "locked" &&
+                    hasSolvedNeighbor(chunk.chunkX, chunk.chunkY)
+                  ? "bg-game-chunklocked"
+                  : ""
             }
-
-            return (
-              <CanvasChunk
-                key={`${chunk.chunkX}:${chunk.chunkY}`}
-                chunkX={chunk.chunkX}
-                chunkY={chunk.chunkY}
-                state={chunk.state}
-                colorClassName={
-                  chunk.state === "solved"
-                    ? "bg-game-border"
-                    : chunk.state === "locked" &&
-                        hasSolvedNeighbor(chunk.chunkX, chunk.chunkY)
-                      ? "bg-game-chunklocked"
-                      : ""
-                }
-                mineBitmap={chunk.mineBitmap}
-                neighborMineLookup={neighborMineLookup}
-                isSelected={selectedChunkId === `${chunk.chunkX}:${chunk.chunkY}`}
-                onClick={() => onChunkClick(`${chunk.chunkX}:${chunk.chunkY}`)}
-              />
-            );
-          });
-        })}
-      </div>
+            mineBitmap={chunk.mineBitmap}
+            neighborMineLookup={neighborMineLookup}
+            isSelected={selectedChunkId === `${chunk.chunkX}:${chunk.chunkY}`}
+            onClick={() => onChunkClick(`${chunk.chunkX}:${chunk.chunkY}`)}
+          />
+        </div>
+      ))}
     </div>
   );
 };
@@ -114,32 +109,24 @@ const CanvasViewport = ({
 const CanvasPage = () => {
   const navigate = useNavigate();
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
-  const [viewCenterChunkX] = useState(0);
-  const [viewCenterChunkY] = useState(0);
   const [chunkArea, setChunkArea] = useState<CanvasChunkAreaResponse | null>(null);
   const [selectedChunkId, setSelectedChunkId] = useState<string | null>(null);
   const [lockingChunkId, setLockingChunkId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
   const transformRef = useRef<ReactZoomPanPinchRef | null>(null);
   const gestureRef = useRef({
     startX: 0,
     startY: 0,
     dragged: false,
   });
-  const viewRadius = 10;
+  const initialLoadRadius = 10;
   const neighborChunkBuffer = 1;
-
-  const { fromChunkX, fromChunkY, toChunkX, toChunkY } = {
-    fromChunkX: viewCenterChunkX - viewRadius,
-    fromChunkY: viewCenterChunkY - viewRadius,
-    toChunkX: viewCenterChunkX + viewRadius,
-    toChunkY: viewCenterChunkY + viewRadius,
-  };
-  const loadFromChunkX = fromChunkX - neighborChunkBuffer;
-  const loadFromChunkY = fromChunkY - neighborChunkBuffer;
-  const loadToChunkX = toChunkX + neighborChunkBuffer;
-  const loadToChunkY = toChunkY + neighborChunkBuffer;
+  const loadFromChunkX = -initialLoadRadius - neighborChunkBuffer;
+  const loadFromChunkY = -initialLoadRadius - neighborChunkBuffer;
+  const loadToChunkX = initialLoadRadius + neighborChunkBuffer;
+  const loadToChunkY = initialLoadRadius + neighborChunkBuffer;
 
   useEffect(() => {
     let isActive = true;
@@ -306,6 +293,18 @@ const CanvasPage = () => {
         <main
           className="relative flex w-full overflow-hidden bg-background h-[calc(100vh-57px)] sm:h-[calc(100vh-73px)]"
         >
+          <div
+            ref={gridRef}
+            aria-hidden
+            className="pointer-events-none absolute inset-0 z-20 size-full"
+            style={{
+              backgroundImage:
+                "linear-gradient(to right, var(--foreground) 1px, transparent 1px), linear-gradient(to bottom, var(--foreground) 1px, transparent 1px)",
+              backgroundPosition: `${CHUNK_ORIGIN_OFFSET * 0.4}px ${CHUNK_ORIGIN_OFFSET * 0.4}px`,
+              backgroundSize: `${CHUNK_PIXEL_SIZE * 0.4}px ${CHUNK_PIXEL_SIZE * 0.4}px`,
+            }}
+          />
+
           {selectedChunk ? (
             <div className="absolute bottom-0 md:bottom-4 left-1/2 gap-0 -translate-x-1/2 z-50 bg-card border flex flex-col w-full max-w-[600px] px-4 py-2 md:py-4 shadow-lg">
               <h3 className="text-center text-base md:text-lg mb-3">
@@ -397,13 +396,25 @@ const CanvasPage = () => {
             minScale={0.01}
             maxScale={1.0}
             centerOnInit
+            centerZoomedOut={false}
+            limitToBounds={false}
             smooth={false}
             wheel={{ step: 0.05 }}
             panning={{ velocityDisabled: true }}
+            onInit={({ state }) => {
+              if (gridRef.current) {
+                updateChunkGrid(gridRef.current, state);
+              }
+            }}
+            onTransform={(_, transform) => {
+              if (gridRef.current) {
+                updateChunkGrid(gridRef.current, transform);
+              }
+            }}
           >
             {() => (
               <TransformComponent
-                wrapperClass="bg-background"
+                wrapperClass="bg-transparent"
                 wrapperStyle={{
                   position: "absolute",
                   inset: 0,
@@ -411,7 +422,7 @@ const CanvasPage = () => {
                   height: "100%",
                   overflow: "hidden",
                 }}
-                contentClass="bg-background"
+                contentClass="bg-transparent"
                 wrapperProps={{
                   onPointerDown: (event) => {
                     setSelectedChunkId(null);
@@ -442,10 +453,6 @@ const CanvasPage = () => {
                 }}
               >
                 <CanvasViewport
-                  fromChunkX={fromChunkX}
-                  fromChunkY={fromChunkY}
-                  toChunkX={toChunkX}
-                  toChunkY={toChunkY}
                   neighborMineLookup={neighborMineLookup}
                   chunkArea={chunkArea}
                   selectedChunkId={selectedChunkId}
