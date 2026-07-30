@@ -127,7 +127,7 @@ const CanvasPage = () => {
     startY: 0,
     dragged: false,
   });
-  const viewRadius = 6;
+  const viewRadius = 10;
   const neighborChunkBuffer = 1;
 
   const { fromChunkX, fromChunkY, toChunkX, toChunkY } = {

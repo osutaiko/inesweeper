@@ -8,6 +8,8 @@ export type ChunkMineBitmap = {
   mineBitmap: string;
 };
 
+const MINE_THRESHOLD = 50;
+
 const getBoardSecretEnv = () => {
   const value = process.env['CANVAS_BOARD_SECRET']?.trim();
 
@@ -18,18 +20,6 @@ const getBoardSecretEnv = () => {
   }
 
   return value;
-};
-
-const getBoardDensityEnv = () => {
-  const value = process.env['CANVAS_BOARD_DENSITY']?.trim();
-
-  if (!value) {
-    throw new Error(
-      'Requires CANVAS_BOARD_DENSITY env to generate chunk',
-    );
-  }
-
-  return Number(value);
 };
 
 const getChunkStream = (
@@ -48,9 +38,6 @@ const getChunkStream = (
   );
 };
 
-const getMineThreshold = (density: number) =>
-  Math.floor(density * 0x100);
-
 const setBitmapBit = (bitmap: Buffer, bitIndex: number) => {
   const byteIndex = bitIndex >> 3;
   const bitMask = 1 << (bitIndex & 7);
@@ -60,7 +47,6 @@ const setBitmapBit = (bitmap: Buffer, bitIndex: number) => {
 export const isMineAtWorldCoordinate = (
   worldX: number,
   worldY: number,
-  density = getBoardDensityEnv(),
 ) => {
   const chunkX = Math.floor(worldX / CHUNK_SIZE);
   const chunkY = Math.floor(worldY / CHUNK_SIZE);
@@ -70,22 +56,20 @@ export const isMineAtWorldCoordinate = (
   const cellIndex = localY * CHUNK_SIZE + localX;
   const value = chunkStream[cellIndex];
 
-  return value < getMineThreshold(density);
+  return value < MINE_THRESHOLD;
 };
 
 export const buildChunkMineBitmap = (
   chunkX: number,
   chunkY: number,
 ): ChunkMineBitmap => {
-  const density = getBoardDensityEnv();
-  const mineThreshold = getMineThreshold(density);
   const chunkStream = getChunkStream(chunkX, chunkY);
   const mineBitmap = Buffer.alloc((CHUNK_SIZE * CHUNK_SIZE) / 8);
 
   for (let cellIndex = 0; cellIndex < CHUNK_SIZE * CHUNK_SIZE; cellIndex += 1) {
     const value = chunkStream[cellIndex];
 
-    if (value < mineThreshold) {
+    if (value < MINE_THRESHOLD) {
       setBitmapBit(mineBitmap, cellIndex);
     }
   }
