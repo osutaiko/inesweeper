@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import { GameBoardGrid } from "./GameBoardGrid";
@@ -263,25 +262,14 @@ const CanvasGameBoard = ({
     <div className="flex h-min w-min select-none flex-col overflow-hidden rounded-md">
         <div className="border-x-[9px] border-t-[9px] border-game-border bg-game-border">
           <div className="relative flex items-center justify-between rounded-sm bg-game-hidden p-2">
-            <div className="flex gap-2">
-              <Button
-                className="bg-game-button"
-                size="icon"
-                onClick={() => navigate("/place")}
-                title="Return to Map"
-                variant="secondary"
-              >
-                <ArrowLeft />
-              </Button>
-              <div className="flex h-[40px] gap-x-2 overflow-hidden bg-game-button px-3">
-                <div className="flex flex-row items-center gap-1.5">
-                  <span className="font-minesweeper text-[20px] text-red-500">
-                    `
-                  </span>
-                  <span className="text-xl font-bold">
-                    {remainingPosFlags}
-                  </span>
-                </div>
+            <div className="flex h-[40px] gap-x-2 overflow-hidden bg-game-button px-3">
+              <div className="flex flex-row items-center gap-1.5">
+                <span className="font-minesweeper text-[20px] text-red-500">
+                  `
+                </span>
+                <span className="text-xl font-bold">
+                  {remainingPosFlags}
+                </span>
               </div>
             </div>
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 px-4 text-lg font-bold">
