@@ -28,6 +28,7 @@ import {
   isWin,
 } from "@/lib/minesweeper";
 import type { Board, BoardConfig } from "@/lib/types";
+import { timeLeftUntil } from "@/lib/utils";
 
 const CONTEXT_SIZE = 4;
 const SOLVER_SIZE = CHUNK_SIZE + CONTEXT_SIZE * 2;
@@ -61,7 +62,9 @@ const CanvasGameBoard = ({
   isTouchscreen,
 }: CanvasGameBoardProps) => {
   const navigate = useNavigate();
-  const [remainingSeconds, setRemainingSeconds] = useState(0);
+  const [remainingSeconds, setRemainingSeconds] = useState(() =>
+    Math.ceil(timeLeftUntil(chunk.lockedUntil) / 1000),
+  );
   const [gameOverReason, setGameOverReason] = useState<
     "win" | "mine" | "expired" | "error" | null
   >(null);
@@ -223,12 +226,9 @@ const CanvasGameBoard = ({
   });
 
   useEffect(() => {
-    const lockedUntil = chunk.lockedUntil
-      ? new Date(chunk.lockedUntil).getTime()
-      : Date.now();
     const updateRemainingSeconds = () => {
       setRemainingSeconds(
-        Math.max(0, Math.ceil((lockedUntil - Date.now()) / 1000)),
+        Math.ceil(timeLeftUntil(chunk.lockedUntil) / 1000),
       );
     };
     const expireLock = () => {
@@ -244,7 +244,7 @@ const CanvasGameBoard = ({
     const intervalId = window.setInterval(updateRemainingSeconds, 1000);
     const timeoutId = window.setTimeout(
       expireLock,
-      Math.max(0, lockedUntil - Date.now()),
+      timeLeftUntil(chunk.lockedUntil),
     );
     return () => {
       window.clearInterval(intervalId);
@@ -272,10 +272,13 @@ const CanvasGameBoard = ({
                 </span>
               </div>
             </div>
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 px-4 text-lg font-bold">
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center px-3 h-[40px] text-lg font-bold bg-game-button">
               Chunk (X={chunk.chunkX}, Y={chunk.chunkY})
             </div>
-            <div className="flex h-[40px] min-w-[80px] items-center justify-center rounded-md bg-game-button px-3 text-xl font-bold">
+            <div className={`flex h-[40px] min-w-[80px] items-center justify-center
+              ${remainingSeconds === 0 || (remainingSeconds <= 30 && remainingSeconds % 2 === 0) ? 'bg-destructive' : 'bg-game-button'}
+              px-3 text-xl font-bold`}
+            >
               {minutes}:{seconds} Left
             </div>
           </div>

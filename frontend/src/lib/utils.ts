@@ -50,3 +50,9 @@ export function useMediaQuery(query: string): boolean {
 export function formatTimeMs(ms: number): string {
   return (Math.floor(ms / 10) / 100).toFixed(2);
 }
+
+export function timeLeftUntil(until: string | null): number {
+  return until
+    ? Math.max(0, new Date(until).getTime() - Date.now())
+    : 0;
+}
