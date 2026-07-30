@@ -7,6 +7,8 @@ import {
 import { LockKeyhole, MapPin } from "lucide-react";
 import { useTransformComponent } from "react-zoom-pan-pinch";
 
+const CELL_RENDER_MIN_SCALE = 0.2;
+
 type CanvasChunkProps = {
   chunkX: number;
   chunkY: number;
@@ -59,14 +61,22 @@ const CanvasChunk = ({
   onClick,
 }: CanvasChunkProps) => {
   const chunkId = `${chunkX}:${chunkY}`;
-  const renderCells = state === "solved";
-  const mineBitmapBytes = renderCells ? decodeMineBitmap(mineBitmap) : null;
   const scale = useTransformComponent(({ state }) => state.scale);
+  const renderDetails = scale >= CELL_RENDER_MIN_SCALE;
+  const renderCells = renderDetails && state === "solved";
+  const mineBitmapBytes = renderCells ? decodeMineBitmap(mineBitmap) : null;
+  const backgroundClassName = renderDetails
+    ? colorClassName
+    : state === "solved"
+      ? "bg-game-revealed"
+      : state === "locked"
+        ? "bg-game-chunklocked"
+        : "";
 
   return (
     <div
       id={`chunk-${chunkId}`}
-      className={`relative grid ${colorClassName} ${
+      className={`relative grid ${backgroundClassName} ${
         isSelected ? "z-30 ring-8 ring-destructive" : ""
       }`}
       onClick={onClick}
@@ -87,7 +97,7 @@ const CanvasChunk = ({
           <MapPin className="size-full fill-foreground" />
         </div>
       )}
-      {state === "locked" && (
+      {renderDetails && state === "locked" && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <LockKeyhole size={80} />
         </div>
