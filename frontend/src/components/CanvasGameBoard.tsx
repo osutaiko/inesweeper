@@ -154,7 +154,7 @@ const CanvasGameBoard = ({
     setGameOverReason("win");
 
     try {
-      await solveCanvasChunk(chunk.chunkX, chunk.chunkY);
+      await solveCanvasChunk();
     } catch {
       setGameOverReason("error");
     }

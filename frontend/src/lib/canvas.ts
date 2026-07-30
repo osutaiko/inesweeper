@@ -143,14 +143,14 @@ export const lockCanvasChunk = async (chunkX: number, chunkY: number) => {
   return (await response.json()) as CanvasChunk;
 };
 
-export const solveCanvasChunk = async (chunkX: number, chunkY: number) => {
+export const solveCanvasChunk = async () => {
   const accessToken = await getAuthAccessToken();
   if (!accessToken) {
     throw new Error("Login required");
   }
 
   const response = await fetch(
-    `${getBackendUrl()}/place/chunks/${chunkX}/${chunkY}/solve`,
+    `${getBackendUrl()}/place/chunks/solve`,
     {
       method: "POST",
       headers: {

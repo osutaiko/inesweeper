@@ -36,12 +36,13 @@ export class ChunkController {
     return this.chunkService.lockChunk(req, chunkX, chunkY);
   }
 
-  @Post(':chunkX/:chunkY/solve')
-  async solveChunk(
-    @Req() req: Request,
-    @Param('chunkX', ParseIntPipe) chunkX: number,
-    @Param('chunkY', ParseIntPipe) chunkY: number,
-  ) {
-    return this.chunkService.solveChunk(req, chunkX, chunkY);
+  @Post('solve')
+  async solveChunk(@Req() req: Request) {
+    return this.chunkService.solveChunk(req);
+  }
+
+  @Post('fail')
+  async failChunk(@Req() req: Request) {
+    return this.chunkService.failChunk(req);
   }
 }

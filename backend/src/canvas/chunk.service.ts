@@ -446,7 +446,7 @@ export class ChunkService {
     return this.withChunkMineBitmap(saved, user.id, user.nickname);
   }
 
-  async solveChunk(req: Request, chunkX: number, chunkY: number) {
+  async solveChunk(req: Request) {
     const user = await this.requireUser(req);
 
     if (!user) {
@@ -454,14 +454,29 @@ export class ChunkService {
     }
 
     const client = this.authService.createBearerClient(req);
-    const chunk = await this.getOrCreateChunkRecord(client, chunkX, chunkY);
+    const { data, error } = await client
+      .from(this.chunkTable)
+      .select('*')
+      .eq('locked_by_user_id', user.id)
+      .eq('state', 'locked')
+      .maybeSingle();
 
-    if (chunk.state !== 'locked' || !chunk.lockedByUserId) {
-      throw new ConflictException('Chunk must be locked before solving');
+    if (error) {
+      throw new BadRequestException(
+        error.message ?? 'Unable to read locked chunk',
+      );
     }
 
-    if (chunk.lockedByUserId !== user.id) {
-      throw new ConflictException('You are not the user that locked this chunk');
+    if (!data) {
+      throw new ConflictException('You do not have a locked chunk');
+    }
+
+    const chunk = this.rowToChunk(data as ChunkRow);
+    if (
+      !chunk.lockedUntil ||
+      new Date(chunk.lockedUntil).getTime() <= Date.now()
+    ) {
+      throw new ConflictException('Chunk lock expired');
     }
 
     const solvedAt = new Date();
@@ -472,6 +487,50 @@ export class ChunkService {
       solvedAt: solvedAt.toISOString(),
       lockedUntil: null,
     });
+
+    return this.withChunkMineBitmap(saved, user.id, user.nickname);
+  }
+
+  async failChunk(req: Request) {
+    const user = await this.requireUser(req);
+
+    if (!user) {
+      throw new UnauthorizedException('Must log in to play');
+    }
+
+    const client = this.authService.createBearerClient(req);
+    const { data, error } = await client
+      .from(this.chunkTable)
+      .select('*')
+      .eq('locked_by_user_id', user.id)
+      .eq('state', 'locked')
+      .maybeSingle();
+
+    if (error) {
+      throw new BadRequestException(
+        error.message ?? 'Unable to read locked chunk',
+      );
+    }
+
+    if (!data) {
+      throw new ConflictException('You do not have a locked chunk');
+    }
+
+    const row = data as ChunkRow;
+    const failedAt = Date.now();
+    const saved = await this.setChunkRecord(client, {
+      ...this.rowToChunk(row),
+      state: 'open',
+      lockedByUserId: null,
+      lockedAt: null,
+      lockedUntil: null,
+      solverUserId: null,
+      solvedAt: null,
+    });
+    this.nextLockAtByUserId.set(
+      user.id,
+      failedAt + this.claimDurationMs,
+    );
 
     return this.withChunkMineBitmap(saved, user.id, user.nickname);
   }
