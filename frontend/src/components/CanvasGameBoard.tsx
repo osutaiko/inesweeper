@@ -28,11 +28,12 @@ import {
   isWin,
 } from "@/lib/minesweeper";
 import type { Board, BoardConfig } from "@/lib/types";
-import { timeLeftUntil } from "@/lib/utils";
+import { getMsParts, timeLeftUntil } from "@/lib/utils";
 
 const CONTEXT_SIZE = 4;
 const SOLVER_SIZE = CHUNK_SIZE + CONTEXT_SIZE * 2;
 const FADE_SIZE_PX = 60;
+const CLAIM_COOLDOWN_MS = 5 * 60 * 1000;
 
 const SOLVER_CONFIG: BoardConfig = {
   width: SOLVER_SIZE,
@@ -62,9 +63,11 @@ const CanvasGameBoard = ({
   isTouchscreen,
 }: CanvasGameBoardProps) => {
   const navigate = useNavigate();
-  const [remainingSeconds, setRemainingSeconds] = useState(() =>
-    Math.ceil(timeLeftUntil(chunk.lockedUntil) / 1000),
+  const [remainingMs, setRemainingMs] = useState(() =>
+    timeLeftUntil(chunk.lockedUntil),
   );
+  const [nextClaimAt, setNextClaimAt] = useState<string | null>(null);
+  const [nextClaimInMs, setNextClaimInMs] = useState(0);
   const [gameOverReason, setGameOverReason] = useState<
     "win" | "mine" | "expired" | "error" | null
   >(null);
@@ -141,6 +144,9 @@ const CanvasGameBoard = ({
     }
 
     isGameOverRef.current = true;
+    const retryAt = new Date(Date.now() + CLAIM_COOLDOWN_MS).toISOString();
+    setNextClaimAt(retryAt);
+    setNextClaimInMs(timeLeftUntil(retryAt));
     setGameOverReason(reason);
     setIsGameOverDialogOpen(true);
   };
@@ -226,22 +232,25 @@ const CanvasGameBoard = ({
   });
 
   useEffect(() => {
-    const updateRemainingSeconds = () => {
-      setRemainingSeconds(
-        Math.ceil(timeLeftUntil(chunk.lockedUntil) / 1000),
-      );
+    const updateRemainingMs = () => {
+      setRemainingMs(timeLeftUntil(chunk.lockedUntil));
     };
     const expireLock = () => {
-      setRemainingSeconds(0);
+      setRemainingMs(0);
       if (!isGameOverRef.current) {
+        const retryAt = new Date(
+          Date.now() + CLAIM_COOLDOWN_MS,
+        ).toISOString();
         isGameOverRef.current = true;
+        setNextClaimAt(retryAt);
+        setNextClaimInMs(timeLeftUntil(retryAt));
         setGameOverReason("expired");
         setIsGameOverDialogOpen(true);
       }
     };
 
-    updateRemainingSeconds();
-    const intervalId = window.setInterval(updateRemainingSeconds, 1000);
+    updateRemainingMs();
+    const intervalId = window.setInterval(updateRemainingMs, 1000);
     const timeoutId = window.setTimeout(
       expireLock,
       timeLeftUntil(chunk.lockedUntil),
@@ -252,8 +261,30 @@ const CanvasGameBoard = ({
     };
   }, [chunk.lockedUntil]);
 
-  const minutes = Math.floor(remainingSeconds / 60);
-  const seconds = String(remainingSeconds % 60).padStart(2, "0");
+  useEffect(() => {
+    if (!nextClaimAt) {
+      return;
+    }
+
+    const updateNextClaimInMs = () => {
+      setNextClaimInMs(timeLeftUntil(nextClaimAt));
+    };
+
+    updateNextClaimInMs();
+    const intervalId = window.setInterval(updateNextClaimInMs, 1000);
+    return () => window.clearInterval(intervalId);
+  }, [nextClaimAt]);
+
+  const remainingSeconds = Math.ceil(remainingMs / 1000);
+  const {
+    minutes: remainingMinutes,
+    seconds: remainingSecondsPart,
+  } = getMsParts(remainingSeconds * 1000);
+  const nextClaimInSeconds = Math.ceil(nextClaimInMs / 1000);
+  const {
+    minutes: nextClaimInMinutes,
+    seconds: nextClaimInSecondsPart,
+  } = getMsParts(nextClaimInSeconds * 1000);
   const { remainingPosFlags } = countRemainingFlags(
     getTargetChunkBoard(board),
   );
@@ -279,7 +310,8 @@ const CanvasGameBoard = ({
               ${remainingSeconds === 0 || (remainingSeconds <= 30 && remainingSeconds % 2 === 0) ? 'bg-destructive' : 'bg-game-button'}
               px-3 text-xl font-bold`}
             >
-              {minutes}:{seconds} Left
+              {remainingMinutes}:
+              {String(remainingSecondsPart).padStart(2, "0")} Left
             </div>
           </div>
         </div>
@@ -369,7 +401,7 @@ const CanvasGameBoard = ({
               </DialogDescription>
             </DialogHeader>
             {gameOverReason !== "win" &&
-              "You may attempt to claim a chunk again in 5 minutes."}
+              `You may attempt to claim a chunk again in ${nextClaimInMinutes}:${String(nextClaimInSecondsPart).padStart(2, "0")}.`}
             <DialogFooter>
               <Button
                 variant="outline"
