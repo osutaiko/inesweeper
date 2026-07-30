@@ -14,6 +14,7 @@ import {
 } from "./ui/dialog";
 import {
   buildCanvasMineLookup,
+  solveCanvasChunk,
   type CanvasChunk,
   type CanvasChunkAreaResponse,
 } from "@/lib/canvas";
@@ -24,6 +25,7 @@ import {
   handleClick,
   handleFlag,
   isLoss,
+  isWin,
 } from "@/lib/minesweeper";
 import type { Board, BoardConfig } from "@/lib/types";
 
@@ -56,7 +58,7 @@ const CanvasGameBoard = ({
   const navigate = useNavigate();
   const [remainingSeconds, setRemainingSeconds] = useState(0);
   const [gameOverReason, setGameOverReason] = useState<
-    "mine" | "expired" | null
+    "win" | "mine" | "expired" | "error" | null
   >(null);
   const [isGameOverDialogOpen, setIsGameOverDialogOpen] = useState(false);
   const [explodedCell, setExplodedCell] = useState<{
@@ -135,6 +137,23 @@ const CanvasGameBoard = ({
     setIsGameOverDialogOpen(true);
   };
 
+  const doAfterWin = async () => {
+    if (isGameOverRef.current) {
+      return;
+    }
+
+    isGameOverRef.current = true;
+    setGameOverReason("win");
+
+    try {
+      await solveCanvasChunk(chunk.chunkX, chunk.chunkY);
+    } catch {
+      setGameOverReason("error");
+    }
+
+    setIsGameOverDialogOpen(true);
+  };
+
   const applyBoardAction = (action: (currentBoard: Board) => Board) => {
     if (isGameOverRef.current) {
       return;
@@ -157,6 +176,16 @@ const CanvasGameBoard = ({
     if (loss) {
       setExplodedCell(loss);
       doAfterLoss("mine");
+    } else if (
+      isWin(
+        updatedBoard
+          .slice(CONTEXT_SIZE, CONTEXT_SIZE + CHUNK_SIZE)
+          .map((row) =>
+            row.slice(CONTEXT_SIZE, CONTEXT_SIZE + CHUNK_SIZE),
+          ),
+      )
+    ) {
+      void doAfterWin();
     }
   };
   const {
@@ -261,7 +290,13 @@ const CanvasGameBoard = ({
           <GameBoardGrid
             board={board}
             config={SOLVER_CONFIG}
-            isGameOver={gameOverReason === "mine" ? "loss" : null}
+            isGameOver={
+              gameOverReason === "win"
+                ? "win"
+                : gameOverReason === "mine"
+                  ? "loss"
+                  : null
+            }
             explodedCell={explodedCell}
             incorrectFlagCells={[]}
             shadedCells={[]}
@@ -316,14 +351,21 @@ const CanvasGameBoard = ({
             onInteractOutside={(event) => event.preventDefault()}
           >
             <DialogHeader>
-              <DialogTitle>Game Over</DialogTitle>
+              <DialogTitle>
+                {gameOverReason === "win" ? "Chunk Claimed!" : "Failed Claim!"}
+              </DialogTitle>
               <DialogDescription>
-                {gameOverReason === "mine"
-                  ? "You revealed a mine!"
-                  : "Your claim attempt time expired!"}
+                {gameOverReason === "win"
+                  ? "You successfully claimed this chunk!"
+                  : gameOverReason === "mine"
+                    ? "You revealed a mine..."
+                    : gameOverReason === "expired"
+                      ? "Claim attempt time expired..."
+                      : ""}
               </DialogDescription>
             </DialogHeader>
-            You may attempt to claim a chunk again in 5 minutes.
+            {gameOverReason !== "win" &&
+              "You may attempt to claim a chunk again in 5 minutes."}
             <DialogFooter>
               <Button
                 variant="outline"
