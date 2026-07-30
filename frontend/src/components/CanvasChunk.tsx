@@ -177,27 +177,26 @@ const CanvasChunk = ({
   return (
     <div
       id={`chunk-${chunkId}`}
-      className={`relative grid ${backgroundClassName} ${
-        isSelected && renderDetails
-          ? "z-30 ring-8 ring-destructive"
-          : ""
-      }`}
+      className={`relative grid ${backgroundClassName}`}
       onClick={onClick}
       style={{
         width: CHUNK_PIXEL_SIZE,
         height: CHUNK_PIXEL_SIZE,
       }}
     >
-      {isSelected && !renderDetails && (
-        <div
-          className="pointer-events-none absolute bottom-full left-1/2 z-40 size-[50px] text-destructive"
-          style={{
-            transform: `translateX(-50%) scale(${1 / scale})`,
-            transformOrigin: "bottom center",
-          }}
-        >
-          <MapPin className="size-full fill-foreground" />
-        </div>
+      {isSelected && (
+        <>
+          <div className="pointer-events-none absolute inset-0 z-30 bg-green-500 opacity-20" />
+          <div
+            className="pointer-events-none absolute bottom-full left-1/2 z-40 size-[50px] text-destructive"
+            style={{
+              transform: `translateX(-50%) scale(${1 / scale})`,
+              transformOrigin: "bottom center",
+            }}
+          >
+            <MapPin className="size-full fill-foreground" />
+          </div>
+        </>
       )}
       {renderDetails && state === "locked" && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">

@@ -24,7 +24,7 @@ import {
 
 const CHUNK_PIXEL_SIZE = 480;
 const CHUNK_ORIGIN_OFFSET = -CHUNK_PIXEL_SIZE / 2;
-const GRID_DETAIL_SCALE = 0.2;
+const GRID_DETAIL_SCALE = 0.1;
 const LOW_SCALE_GRID_STEP = 10;
 
 type ChunkGridTransform = {
