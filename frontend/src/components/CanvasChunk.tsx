@@ -9,7 +9,6 @@ import {
 import { LockKeyhole, MapPin } from "lucide-react";
 import { useTransformComponent } from "react-zoom-pan-pinch";
 
-const CELL_RENDER_MIN_SCALE = 0.1;
 const CELL_SIZE = 30;
 const CHUNK_PIXEL_SIZE = CHUNK_SIZE * CELL_SIZE;
 
@@ -165,7 +164,7 @@ const CanvasChunk = ({
 }: CanvasChunkProps) => {
   const chunkId = `${chunkX}:${chunkY}`;
   const scale = useTransformComponent(({ state }) => state.scale);
-  const renderDetails = scale >= CELL_RENDER_MIN_SCALE;
+  const renderDetails = mineBitmap !== null;
   const renderCells = renderDetails && state === "solved";
   const backgroundClassName = renderDetails
     ? colorClassName
