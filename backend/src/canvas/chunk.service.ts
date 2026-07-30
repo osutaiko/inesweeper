@@ -36,6 +36,8 @@ const chunkStateCode = {
 export class ChunkService {
   private readonly claimDurationMs = 5 * 60 * 1000; // 5 minutes
   private readonly chunkTable = 'canvas_chunks';
+  private readonly maxChunkAreaSize = 10_000;
+  private readonly maxMineBitmapAreaSize = 1_024;
   private readonly nextLockAtByUserId = new Map<string, number>();
 
   constructor(private readonly authService: AuthService) {}
@@ -276,6 +278,18 @@ export class ChunkService {
     const endX = Math.max(fromChunkX, toChunkX);
     const startY = Math.min(fromChunkY, toChunkY);
     const endY = Math.max(fromChunkY, toChunkY);
+    const width = endX - startX + 1;
+    const height = endY - startY + 1;
+    const areaSize = width * height;
+
+    if (
+      !Number.isSafeInteger(areaSize) ||
+      areaSize > this.maxChunkAreaSize
+    ) {
+      throw new BadRequestException('Requested chunk area is too large');
+    }
+
+    const includeMineBitmaps = areaSize <= this.maxMineBitmapAreaSize;
     const now = Date.now();
     const { data, error } = await client
       .from(this.chunkTable)
@@ -358,8 +372,9 @@ export class ChunkService {
           solverName: chunk.solverUserId
             ? nameByUserId.get(chunk.solverUserId) ?? null
             : null,
-          mineBitmap: this.getChunkMineBitmap(chunk.chunkX, chunk.chunkY)
-            .mineBitmap,
+          mineBitmap: includeMineBitmaps
+            ? this.getChunkMineBitmap(chunk.chunkX, chunk.chunkY).mineBitmap
+            : null,
         });
       }
     }
@@ -369,9 +384,12 @@ export class ChunkService {
       fromChunkY: startY,
       toChunkX: endX,
       toChunkY: endY,
-      width: endX - startX + 1,
-      height: endY - startY + 1,
+      width,
+      height,
       states: chunks.map((chunk) => chunkStateCode[chunk.state]).join(''),
+      mineBitmaps: includeMineBitmaps
+        ? chunks.map((chunk) => chunk.mineBitmap)
+        : null,
       chunks,
     };
   }
