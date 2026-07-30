@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
+import { Locate } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import { Button } from "./ui/button";
-import { Card } from "./ui/card";
 import {
   TransformComponent,
   TransformWrapper,
+  type ReactZoomPanPinchRef,
 } from "react-zoom-pan-pinch";
 
 import { ThemeProvider } from "./theme-provider";
@@ -120,6 +121,7 @@ const CanvasPage = () => {
   const [lockingChunkId, setLockingChunkId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const transformRef = useRef<ReactZoomPanPinchRef | null>(null);
   const gestureRef = useRef({
     startX: 0,
     startY: 0,
@@ -305,8 +307,8 @@ const CanvasPage = () => {
           className="relative flex w-full overflow-hidden bg-background h-[calc(100vh-57px)] sm:h-[calc(100vh-73px)]"
         >
           {selectedChunk ? (
-            <Card className="absolute bottom-0 md:bottom-4 left-1/2 -translate-x-1/2 z-50 flex gap-0.5 text-center w-max max-w-full md:max-w-[calc(100%-2rem)] px-4 py-2 md:py-4 shadow-lg rounded-none">
-              <h3 className="text-base md:text-lg mb-1">
+            <div className="absolute bottom-0 md:bottom-4 left-1/2 gap-0 -translate-x-1/2 z-50 bg-card border flex flex-col w-full md:max-w-[calc(100%-2rem)] px-4 py-2 md:py-4 shadow-lg">
+              <h3 className="text-center text-base md:text-lg mb-1">
                 {selectedChunk.state === "locked" && "Being solved by: "}
                 <span
                   className={
@@ -322,26 +324,42 @@ const CanvasPage = () => {
                       : "(Unclaimed)")}
                 </span>
               </h3>
-              {selectedChunk.state === 'solved' &&
-                <>
-                  <span className="text-muted-foreground">
-                    {formatChunkTimestamp(selectedChunkAt, true)}
-                  </span>
-                </>
-              }
-              {selectedChunk.state === 'locked' &&
-                <span className="text-muted-foreground">
-                  Locked until: {formatChunkTimestamp(selectedChunkAt, false)}
-                </span>
-              }
-              <span className="text-muted-foreground">
-                (X={selectedChunk.chunkX}, Y={selectedChunk.chunkY})
-              </span>
+              <div className="flex flex-row w-full justify-between">
+                <div className="flex flex-col gap-0.5">
+                  {selectedChunk.state === 'solved' &&
+                    <>
+                      <span className="text-muted-foreground">
+                        {formatChunkTimestamp(selectedChunkAt, true)}
+                      </span>
+                    </>
+                  }
+                  {selectedChunk.state === 'locked' &&
+                    <span className="text-muted-foreground">
+                      Locked until: {formatChunkTimestamp(selectedChunkAt, false)}
+                    </span>
+                  }
+                  <span className="text-muted-foreground">(X={selectedChunk.chunkX}, Y={selectedChunk.chunkY})</span>
+                </div>
+                <Button
+                  onClick={() =>
+                    transformRef.current?.zoomToElement(
+                      `chunk-${selectedChunk.chunkX}:${selectedChunk.chunkY}`,
+                      0.6,
+                      500,
+                      "easeOut",
+                    )
+                  }
+                  size="icon"
+                  title="Locate chunk"
+                  variant="secondary"
+                >
+                  <Locate />
+                </Button>
+              </div>
               {canStartSolving && (
                 <Button
                   className="mt-2"
                   disabled={lockingChunkId !== null}
-                  size="lg"
                   onClick={() =>
                     void handleStartSolving(
                       selectedChunk.chunkX,
@@ -357,7 +375,7 @@ const CanvasPage = () => {
                   Log in to start claiming chunks!
                 </span>
               )}
-            </Card>
+            </div>
           ) : null}
 
           {(error || isLoading) && (
@@ -374,6 +392,7 @@ const CanvasPage = () => {
 
           {chunkArea ? (
           <TransformWrapper
+            ref={transformRef}
             initialScale={0.4}
             minScale={0.05}
             maxScale={2.0}
