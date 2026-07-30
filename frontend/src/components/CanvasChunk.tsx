@@ -1,3 +1,5 @@
+import { useEffect, useRef } from "react";
+
 import { CHUNK_SIZE } from "@/lib/coordinates";
 import {
   decodeMineBitmap,
@@ -8,6 +10,8 @@ import { LockKeyhole, MapPin } from "lucide-react";
 import { useTransformComponent } from "react-zoom-pan-pinch";
 
 const CELL_RENDER_MIN_SCALE = 0.2;
+const CELL_SIZE = 30;
+const CHUNK_PIXEL_SIZE = CHUNK_SIZE * CELL_SIZE;
 
 type CanvasChunkProps = {
   chunkX: number;
@@ -20,13 +24,8 @@ type CanvasChunkProps = {
   onClick: () => void;
 };
 
-const getNumberColorClass = (num: number) => {
-  if (num === 0) {
-    return "text-game-number-0";
-  }
-
-  return `text-game-number-${num % 8 === 0 ? 8 : num % 8}`;
-};
+const getNumberColorProperty = (num: number) =>
+  `--game-number-${num % 8 === 0 ? 8 : num % 8}`;
 
 const getNeighborCount = (
   neighborMineLookup: CanvasChunkMineLookup,
@@ -59,49 +58,99 @@ const CanvasChunkPreview = ({
   CanvasChunkProps,
   "chunkX" | "chunkY" | "mineBitmap" | "neighborMineLookup"
 >) => {
-  const chunkId = `${chunkX}:${chunkY}`;
-  const mineBitmapBytes = decodeMineBitmap(mineBitmap);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  return Array.from({ length: CHUNK_SIZE }).flatMap((_, displayRow) => {
-    const localY = CHUNK_SIZE - 1 - displayRow;
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) {
+      return;
+    }
 
-    return Array.from({ length: CHUNK_SIZE }).map((__, localX) => {
-      const worldX = chunkX * CHUNK_SIZE + localX;
-      const worldY = chunkY * CHUNK_SIZE + localY;
-      const isMine =
-        mineBitmapBytes !== null &&
-        isMineInBitmap(mineBitmapBytes, localX, localY);
-      const neighborCount =
-        !isMine && neighborMineLookup
-          ? getNeighborCount(neighborMineLookup, worldX, worldY)
-          : 0;
+    const context = canvas.getContext("2d", { alpha: false });
+    if (!context) {
+      return;
+    }
 
-      return (
-        <div
-          key={`${chunkId}:${localX}:${localY}`}
-          className={`relative z-10 flex justify-center items-center font-minesweeper border border-game-border ${
-            isMine ? "bg-game-hidden" : "bg-game-revealed"
-          } rounded-sm overflow-hidden`}
-        >
-          {isMine ? (
-            <div className="flex flex-wrap pt-[1px] gap-y-[1px] justify-center items-center">
-              <span className="text-red-500 ml-[2px] leading-none text-[18px]">
-                `
-              </span>
-            </div>
-          ) : neighborCount ? (
-            <span
-              className={`inline-block origin-center ml-[2px] text-lg ${getNumberColorClass(
-                neighborCount,
-              )}`}
-            >
-              {neighborCount}
-            </span>
-          ) : null}
-        </div>
-      );
+    const mineBitmapBytes = decodeMineBitmap(mineBitmap);
+    const draw = () => {
+      const styles = getComputedStyle(document.documentElement);
+      const gameBorder = styles.getPropertyValue("--game-border");
+      const gameHidden = styles.getPropertyValue("--game-hidden");
+      const gameRevealed = styles.getPropertyValue("--game-revealed");
+
+      context.fillStyle = gameBorder;
+      context.fillRect(0, 0, CHUNK_PIXEL_SIZE, CHUNK_PIXEL_SIZE);
+      context.textAlign = "center";
+      context.textBaseline = "middle";
+
+      for (let displayRow = 0; displayRow < CHUNK_SIZE; displayRow += 1) {
+        const localY = CHUNK_SIZE - 1 - displayRow;
+
+        for (let localX = 0; localX < CHUNK_SIZE; localX += 1) {
+          const worldX = chunkX * CHUNK_SIZE + localX;
+          const worldY = chunkY * CHUNK_SIZE + localY;
+          const isMine =
+            mineBitmapBytes !== null &&
+            isMineInBitmap(mineBitmapBytes, localX, localY);
+          const neighborCount =
+            !isMine && neighborMineLookup
+              ? getNeighborCount(neighborMineLookup, worldX, worldY)
+              : 0;
+          const cellX = localX * CELL_SIZE;
+          const cellY = displayRow * CELL_SIZE;
+
+          context.fillStyle = isMine ? gameHidden : gameRevealed;
+          context.fillRect(
+            cellX + 1,
+            cellY + 1,
+            CELL_SIZE - 2,
+            CELL_SIZE - 2,
+          );
+
+          if (isMine) {
+            context.fillStyle = "#ef4444";
+            context.font = "18px MineSweeper";
+            context.fillText(
+              "`",
+              cellX + CELL_SIZE / 2 + 1,
+              cellY + CELL_SIZE / 2,
+            );
+          } else if (neighborCount) {
+            context.fillStyle = styles.getPropertyValue(
+              getNumberColorProperty(neighborCount),
+            );
+            context.font = "18px MineSweeper";
+            context.fillText(
+              String(neighborCount),
+              cellX + CELL_SIZE / 2 + 1,
+              cellY + CELL_SIZE / 2,
+            );
+          }
+        }
+      }
+    };
+
+    draw();
+    void document.fonts.load("18px MineSweeper").then(draw);
+
+    const themeObserver = new MutationObserver(draw);
+    themeObserver.observe(document.documentElement, {
+      attributeFilter: ["class"],
+      attributes: true,
     });
-  });
+
+    return () => themeObserver.disconnect();
+  }, [chunkX, chunkY, mineBitmap, neighborMineLookup]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      aria-hidden
+      className="absolute inset-0 z-10 size-full"
+      height={CHUNK_PIXEL_SIZE}
+      width={CHUNK_PIXEL_SIZE}
+    />
+  );
 };
 
 const CanvasChunk = ({
@@ -135,10 +184,6 @@ const CanvasChunk = ({
           : ""
       }`}
       onClick={onClick}
-      style={{
-        gridTemplateColumns: `repeat(${CHUNK_SIZE}, 30px)`,
-        gridTemplateRows: `repeat(${CHUNK_SIZE}, 30px)`,
-      }}
     >
       <div className="pointer-events-none absolute inset-0 z-20 border border-foreground" />
       {isSelected && !renderDetails && (

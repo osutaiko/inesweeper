@@ -395,7 +395,7 @@ const CanvasPage = () => {
             ref={transformRef}
             initialScale={0.4}
             minScale={0.05}
-            maxScale={2.0}
+            maxScale={1.0}
             centerOnInit
             smooth={false}
             wheel={{ step: 0.05 }}
