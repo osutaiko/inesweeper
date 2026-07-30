@@ -30,6 +30,7 @@ type UserProfileNameRow = {
 export class ChunkService {
   private readonly claimDurationMs = 5 * 60 * 1000; // 5 minutes
   private readonly chunkTable = 'canvas_chunks';
+  private readonly nextLockAtByUserId = new Map<string, number>();
 
   constructor(private readonly authService: AuthService) {}
 
@@ -215,6 +216,14 @@ export class ChunkService {
     }
 
     return this.rowToChunk(data as ChunkRow);
+  }
+
+  private ensureLockCooldownElapsed(userId: string) {
+    const nextLockAt = this.nextLockAtByUserId.get(userId) ?? 0;
+
+    if (nextLockAt > Date.now()) {
+      throw new ConflictException(`Must wait ${nextLockAt - Date.now()} ms before locking another chunk`);
+    }
   }
 
   // Can only lock (or solve) next to already solved chunks
@@ -421,6 +430,7 @@ export class ChunkService {
 
     const lockedAt = new Date();
     const lockedUntil = new Date(lockedAt.getTime() + this.claimDurationMs);
+    this.ensureLockCooldownElapsed(user.id);
 
     const saved = await this.setChunkRecord(client, {
       ...chunk,
@@ -431,6 +441,7 @@ export class ChunkService {
       solvedAt: null,
       lockedUntil: lockedUntil.toISOString(),
     });
+    this.nextLockAtByUserId.set(user.id, lockedUntil.getTime());
 
     return this.withChunkMineBitmap(saved, user.id, user.nickname);
   }
