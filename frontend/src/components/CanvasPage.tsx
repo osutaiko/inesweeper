@@ -300,7 +300,7 @@ const CanvasPage = () => {
           <div
             ref={gridRef}
             aria-hidden
-            className="pointer-events-none absolute inset-0 z-20 size-full"
+            className="pointer-events-none absolute inset-0 z-20 size-full opacity-30"
             style={{
               backgroundImage:
                 "linear-gradient(to right, var(--foreground) 1px, transparent 1px), linear-gradient(to bottom, var(--foreground) 1px, transparent 1px)",
