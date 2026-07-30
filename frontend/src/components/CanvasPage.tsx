@@ -347,6 +347,11 @@ const CanvasPage = () => {
                   Attempt Claim!
                 </Button>
               )}
+              {!authUser && selectedChunk.state === "open" && (
+                <span className="mt-2 text-destructive">
+                  Log in to start claiming chunks!
+                </span>
+              )}
             </Card>
           ) : null}
 
