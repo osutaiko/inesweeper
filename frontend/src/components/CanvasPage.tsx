@@ -300,44 +300,53 @@ const CanvasPage = () => {
           className="relative flex w-full overflow-hidden bg-background h-[calc(100vh-57px)] sm:h-[calc(100vh-73px)]"
         >
           {selectedChunk ? (
-            <Card className="px-4 py-3 absolute bottom-4 left-1/2 -translate-x-1/2 z-50 text-center w-max max-w-[calc(100%-2rem)] shadow-lg rounded-none py-4">
-              <div className="flex flex-col gap-1 whitespace-nowrap text-sm">
-                {selectedChunkOwnerName &&
-                  <h3 className="font-semibold text-foreground font-mono mb-1">
-                    {selectedChunkOwnerName}
-                  </h3>
-                }
-                {selectedChunk.state === 'solved' &&
-                  <>
-                    <span className="text-muted-foreground">
-                      {formatChunkDate(selectedChunkAt)}
-                    </span>
-                  </>
-                }
-                {selectedChunk.state === 'locked' &&
-                  <span className="text-muted-foreground">
-                    Locked until: {formatChunkDate(selectedChunkAt)}
-                  </span>
-                }
-                <span className="text-muted-foreground">
-                  (X={selectedChunk.chunkX}, Y={selectedChunk.chunkY})
+            <Card className="absolute bottom-0 md:bottom-4 left-1/2 -translate-x-1/2 z-50 flex gap-0.5 text-center w-max max-w-full md:max-w-[calc(100%-2rem)] px-4 py-2 md:py-4 shadow-lg rounded-none">
+              <h3 className="text-base md:text-lg mb-1">
+                {selectedChunk.state === "locked" && "Being solved by: "}
+                <span
+                  className={
+                    selectedChunk.state === "locked" ||
+                    !selectedChunkOwnerName
+                      ? "text-muted-foreground"
+                      : undefined
+                  }
+                >
+                  {selectedChunkOwnerName ||
+                    (selectedChunk.state === "locked"
+                      ? "[Unknown sweeper]"
+                      : "(Unclaimed)")}
                 </span>
-                {canStartSolving && (
-                  <Button
-                    className="mt-2"
-                    disabled={lockingChunkId !== null}
-                    size="lg"
-                    onClick={() =>
-                      void handleStartSolving(
-                        selectedChunk.chunkX,
-                        selectedChunk.chunkY,
-                      )
-                    }
-                  >
-                    Attempt Claim!
-                  </Button>
-                )}
-              </div>
+              </h3>
+              {selectedChunk.state === 'solved' &&
+                <>
+                  <span className="text-muted-foreground">
+                    {formatChunkDate(selectedChunkAt)}
+                  </span>
+                </>
+              }
+              {selectedChunk.state === 'locked' &&
+                <span className="text-muted-foreground">
+                  Locked until: {formatChunkDate(selectedChunkAt)}
+                </span>
+              }
+              <span className="text-muted-foreground">
+                (X={selectedChunk.chunkX}, Y={selectedChunk.chunkY})
+              </span>
+              {canStartSolving && (
+                <Button
+                  className="mt-2"
+                  disabled={lockingChunkId !== null}
+                  size="lg"
+                  onClick={() =>
+                    void handleStartSolving(
+                      selectedChunk.chunkX,
+                      selectedChunk.chunkY,
+                    )
+                  }
+                >
+                  Attempt Claim!
+                </Button>
+              )}
             </Card>
           ) : null}
 
