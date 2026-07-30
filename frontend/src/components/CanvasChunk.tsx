@@ -6,7 +6,7 @@ import {
   isMineInBitmap,
   type CanvasChunkMineLookup,
 } from "@/lib/canvas";
-import { LockKeyhole, MapPin } from "lucide-react";
+import { LockKeyhole, MapPin, Navigation2 } from "lucide-react";
 import { useTransformComponent } from "react-zoom-pan-pinch";
 
 const CELL_SIZE = 30;
@@ -186,15 +186,15 @@ const CanvasChunk = ({
     >
       {isSelected && (
         <>
-          <div className="pointer-events-none absolute inset-0 z-30 bg-green-500 opacity-20" />
+          <div className="pointer-events-none absolute inset-0 z-30 bg-blue-500 opacity-20" />
           <div
-            className="pointer-events-none absolute bottom-full left-1/2 z-40 size-[50px] text-destructive"
+            className="pointer-events-none absolute top-full left-1/2 z-40 size-[40px]"
             style={{
               transform: `translateX(-50%) scale(${1 / scale})`,
-              transformOrigin: "bottom center",
+              transformOrigin: "top center",
             }}
           >
-            <MapPin className="size-full fill-foreground" />
+            <Navigation2 className="size-full text-blue-500 fill-white" />
           </div>
         </>
       )}
