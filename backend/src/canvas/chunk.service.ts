@@ -510,9 +510,11 @@ export class ChunkService {
     const saved = await this.setChunkRecord(client, {
       ...chunk,
       state: 'solved',
+      lockedByUserId: null,
+      lockedAt: null,
+      lockedUntil: null,
       solverUserId: user.id,
       solvedAt: solvedAt.toISOString(),
-      lockedUntil: null,
     });
 
     return this.withChunkMineBitmap(saved, user.id, user.nickname);
