@@ -394,7 +394,7 @@ const CanvasPage = () => {
           <TransformWrapper
             ref={transformRef}
             initialScale={0.4}
-            minScale={0.05}
+            minScale={0.01}
             maxScale={1.0}
             centerOnInit
             smooth={false}

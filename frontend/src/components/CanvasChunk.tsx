@@ -9,7 +9,7 @@ import {
 import { LockKeyhole, MapPin } from "lucide-react";
 import { useTransformComponent } from "react-zoom-pan-pinch";
 
-const CELL_RENDER_MIN_SCALE = 0.2;
+const CELL_RENDER_MIN_SCALE = 0.1;
 const CELL_SIZE = 30;
 const CHUNK_PIXEL_SIZE = CHUNK_SIZE * CELL_SIZE;
 
