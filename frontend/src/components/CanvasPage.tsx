@@ -24,6 +24,8 @@ import {
 
 const CHUNK_PIXEL_SIZE = 480;
 const CHUNK_ORIGIN_OFFSET = -CHUNK_PIXEL_SIZE / 2;
+const GRID_DETAIL_SCALE = 0.2;
+const LOW_SCALE_GRID_STEP = 10;
 
 type ChunkGridTransform = {
   scale: number;
@@ -35,7 +37,9 @@ const updateChunkGrid = (
   element: HTMLDivElement,
   { scale, positionX, positionY }: ChunkGridTransform,
 ) => {
-  const spacing = CHUNK_PIXEL_SIZE * scale;
+  const chunkSpacing = CHUNK_PIXEL_SIZE * scale;
+  const lineStep = scale < GRID_DETAIL_SCALE ? LOW_SCALE_GRID_STEP : 1;
+  const spacing = chunkSpacing * lineStep;
   const offsetX = positionX + CHUNK_ORIGIN_OFFSET * scale;
   const offsetY = positionY + CHUNK_ORIGIN_OFFSET * scale;
 
