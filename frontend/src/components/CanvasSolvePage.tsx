@@ -100,6 +100,7 @@ const CanvasSolvePage = () => {
               <CanvasGameBoard
                 chunk={solverData.chunk}
                 chunkArea={solverData.chunkArea}
+                isTouchscreen={isTouchscreen}
               />
             ) : (
               <StatusToast

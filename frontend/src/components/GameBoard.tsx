@@ -29,19 +29,7 @@ export const GameBoard: React.FC<{
   const [shadedCells, setShadedCells] = useState<{ row: number, col: number }[]>([]);
   const [explodedCell, setExplodedCell] = useState<{ row: number, col: number } | null>(null);
   const [incorrectFlagCells, setIncorrectFlagCells] = useState<{ row: number, col: number }[] | null>(null);
-  const [touchStartPos, setTouchStartPos] = useState({ x: 0, y: 0 });
-
-  const DRAG_THRESHOLD = 10;
   const animationFrameRef = useRef<number | null>(null);
-  const touchHoldTimerRef = useRef<number | null>(null);
-  const touchHoldFiredRef = useRef(false);
-
-  const clearTouchHoldTimer = () => {
-    if (touchHoldTimerRef.current !== null) {
-      window.clearTimeout(touchHoldTimerRef.current);
-      touchHoldTimerRef.current = null;
-    }
-  };
 
   const handleReset = () => {
     const newBoard = createBoard(config);
@@ -55,8 +43,6 @@ export const GameBoard: React.FC<{
     setHoveredCell(null);
     setExplodedCell(null);
     setIncorrectFlagCells(null);
-    clearTouchHoldTimer();
-    touchHoldFiredRef.current = false;
   };
 
   const handleBeforeFirstClick = (row: number, col: number) => {
@@ -168,101 +154,24 @@ export const GameBoard: React.FC<{
     }
   }, [JSON.stringify(board)]);
 
-  useEffect(() => {
-    return () => {
-      clearTouchHoldTimer();
-    };
-  }, []);
-
-  const handleTouchStart = (e: React.TouchEvent, row: number, col: number) => {
-    if (isGameOver || !isTouchscreen ) {
-      return;
-    }
-
-    clearTouchHoldTimer();
-    touchHoldFiredRef.current = false;
-
-    const touch = e.touches[0];
-    setTouchStartPos({ x: touch.clientX, y: touch.clientY });
-
-    touchHoldTimerRef.current = window.setTimeout(() => {
-      touchHoldFiredRef.current = true;
-
-      if (!isFlagToggled && board[row][col].state.type !== "revealed") {
-        setBoard(handleFlag(board, row, col, config));
-        return;
-      }
-
-      if (board[row][col].state.type !== "revealed") {
-        if (isFirstClick) {
-          handleBeforeFirstClick(row, col);
-        }
-        setBoard(handleClick(board, row, col, config));
-      }
-    }, touchHoldDelay);
-
-    return;
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (isGameOver || !isTouchscreen) {
-      return;
-    }
-
-    const touch = e.touches[0];
-    const dx = Math.abs(touch.clientX - touchStartPos.x);
-    const dy = Math.abs(touch.clientY - touchStartPos.y);
-    if (dx > DRAG_THRESHOLD || dy > DRAG_THRESHOLD) {
-      clearTouchHoldTimer();
-    }
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent, row: number, col: number) => {
-    if (isGameOver || !isTouchscreen) {
-      return;
-    }
-
-    clearTouchHoldTimer();
-
-    if (touchHoldFiredRef.current) {
-      touchHoldFiredRef.current = false;
-      return;
-    }
-
-    const touch = e.changedTouches[0];
-    const dx = Math.abs(touch.clientX - touchStartPos.x);
-    const dy = Math.abs(touch.clientY - touchStartPos.y);
-    if (dx > DRAG_THRESHOLD || dy > DRAG_THRESHOLD) {
-      return;
-    }
-
-    if (board[row][col].state.type === "revealed") {
-      setBoard(handleChord(board, row, col, config));
-      return;
-    }
-
-    if (isFlagToggled) {
-      setBoard(handleFlag(board, row, col, config));
-      return;
-    }
-
-    if (isFirstClick) {
-      handleBeforeFirstClick(row, col);
-    }
-    setBoard(handleClick(board, row, col, config));
-    return;
-  };
-
   const {
     isLmbDown,
-    onMouseDown: handleMouseDown,
-    onMouseUp: handleMouseUp,
+    handleMouseDown,
+    handleMouseUp,
+    handleTouchStart,
+    handleTouchMove,
+    handleTouchEnd,
     resetControls,
   } = useMinesweeperControls({
-    disabled: Boolean(isGameOver) || isTouchscreen,
+    disabled: Boolean(isGameOver),
+    isTouchscreen,
+    touchHoldDelay,
+    isFlagToggled,
     canReveal: () => true,
-    canFlag: () => true,
+    canFlag: (row, col) => board[row][col].state.type !== "revealed",
     canChord: () => true,
+    canTouchChord: (row, col) =>
+      board[row][col].state.type === "revealed",
     onReveal: (row, col) => {
       if (isFirstClick) {
         handleBeforeFirstClick(row, col);

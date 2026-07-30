@@ -45,9 +45,14 @@ const SOLVER_CONFIG: BoardConfig = {
 type CanvasGameBoardProps = {
   chunk: CanvasChunk;
   chunkArea: CanvasChunkAreaResponse;
+  isTouchscreen: boolean;
 };
 
-const CanvasGameBoard = ({ chunk, chunkArea }: CanvasGameBoardProps) => {
+const CanvasGameBoard = ({
+  chunk,
+  chunkArea,
+  isTouchscreen,
+}: CanvasGameBoardProps) => {
   const navigate = useNavigate();
   const [remainingSeconds, setRemainingSeconds] = useState(0);
   const [gameOverReason, setGameOverReason] = useState<
@@ -154,11 +159,26 @@ const CanvasGameBoard = ({ chunk, chunkArea }: CanvasGameBoardProps) => {
       doAfterLoss("mine");
     }
   };
-  const { onMouseDown, onMouseUp } = useMinesweeperControls({
+  const {
+    handleMouseDown,
+    handleMouseUp,
+    handleTouchStart,
+    handleTouchMove,
+    handleTouchEnd,
+  } = useMinesweeperControls({
     disabled: gameOverReason !== null,
+    isTouchscreen,
+    touchHoldDelay: Number(
+      localStorage.getItem("touchHoldDelay") ?? 200,
+    ),
     canReveal: isInsideTargetChunk,
-    canFlag: isInsideTargetChunk,
+    canFlag: (row, col) =>
+      isInsideTargetChunk(row, col) &&
+      board[row][col].state.type !== "revealed",
     canChord: () => true,
+    canTouchChord: (row, col) =>
+      !isInsideTargetChunk(row, col) ||
+      board[row][col].state.type === "revealed",
     onReveal: (row, col) => {
       applyBoardAction((currentBoard) =>
         handleClick(currentBoard, row, col, SOLVER_CONFIG),
@@ -246,28 +266,11 @@ const CanvasGameBoard = ({ chunk, chunkArea }: CanvasGameBoardProps) => {
             incorrectFlagCells={[]}
             shadedCells={[]}
             isFlagToggled={false}
-            onMouseDown={onMouseDown}
-            onMouseUp={onMouseUp}
-            onTouchStart={() => {}}
-            onTouchMove={() => {}}
-            onTouchEnd={(_, row, col) => {
-              if (isGameOverRef.current) {
-                return;
-              }
-
-              if (
-                !isInsideTargetChunk(row, col) ||
-                board[row][col].state.type === "revealed"
-              ) {
-                applyBoardAction((currentBoard) =>
-                  handleChord(currentBoard, row, col, SOLVER_CONFIG),
-                );
-              } else if (isInsideTargetChunk(row, col)) {
-                applyBoardAction((currentBoard) =>
-                  handleClick(currentBoard, row, col, SOLVER_CONFIG),
-                );
-              }
-            }}
+            onMouseDown={handleMouseDown}
+            onMouseUp={handleMouseUp}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
             onHoveredCellChange={() => {}}
             getCellClassName={(row, col) => {
               const classes = [];
