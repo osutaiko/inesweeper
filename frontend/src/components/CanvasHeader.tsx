@@ -12,7 +12,7 @@ type CanvasHeaderProps = {
 
 const CanvasHeader = ({ authUser }: CanvasHeaderProps) => (
   <header className="flex flex-row w-full gap-4 px-3 sm:px-8 py-2 sm:py-4 justify-between items-center border-b overflow-x-auto">
-    <a href="/">
+    <a href="/place">
       <div className="flex flex-row items-center gap-3">
         <img src={InesweeperLogo} alt="Inesweeper Logo" className="w-[40px] h-[40px] min-w-[40px] min-h-[40px]" />
         <h2 className="font-minesweeper hidden min-[510px]:block text-lg sm:text-2xl">
