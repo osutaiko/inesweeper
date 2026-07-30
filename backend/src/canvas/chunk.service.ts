@@ -8,11 +8,7 @@ import type { Request } from 'express';
 
 import { AuthService } from '../auth/auth.service';
 import { buildChunkMineBitmap } from './chunk-board';
-import type {
-  Chunk,
-  DailyAttemptState,
-  ChunkRecord,
-} from './chunk.types';
+import type { Chunk, ChunkRecord } from './chunk.types';
 
 type ChunkRow = {
   chunk_x: number;
@@ -33,15 +29,9 @@ type UserProfileNameRow = {
 @Injectable()
 export class ChunkService {
   private readonly claimDurationMs = 5 * 60 * 1000; // 5 minutes
-  private readonly attemptLimit = 5;
   private readonly chunkTable = 'canvas_chunks';
-  private readonly attemptStore = new Map<string, DailyAttemptState>();
 
   constructor(private readonly authService: AuthService) {}
-
-  private dateKey(now = new Date()) {
-    return now.toISOString().slice(0, 10);
-  }
 
   private requireUser(req: Request) {
     return this.authService.getCurrentUser(req);
@@ -227,28 +217,6 @@ export class ChunkService {
     return this.rowToChunk(data as ChunkRow);
   }
 
-  private lockAttempt(userId: string) {
-    const dateKey = this.dateKey();
-    const key = `${userId}:${dateKey}`;
-    const existing = this.attemptStore.get(key) ?? {
-      userId,
-      dateKey,
-      attemptsUsed: 0,
-    };
-
-    if (existing.attemptsUsed >= this.attemptLimit) {
-      throw new BadRequestException('Daily chunk attempts exhausted');
-    }
-
-    const nextAttempt: DailyAttemptState = {
-      ...existing,
-      attemptsUsed: existing.attemptsUsed + 1,
-    };
-
-    this.attemptStore.set(key, nextAttempt);
-    return nextAttempt;
-  }
-
   // Can only lock (or solve) next to already solved chunks
   private async hasSolvedCardinalNeighbor(
     client: ReturnType<AuthService['createBearerClient']>,
@@ -413,8 +381,6 @@ export class ChunkService {
     }
 
     const client = this.authService.createBearerClient(req);
-    this.lockAttempt(user.id);
-
     const chunk = await this.getOrCreateChunkRecord(client, chunkX, chunkY);
     const activeLock = await this.getActiveLockForUser(client, user.id);
 
