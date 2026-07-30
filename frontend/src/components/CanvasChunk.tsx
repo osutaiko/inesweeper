@@ -50,6 +50,60 @@ const getNeighborCount = (
   return neighborCount;
 };
 
+const CanvasChunkPreview = ({
+  chunkX,
+  chunkY,
+  mineBitmap,
+  neighborMineLookup,
+}: Pick<
+  CanvasChunkProps,
+  "chunkX" | "chunkY" | "mineBitmap" | "neighborMineLookup"
+>) => {
+  const chunkId = `${chunkX}:${chunkY}`;
+  const mineBitmapBytes = decodeMineBitmap(mineBitmap);
+
+  return Array.from({ length: CHUNK_SIZE }).flatMap((_, displayRow) => {
+    const localY = CHUNK_SIZE - 1 - displayRow;
+
+    return Array.from({ length: CHUNK_SIZE }).map((__, localX) => {
+      const worldX = chunkX * CHUNK_SIZE + localX;
+      const worldY = chunkY * CHUNK_SIZE + localY;
+      const isMine =
+        mineBitmapBytes !== null &&
+        isMineInBitmap(mineBitmapBytes, localX, localY);
+      const neighborCount =
+        !isMine && neighborMineLookup
+          ? getNeighborCount(neighborMineLookup, worldX, worldY)
+          : 0;
+
+      return (
+        <div
+          key={`${chunkId}:${localX}:${localY}`}
+          className={`relative z-10 flex justify-center items-center font-minesweeper border border-game-border ${
+            isMine ? "bg-game-hidden" : "bg-game-revealed"
+          } rounded-sm overflow-hidden`}
+        >
+          {isMine ? (
+            <div className="flex flex-wrap pt-[1px] gap-y-[1px] justify-center items-center">
+              <span className="text-red-500 ml-[2px] leading-none text-[18px]">
+                `
+              </span>
+            </div>
+          ) : neighborCount ? (
+            <span
+              className={`inline-block origin-center ml-[2px] text-lg ${getNumberColorClass(
+                neighborCount,
+              )}`}
+            >
+              {neighborCount}
+            </span>
+          ) : null}
+        </div>
+      );
+    });
+  });
+};
+
 const CanvasChunk = ({
   chunkX,
   chunkY,
@@ -64,7 +118,6 @@ const CanvasChunk = ({
   const scale = useTransformComponent(({ state }) => state.scale);
   const renderDetails = scale >= CELL_RENDER_MIN_SCALE;
   const renderCells = renderDetails && state === "solved";
-  const mineBitmapBytes = renderCells ? decodeMineBitmap(mineBitmap) : null;
   const backgroundClassName = renderDetails
     ? colorClassName
     : state === "solved"
@@ -104,47 +157,14 @@ const CanvasChunk = ({
           <LockKeyhole size={100} />
         </div>
       )}
-      {renderCells &&
-        Array.from({ length: CHUNK_SIZE }).flatMap((_, displayRow) => {
-          const localY = CHUNK_SIZE - 1 - displayRow;
-
-          return Array.from({ length: CHUNK_SIZE }).map((__, localX) => {
-            const worldX = chunkX * CHUNK_SIZE + localX;
-            const worldY = chunkY * CHUNK_SIZE + localY;
-            const isMine =
-              mineBitmapBytes !== null &&
-              isMineInBitmap(mineBitmapBytes, localX, localY);
-            const neighborCount =
-              !isMine && neighborMineLookup
-                ? getNeighborCount(neighborMineLookup, worldX, worldY)
-                : 0;
-
-            return (
-              <div
-                key={`${chunkId}:${localX}:${localY}`}
-                className={`relative z-10 flex justify-center items-center font-minesweeper border border-game-border ${
-                  isMine ? "bg-game-hidden" : "bg-game-revealed"
-                } rounded-sm overflow-hidden`}
-              >
-                {isMine ? (
-                  <div className="flex flex-wrap pt-[1px] gap-y-[1px] justify-center items-center">
-                    <span className="text-red-500 ml-[2px] leading-none text-[18px]">
-                      `
-                    </span>
-                  </div>
-                ) : neighborCount ? (
-                  <span
-                    className={`inline-block origin-center ml-[2px] text-lg ${getNumberColorClass(
-                      neighborCount,
-                    )}`}
-                  >
-                    {neighborCount}
-                  </span>
-                ) : null}
-              </div>
-            );
-          });
-        })}
+      {renderCells && (
+        <CanvasChunkPreview
+          chunkX={chunkX}
+          chunkY={chunkY}
+          mineBitmap={mineBitmap}
+          neighborMineLookup={neighborMineLookup}
+        />
+      )}
     </div>
   );
 };
