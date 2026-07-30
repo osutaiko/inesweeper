@@ -21,6 +21,7 @@ import {
 import { CHUNK_SIZE } from "@/lib/coordinates";
 import { useMinesweeperControls } from "@/hooks/useMinesweeperControls";
 import {
+  countRemainingFlags,
   handleChord,
   handleClick,
   handleFlag,
@@ -49,6 +50,11 @@ type CanvasGameBoardProps = {
   chunkArea: CanvasChunkAreaResponse;
   isTouchscreen: boolean;
 };
+
+const getTargetChunkBoard = (board: Board) =>
+  board
+    .slice(CONTEXT_SIZE, CONTEXT_SIZE + CHUNK_SIZE)
+    .map((row) => row.slice(CONTEXT_SIZE, CONTEXT_SIZE + CHUNK_SIZE));
 
 const CanvasGameBoard = ({
   chunk,
@@ -176,15 +182,7 @@ const CanvasGameBoard = ({
     if (loss) {
       setExplodedCell(loss);
       doAfterLoss("mine");
-    } else if (
-      isWin(
-        updatedBoard
-          .slice(CONTEXT_SIZE, CONTEXT_SIZE + CHUNK_SIZE)
-          .map((row) =>
-            row.slice(CONTEXT_SIZE, CONTEXT_SIZE + CHUNK_SIZE),
-          ),
-      )
-    ) {
+    } else if (isWin(getTargetChunkBoard(updatedBoard))) {
       void doAfterWin();
     }
   };
@@ -257,20 +255,35 @@ const CanvasGameBoard = ({
 
   const minutes = Math.floor(remainingSeconds / 60);
   const seconds = String(remainingSeconds % 60).padStart(2, "0");
+  const { remainingPosFlags } = countRemainingFlags(
+    getTargetChunkBoard(board),
+  );
 
   return (
     <div className="flex h-min w-min select-none flex-col overflow-hidden rounded-md">
         <div className="border-x-[9px] border-t-[9px] border-game-border bg-game-border">
           <div className="relative flex items-center justify-between rounded-sm bg-game-hidden p-2">
-            <Button
-              className="bg-game-button"
-              size="icon"
-              onClick={() => navigate("/place")}
-              title="Return to Map"
-              variant="secondary"
-            >
-              <ArrowLeft />
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                className="bg-game-button"
+                size="icon"
+                onClick={() => navigate("/place")}
+                title="Return to Map"
+                variant="secondary"
+              >
+                <ArrowLeft />
+              </Button>
+              <div className="flex h-[40px] gap-x-2 overflow-hidden bg-game-button px-3">
+                <div className="flex flex-row items-center gap-1.5">
+                  <span className="font-minesweeper text-[20px] text-red-500">
+                    `
+                  </span>
+                  <span className="text-xl font-bold">
+                    {remainingPosFlags}
+                  </span>
+                </div>
+              </div>
+            </div>
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 px-4 text-lg font-bold">
               Chunk (X={chunk.chunkX}, Y={chunk.chunkY})
             </div>
