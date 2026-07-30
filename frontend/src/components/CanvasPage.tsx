@@ -307,8 +307,8 @@ const CanvasPage = () => {
           className="relative flex w-full overflow-hidden bg-background h-[calc(100vh-57px)] sm:h-[calc(100vh-73px)]"
         >
           {selectedChunk ? (
-            <div className="absolute bottom-0 md:bottom-4 left-1/2 gap-0 -translate-x-1/2 z-50 bg-card border flex flex-col w-full md:max-w-[calc(100%-2rem)] px-4 py-2 md:py-4 shadow-lg">
-              <h3 className="text-center text-base md:text-lg mb-1">
+            <div className="absolute bottom-0 md:bottom-4 left-1/2 gap-0 -translate-x-1/2 z-50 bg-card border flex flex-col w-full max-w-[600px] px-4 py-2 md:py-4 shadow-lg">
+              <h3 className="text-center text-base md:text-lg mb-3">
                 {selectedChunk.state === "locked" && "Being solved by: "}
                 <span
                   className={
@@ -324,7 +324,7 @@ const CanvasPage = () => {
                       : "(Unclaimed)")}
                 </span>
               </h3>
-              <div className="flex flex-row w-full justify-between">
+              <div className="flex flex-row w-full justify-between items-end">
                 <div className="flex flex-col gap-0.5">
                   {selectedChunk.state === 'solved' &&
                     <>
