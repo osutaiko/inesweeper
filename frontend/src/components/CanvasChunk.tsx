@@ -77,7 +77,9 @@ const CanvasChunk = ({
     <div
       id={`chunk-${chunkId}`}
       className={`relative grid ${backgroundClassName} ${
-        isSelected ? "z-30 ring-8 ring-destructive" : ""
+        isSelected && renderDetails
+          ? "z-30 ring-8 ring-destructive"
+          : ""
       }`}
       onClick={onClick}
       style={{
@@ -86,7 +88,7 @@ const CanvasChunk = ({
       }}
     >
       <div className="pointer-events-none absolute inset-0 z-20 border border-foreground" />
-      {isSelected && (
+      {isSelected && !renderDetails && (
         <div
           className="pointer-events-none absolute bottom-full left-1/2 z-40 size-[50px] text-destructive"
           style={{
@@ -99,7 +101,7 @@ const CanvasChunk = ({
       )}
       {renderDetails && state === "locked" && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <LockKeyhole size={80} />
+          <LockKeyhole size={100} />
         </div>
       )}
       {renderCells &&
