@@ -26,6 +26,12 @@ type UserProfileNameRow = {
   nickname: string;
 };
 
+const chunkStateCode = {
+  open: 'o',
+  locked: 'l',
+  solved: 's',
+} as const satisfies Record<ChunkRecord['state'], string>;
+
 @Injectable()
 export class ChunkService {
   private readonly claimDurationMs = 5 * 60 * 1000; // 5 minutes
@@ -363,6 +369,9 @@ export class ChunkService {
       fromChunkY: startY,
       toChunkX: endX,
       toChunkY: endY,
+      width: endX - startX + 1,
+      height: endY - startY + 1,
+      states: chunks.map((chunk) => chunkStateCode[chunk.state]).join(''),
       chunks,
     };
   }
