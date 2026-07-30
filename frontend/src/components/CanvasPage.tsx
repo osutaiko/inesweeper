@@ -275,7 +275,10 @@ const CanvasPage = () => {
     }
   };
 
-  const formatChunkDate = (value: string | null) => {
+  const formatChunkTimestamp = (
+    value: string | null,
+    includeDate: boolean,
+  ) => {
     if (!value) {
       return "Not available";
     }
@@ -285,10 +288,12 @@ const CanvasPage = () => {
       return value;
     }
 
-    return new Intl.DateTimeFormat("en-US", {
-      dateStyle: "short",
-      timeStyle: "medium",
-    }).format(date);
+    return new Intl.DateTimeFormat(
+      "en-US",
+      includeDate
+        ? { dateStyle: "short", timeStyle: "medium" }
+        : { timeStyle: "medium" },
+    ).format(date);
   };
 
   return (
@@ -320,13 +325,13 @@ const CanvasPage = () => {
               {selectedChunk.state === 'solved' &&
                 <>
                   <span className="text-muted-foreground">
-                    {formatChunkDate(selectedChunkAt)}
+                    {formatChunkTimestamp(selectedChunkAt, true)}
                   </span>
                 </>
               }
               {selectedChunk.state === 'locked' &&
                 <span className="text-muted-foreground">
-                  Locked until: {formatChunkDate(selectedChunkAt)}
+                  Locked until: {formatChunkTimestamp(selectedChunkAt, false)}
                 </span>
               }
               <span className="text-muted-foreground">
