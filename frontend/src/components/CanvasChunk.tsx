@@ -184,6 +184,10 @@ const CanvasChunk = ({
           : ""
       }`}
       onClick={onClick}
+      style={{
+        width: CHUNK_PIXEL_SIZE,
+        height: CHUNK_PIXEL_SIZE,
+      }}
     >
       <div className="pointer-events-none absolute inset-0 z-20 border border-foreground" />
       {isSelected && !renderDetails && (
