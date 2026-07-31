@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Board, BoardConfig, Cell, TimeRecord } from "@/lib/types";
 import { createDemoBoard } from "@/lib/constants";
-import { createBoard, handleClick, handleChord, handleFlag, handleBeforeFirstClick as updateBoardBeforeFirstClick, isWin, isLoss, countRemainingFlags, extractMinesFromBoard, iterateNeighbors } from "@/lib/minesweeper";
+import { createBoard, handleClick, handleChord, handleFlag, handleBeforeFirstClick as updateBoardBeforeFirstClick, isWin, isLoss, countRemainingFlags, extractMinesFromBoard, flagAllMines, iterateNeighbors } from "@/lib/minesweeper";
 import { formatTimeMs } from "@/lib/utils";
 import { useMinesweeperControls } from "@/hooks/useMinesweeperControls";
 
@@ -105,18 +105,7 @@ export const GameBoard: React.FC<{
       const correctedElapsed = startTime !== null ? Date.now() - startTime : timeElapsed;
       setTimeElapsed(correctedElapsed);
 
-      const updatedBoard = board.map(row =>
-        row.map(cell => {
-          if (cell.mineNum !== 0) {
-            return {
-              state: { type: "flagged", flagNum: cell.mineNum },
-              mineNum: cell.mineNum,
-            } as Cell;
-          }
-          return cell;
-        })
-      );
-      setBoard(updatedBoard);
+      setBoard(flagAllMines(board));
 
       addRecord({
         boardConfig: config,

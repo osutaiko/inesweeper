@@ -221,6 +221,19 @@ export const isLoss = (board: Board): { row: number; col: number } | null => {
   return null;
 };
 
+// Flag all mines (usually after win)
+export const flagAllMines = (board: Board): Board =>
+  board.map(row =>
+    row.map(cell =>
+      cell.mineNum !== 0
+        ? {
+            state: { type: "flagged", flagNum: cell.mineNum },
+            mineNum: cell.mineNum,
+          } as Cell
+        : cell,
+    ),
+  );
+
 // Called after user inputs first reveal action (LMB/touch)
 // Only reposition mine if first click is a mine (for now)
 export const handleBeforeFirstClick = (board: Board, row: number, col: number, config: BoardConfig): Board => {
