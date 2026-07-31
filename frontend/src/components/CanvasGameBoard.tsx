@@ -57,6 +57,36 @@ const getTargetChunkBoard = (board: Board) =>
     .slice(CONTEXT_SIZE, CONTEXT_SIZE + CHUNK_SIZE)
     .map((row) => row.slice(CONTEXT_SIZE, CONTEXT_SIZE + CHUNK_SIZE));
 
+const isInsideTargetChunk = (row: number, col: number) =>
+  col >= CONTEXT_SIZE &&
+  col < CONTEXT_SIZE + CHUNK_SIZE &&
+  row >= CONTEXT_SIZE &&
+  row < CONTEXT_SIZE + CHUNK_SIZE;
+
+const chordInitialBorderCells = (board: Board) => {
+  let chordedBoard = board;
+  const borderStart = CONTEXT_SIZE - 1;
+  const borderEnd = CONTEXT_SIZE + CHUNK_SIZE;
+  const chordNullCell = (row: number, col: number) => {
+    const cell = board[row][col];
+    if (cell.state.type === "revealed" && cell.state.num === null) {
+      chordedBoard = handleChord(chordedBoard, row, col, SOLVER_CONFIG);
+    }
+  };
+
+  for (let position = borderStart; position <= borderEnd; position += 1) {
+    chordNullCell(borderStart, position);
+    chordNullCell(borderEnd, position);
+  }
+
+  for (let position = CONTEXT_SIZE; position < borderEnd; position += 1) {
+    chordNullCell(position, borderStart);
+    chordNullCell(position, borderEnd);
+  }
+
+  return chordedBoard;
+};
+
 const CanvasGameBoard = ({
   chunk,
   chunkArea,
@@ -130,13 +160,10 @@ const CanvasGameBoard = ({
       };
     }),
   );
-  const [board, setBoard] = useState<Board>(initialBoard);
-
-  const isInsideTargetChunk = (row: number, col: number) =>
-    col >= CONTEXT_SIZE &&
-    col < CONTEXT_SIZE + CHUNK_SIZE &&
-    row >= CONTEXT_SIZE &&
-    row < CONTEXT_SIZE + CHUNK_SIZE;
+  const [initialChordedBoard] = useState<Board>(() =>
+    chordInitialBorderCells(initialBoard),
+  );
+  const [board, setBoard] = useState<Board>(initialChordedBoard);
 
   const doAfterLoss = (reason: "mine" | "expired") => {
     if (isGameOverRef.current) {
@@ -176,7 +203,7 @@ const CanvasGameBoard = ({
     const updatedBoard = action(board).map((boardRow, rowIndex) =>
       boardRow.map((cell, colIndex) =>
         isInsideTargetChunk(rowIndex, colIndex) ||
-        initialBoard[rowIndex][colIndex].state.type !== "hidden"
+        initialChordedBoard[rowIndex][colIndex].state.type !== "hidden"
           ? cell
           : {
               ...cell,
@@ -210,10 +237,12 @@ const CanvasGameBoard = ({
     canFlag: (row, col) =>
       isInsideTargetChunk(row, col) &&
       board[row][col].state.type !== "revealed",
-    canChord: () => true,
+    canChord: (row, col) =>
+      board[row][col].state.type === "revealed" &&
+      board[row][col].state.num !== null,
     canTouchChord: (row, col) =>
-      !isInsideTargetChunk(row, col) ||
-      board[row][col].state.type === "revealed",
+      board[row][col].state.type === "revealed" &&
+      board[row][col].state.num !== null,
     onReveal: (row, col) => {
       applyBoardAction((currentBoard) =>
         handleClick(currentBoard, row, col, SOLVER_CONFIG),
