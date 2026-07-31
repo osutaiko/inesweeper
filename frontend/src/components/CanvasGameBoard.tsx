@@ -400,8 +400,7 @@ const CanvasGameBoard = ({
                       : ""}
               </DialogDescription>
             </DialogHeader>
-            {gameOverReason !== "win" &&
-              `You may attempt to claim a chunk again in ${nextClaimInMinutes}:${String(nextClaimInSecondsPart).padStart(2, "0")}.`}
+            `You may attempt to claim a chunk again in ${nextClaimInMinutes}:${String(nextClaimInSecondsPart).padStart(2, "0")}.
             <DialogFooter>
               <Button
                 variant="outline"
