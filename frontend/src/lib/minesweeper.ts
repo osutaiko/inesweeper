@@ -222,10 +222,13 @@ export const isLoss = (board: Board): { row: number; col: number } | null => {
 };
 
 // Flag all mines (usually after win)
-export const flagAllMines = (board: Board): Board =>
-  board.map(row =>
-    row.map(cell =>
-      cell.mineNum !== 0
+export const flagAllMines = (
+  board: Board,
+  isInArea: (row: number, col: number) => boolean = () => true,
+): Board =>
+  board.map((row, rowIndex) =>
+    row.map((cell, colIndex) =>
+      isInArea(rowIndex, colIndex) && cell.mineNum !== 0
         ? {
             state: { type: "flagged", flagNum: cell.mineNum },
             mineNum: cell.mineNum,

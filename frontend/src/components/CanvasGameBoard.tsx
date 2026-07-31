@@ -22,6 +22,7 @@ import { CHUNK_SIZE } from "@/lib/coordinates";
 import { useMinesweeperControls } from "@/hooks/useMinesweeperControls";
 import {
   countRemainingFlags,
+  flagAllMines,
   handleChord,
   handleClick,
   handleFlag,
@@ -222,6 +223,7 @@ const CanvasGameBoard = ({
       setExplodedCell(loss);
       doAfterLoss("mine");
     } else if (isWin(getTargetChunkBoard(updatedBoard))) {
+      setBoard(flagAllMines(updatedBoard, isInsideTargetChunk));
       void doAfterWin();
     }
   };
