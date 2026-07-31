@@ -481,29 +481,10 @@ export class ChunkService {
     }
 
     const client = this.authService.createBearerClient(req);
-    const { data, error } = await client
-      .from(this.chunkTable)
-      .select('*')
-      .eq('locked_by_user_id', user.id)
-      .eq('state', 'locked')
-      .maybeSingle();
+    const chunk = await this.getActiveLockForUser(client, user.id);
 
-    if (error) {
-      throw new BadRequestException(
-        error.message ?? 'Unable to read locked chunk',
-      );
-    }
-
-    if (!data) {
+    if (!chunk) {
       throw new ConflictException('You do not have a locked chunk');
-    }
-
-    const chunk = this.rowToChunk(data as ChunkRow);
-    if (
-      !chunk.lockedUntil ||
-      new Date(chunk.lockedUntil).getTime() <= Date.now()
-    ) {
-      throw new ConflictException('Chunk lock expired');
     }
 
     const solvedAt = new Date();
