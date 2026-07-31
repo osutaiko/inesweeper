@@ -8,7 +8,7 @@ export type ChunkMineBitmap = {
   mineBitmap: string;
 };
 
-const MINE_THRESHOLD = 20;
+const MINE_THRESHOLD = 40;
 
 const getBoardSecretEnv = () => {
   const value = process.env['CANVAS_BOARD_SECRET']?.trim();

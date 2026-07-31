@@ -15,6 +15,7 @@ import { ThemeProvider } from "./theme-provider";
 import CanvasHeader from "./CanvasHeader";
 import CanvasChunk from "./CanvasChunk";
 import { loadCurrentAuthUser, subscribeToAuthUser, type AuthUser } from "@/lib/auth";
+import { formatChunkCoordinates } from "@/lib/coordinates";
 import {
   buildCanvasMineLookup,
   getCanvasChunkArea,
@@ -342,7 +343,12 @@ const CanvasPage = () => {
                       Locked until: {formatChunkTimestamp(selectedChunkAt, false)}
                     </span>
                   }
-                  <span className="text-muted-foreground">(X={selectedChunk.chunkX}, Y={selectedChunk.chunkY})</span>
+                  <span className="text-muted-foreground">
+                    {formatChunkCoordinates(
+                      selectedChunk.chunkX,
+                      selectedChunk.chunkY,
+                    )}
+                  </span>
                 </div>
                 <Button
                   onClick={() =>
