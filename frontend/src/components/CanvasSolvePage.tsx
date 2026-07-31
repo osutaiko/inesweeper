@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 import CanvasHeader from "./CanvasHeader";
 import CanvasGameBoard from "./CanvasGameBoard";
-import StatusToast from "./StatusToast";
 import { ThemeProvider } from "./theme-provider";
 import { ScrollArea, ScrollBar } from "./ui/scroll-area";
+import { Toaster } from "./ui/sonner";
 import { loadCurrentAuthUser, type AuthUser } from "@/lib/auth";
 import { useMediaQuery } from "@/lib/utils";
 import {
@@ -32,6 +33,8 @@ const CanvasSolvePage = () => {
     let isActive = true;
 
     const loadSolver = async () => {
+      const loadingToast = toast.loading("Loading...");
+
       try {
         const [chunk, user] = await Promise.all([
           getActiveCanvasLock(),
@@ -58,6 +61,8 @@ const CanvasSolvePage = () => {
         if (isActive) {
           navigate("/place", { replace: true });
         }
+      } finally {
+        toast.dismiss(loadingToast);
       }
     };
 
@@ -89,6 +94,7 @@ const CanvasSolvePage = () => {
 
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+      <Toaster />
       <div className="flex flex-col items-center min-h-screen overflow-hidden touch-none">
         <CanvasHeader authUser={authUser} />
         <ScrollArea 
@@ -96,19 +102,13 @@ const CanvasSolvePage = () => {
           className="flex w-full h-[calc(100vh-57px)] sm:h-[calc(100vh-73px)]"
         >
           <main className={`flex flex-col min-h-[calc(100vh-57px)] sm:min-h-[calc(100vh-73px)] gap-4 justify-center items-center ${isTouchscreen ? 'px-[160px]' : 'px-4'} py-6`}>
-            {solverData ? (
+            {solverData &&
               <CanvasGameBoard
                 chunk={solverData.chunk}
                 chunkArea={solverData.chunkArea}
                 isTouchscreen={isTouchscreen}
               />
-            ) : (
-              <StatusToast
-                className="absolute right-4 top-4"
-                message="Loading..."
-                variant="loading"
-              />
-            )}
+            }
           </main>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>

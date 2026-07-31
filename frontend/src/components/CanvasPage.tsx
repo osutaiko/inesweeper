@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Locate } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 import { Button } from "./ui/button";
+import { Toaster } from "./ui/sonner";
 import {
   TransformComponent,
   TransformWrapper,
@@ -11,7 +13,6 @@ import {
 
 import { ThemeProvider } from "./theme-provider";
 import CanvasHeader from "./CanvasHeader";
-import StatusToast from "./StatusToast";
 import CanvasChunk from "./CanvasChunk";
 import { loadCurrentAuthUser, subscribeToAuthUser, type AuthUser } from "@/lib/auth";
 import {
@@ -117,8 +118,6 @@ const CanvasPage = () => {
   const [chunkArea, setChunkArea] = useState<CanvasChunkAreaResponse | null>(null);
   const [selectedChunkId, setSelectedChunkId] = useState<string | null>(null);
   const [lockingChunkId, setLockingChunkId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const transformRef = useRef<ReactZoomPanPinchRef | null>(null);
   const gestureRef = useRef({
@@ -161,8 +160,7 @@ const CanvasPage = () => {
     let isActive = true;
 
     const loadArea = async () => {
-      setIsLoading(true);
-      setError(null);
+      const loadingToast = toast.loading("Loading...");
 
       try {
         const nextArea = await getCanvasChunkArea(
@@ -182,11 +180,11 @@ const CanvasPage = () => {
           return;
         }
 
-        setError(error instanceof Error ? error.message : "Failed to load Place");
+        toast.error(
+          error instanceof Error ? error.message : "Failed to load Place",
+        );
       } finally {
-        if (isActive) {
-          setIsLoading(false);
-        }
+        toast.dismiss(loadingToast);
       }
     };
 
@@ -245,7 +243,6 @@ const CanvasPage = () => {
   const handleStartSolving = async (chunkX: number, chunkY: number) => {
     const chunkId = `${chunkX}:${chunkY}`;
     setLockingChunkId(chunkId);
-    setError(null);
 
     try {
       const lockedChunk = await lockCanvasChunk(chunkX, chunkY);
@@ -263,7 +260,9 @@ const CanvasPage = () => {
       );
       navigate("/place/solve");
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Unable to lock chunk");
+      toast.error(
+        error instanceof Error ? error.message : "Unable to lock chunk",
+      );
     } finally {
       setLockingChunkId(null);
     }
@@ -292,6 +291,7 @@ const CanvasPage = () => {
 
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+      <Toaster />
       <div className="flex flex-col items-center min-h-screen overflow-hidden touch-none">
         <CanvasHeader authUser={authUser} />
 
@@ -310,7 +310,7 @@ const CanvasPage = () => {
             }}
           />
 
-          {selectedChunk ? (
+          {selectedChunk &&
             <div className="absolute bottom-0 md:bottom-4 left-1/2 gap-0 -translate-x-1/2 z-50 bg-card border flex flex-col w-full max-w-[600px] px-4 py-2 md:py-4 shadow-lg">
               <h3 className="text-center text-base md:text-lg mb-3">
                 {selectedChunk.state === "locked" && "Being solved by: "}
@@ -380,19 +380,7 @@ const CanvasPage = () => {
                 </span>
               )}
             </div>
-          ) : null}
-
-          {(error || isLoading) && (
-            <div className="pointer-events-none absolute inset-0 z-50">
-              {error && (
-                <StatusToast variant="error" message={error} className="absolute left-4 top-4" />
-              )}
-
-              {isLoading && (
-                <StatusToast variant="loading" message="Loading..." className="absolute right-4 top-4" />
-              )}
-            </div>
-          )}
+          }
 
           {chunkArea ? (
           <TransformWrapper
