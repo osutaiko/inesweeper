@@ -492,7 +492,7 @@ export class ChunkService {
       ...chunk,
       state: 'solved',
       lockedByUserId: null,
-      lockedAt: null,
+      // lockedAt: null,
       lockedUntil: null,
       solverUserId: user.id,
       solvedAt: solvedAt.toISOString(),
