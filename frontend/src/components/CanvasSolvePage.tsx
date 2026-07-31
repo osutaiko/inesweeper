@@ -2,13 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
-import CanvasHeader from "./CanvasHeader";
 import CanvasGameBoard from "./CanvasGameBoard";
-import { ThemeProvider } from "./theme-provider";
+import { useSiteLayout } from "./Layout";
 import { ScrollArea, ScrollBar } from "./ui/scroll-area";
 import { Toaster } from "./ui/sonner";
-import { loadCurrentAuthUser, type AuthUser } from "@/lib/auth";
-import { useMediaQuery } from "@/lib/utils";
+import { loadCurrentAuthUser } from "@/lib/auth";
 import {
   getActiveCanvasLock,
   getCanvasChunkArea,
@@ -23,10 +21,9 @@ type SolverData = {
 
 const CanvasSolvePage = () => {
   const navigate = useNavigate();
-  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [solverData, setSolverData] = useState<SolverData | null>(null);
-  const isTouchscreen = useMediaQuery("(pointer: coarse) and (hover: none)");
-  
+  const { isTouchscreen } = useSiteLayout();
+
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -54,7 +51,6 @@ const CanvasSolvePage = () => {
         );
 
         if (isActive) {
-          setAuthUser(user);
           setSolverData({ chunk, chunkArea });
         }
       } catch {
@@ -93,27 +89,24 @@ const CanvasSolvePage = () => {
   }, [solverData]);
 
   return (
-    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+    <>
       <Toaster />
-      <div className="flex flex-col items-center min-h-screen overflow-hidden touch-none">
-        <CanvasHeader authUser={authUser} />
-        <ScrollArea 
-          ref={scrollAreaRef}
-          className="flex w-full h-[calc(100vh-57px)] sm:h-[calc(100vh-73px)]"
-        >
-          <main className={`flex flex-col min-h-[calc(100vh-57px)] sm:min-h-[calc(100vh-73px)] gap-4 justify-center items-center ${isTouchscreen ? 'px-[160px]' : 'px-4'} py-6`}>
-            {solverData &&
-              <CanvasGameBoard
-                chunk={solverData.chunk}
-                chunkArea={solverData.chunkArea}
-                isTouchscreen={isTouchscreen}
-              />
-            }
-          </main>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
-      </div>
-    </ThemeProvider>
+      <ScrollArea
+        ref={scrollAreaRef}
+        className="flex w-full h-[calc(100vh-57px)] sm:h-[calc(100vh-73px)]"
+      >
+        <main className={`flex flex-col min-h-[calc(100vh-57px)] sm:min-h-[calc(100vh-73px)] gap-4 justify-center items-center ${isTouchscreen ? 'px-[160px]' : 'px-4'} py-6`}>
+          {solverData &&
+            <CanvasGameBoard
+              chunk={solverData.chunk}
+              chunkArea={solverData.chunkArea}
+              isTouchscreen={isTouchscreen}
+            />
+          }
+        </main>
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
+    </>
   );
 };
 

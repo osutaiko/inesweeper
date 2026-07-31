@@ -13,8 +13,8 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <BrowserRouter>
     <Routes>
       <Route path="/" element={<Layout />} />
-      <Route path="/place" element={<CanvasPage />} />
-      <Route path="/place/solve" element={<CanvasSolvePage />} />
+      <Route path="/place" element={<Layout><CanvasPage /></Layout>} />
+      <Route path="/place/solve" element={<Layout><CanvasSolvePage /></Layout>} />
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

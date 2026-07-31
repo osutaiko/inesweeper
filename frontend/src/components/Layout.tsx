@@ -1,6 +1,13 @@
-import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+import { Link, useLocation } from "react-router-dom";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { ThemeProvider } from "./theme-provider";
 import { DifficultyName, TimeRecord, VariantName } from "@/lib/types";
 import { boardConfigLibrary, difficultyMap, variantGroups } from "@/lib/constants";
@@ -36,7 +43,25 @@ import InfoButton from "./layout-actions/InfoButton";
 import SettingsButton from "./layout-actions/SettingsButton";
 import StatsButton from "./layout-actions/StatsButton";
 
-const Layout = () => {
+type SiteLayoutContextValue = {
+  authUser: AuthUser | null;
+  isTouchscreen: boolean;
+};
+
+const SiteLayoutContext = createContext<SiteLayoutContextValue | null>(null);
+
+export const useSiteLayout = () => {
+  const context = useContext(SiteLayoutContext);
+  if (!context) {
+    throw new Error("useSiteLayout must be used within Layout");
+  }
+  return context;
+};
+
+const Layout = ({ children }: {
+  children?: ReactNode;
+}) => {
+  const isPlace = useLocation().pathname.startsWith("/place");
   const DEFAULT_ZOOM = 100;
   const DEFAULT_FLAG_BUTTON_SIZE = 72;
   const DEFAULT_FLAG_BUTTON_POSITION = "bottom-right";
@@ -263,7 +288,8 @@ const Layout = () => {
 
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-      <div className="flex flex-col items-center min-h-screen overflow-hidden touch-none">
+      <SiteLayoutContext.Provider value={{ authUser, isTouchscreen }}>
+        <div className="flex flex-col items-center min-h-screen overflow-hidden touch-none">
         {/* Header */}
         <header className="flex flex-row w-full gap-4 px-3 sm:px-8 py-2 sm:py-4 justify-between items-center border-b overflow-x-auto">
           <a href="/">
@@ -279,10 +305,17 @@ const Layout = () => {
           </a>
           <div className="flex flex-row gap-2">
             <Button asChild variant="secondary" className="pr-3">
-              <Link to="/place">
-                Place
-                <ArrowRight />
-              </Link>
+              {isPlace ? (
+                <Link to="/">
+                  <ArrowLeft />
+                  Singleplayer
+                </Link>
+              ) : (
+                <Link to="/place">
+                  Place
+                  <ArrowRight />
+                </Link>
+              )}
             </Button>
             <SettingsButton
               isTouchscreen={isTouchscreen}
@@ -306,14 +339,15 @@ const Layout = () => {
             <AuthButton authUser={authUser} />
           </div>
         </header>
-
-        {/* Main Play Area */}
-        <ScrollArea
-          ref={scrollAreaRef}
-          className="flex w-full h-[calc(100vh-57px)] sm:h-[calc(100vh-73px)]" /* FIXME: need way to avoid using magic */
-        >
-          <main
-            className={`flex flex-col min-h-[calc(100vh-57px)] sm:min-h-[calc(100vh-73px)] gap-4 justify-center items-center ${isTouchscreen ? 'px-[160px]' : 'px-4'} py-6`}
+          
+          {/* Main Play Area */}
+          {children ?? (
+            <ScrollArea
+              ref={scrollAreaRef}
+              className="flex w-full h-[calc(100vh-57px)] sm:h-[calc(100vh-73px)]" /* FIXME: need way to avoid using magic */
+            >
+              <main
+                className={`flex flex-col min-h-[calc(100vh-57px)] sm:min-h-[calc(100vh-73px)] gap-4 justify-center items-center ${isTouchscreen ? 'px-[160px]' : 'px-4'} py-6`}
           >
             <GameBoard 
               key={`${variant}-${difficulty}`}
@@ -364,10 +398,12 @@ const Layout = () => {
                 </SelectContent>
               </Select>
             </div>
-          </main>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
-      </div>
+              </main>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
+          )}
+        </div>
+      </SiteLayoutContext.Provider>
     </ThemeProvider>
   );
 };

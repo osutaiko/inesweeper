@@ -11,10 +11,8 @@ import {
   type ReactZoomPanPinchRef,
 } from "react-zoom-pan-pinch";
 
-import { ThemeProvider } from "./theme-provider";
-import CanvasHeader from "./CanvasHeader";
 import CanvasChunk from "./CanvasChunk";
-import { loadCurrentAuthUser, subscribeToAuthUser, type AuthUser } from "@/lib/auth";
+import { useSiteLayout } from "./Layout";
 import { formatChunkCoordinates } from "@/lib/coordinates";
 import {
   buildCanvasMineLookup,
@@ -115,7 +113,7 @@ const CanvasViewport = ({
 
 const CanvasPage = () => {
   const navigate = useNavigate();
-  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+  const { authUser } = useSiteLayout();
   const [chunkArea, setChunkArea] = useState<CanvasChunkAreaResponse | null>(null);
   const [selectedChunkId, setSelectedChunkId] = useState<string | null>(null);
   const [lockingChunkId, setLockingChunkId] = useState<string | null>(null);
@@ -132,30 +130,6 @@ const CanvasPage = () => {
   const loadFromChunkY = -initialLoadRadius - neighborChunkBuffer;
   const loadToChunkX = initialLoadRadius + neighborChunkBuffer;
   const loadToChunkY = initialLoadRadius + neighborChunkBuffer;
-
-  useEffect(() => {
-    let isActive = true;
-
-    const loadAuthUser = async () => {
-      const user = await loadCurrentAuthUser();
-      if (!isActive) {
-        return;
-      }
-
-      setAuthUser(user);
-    };
-
-    const subscription = subscribeToAuthUser((user) => {
-      setAuthUser(user);
-    });
-
-    loadAuthUser();
-
-    return () => {
-      isActive = false;
-      subscription.unsubscribe();
-    };
-  }, []);
 
   useEffect(() => {
     let isActive = true;
@@ -291,14 +265,11 @@ const CanvasPage = () => {
   };
 
   return (
-    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+    <>
       <Toaster />
-      <div className="flex flex-col items-center min-h-screen overflow-hidden touch-none">
-        <CanvasHeader authUser={authUser} />
-
-        <main
-          className="relative flex w-full overflow-hidden bg-background h-[calc(100vh-57px)] sm:h-[calc(100vh-73px)]"
-        >
+      <main
+        className="relative flex w-full overflow-hidden bg-background h-[calc(100vh-57px)] sm:h-[calc(100vh-73px)]"
+      >
           <div
             ref={gridRef}
             aria-hidden
@@ -468,9 +439,8 @@ const CanvasPage = () => {
             )}
           </TransformWrapper>
           ) : null}
-        </main>
-      </div>
-    </ThemeProvider>
+      </main>
+    </>
   );
 };
 
