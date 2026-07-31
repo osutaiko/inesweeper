@@ -24,6 +24,7 @@ import {
 
 const CHUNK_PIXEL_SIZE = 480;
 const CHUNK_ORIGIN_OFFSET = -CHUNK_PIXEL_SIZE / 2;
+const INITIAL_SCALE = 0.4;
 const GRID_DETAIL_SCALE = 0.1;
 const LOW_SCALE_GRID_STEP = 10;
 
@@ -304,8 +305,8 @@ const CanvasPage = () => {
             style={{
               backgroundImage:
                 "linear-gradient(to right, var(--foreground) 1px, transparent 1px), linear-gradient(to bottom, var(--foreground) 1px, transparent 1px)",
-              backgroundPosition: `${CHUNK_ORIGIN_OFFSET * 0.4}px ${-CHUNK_ORIGIN_OFFSET * 0.4}px`,
-              backgroundSize: `${CHUNK_PIXEL_SIZE * 0.4}px ${CHUNK_PIXEL_SIZE * 0.4}px`,
+              backgroundPosition: `${CHUNK_ORIGIN_OFFSET * INITIAL_SCALE}px ${-CHUNK_ORIGIN_OFFSET * INITIAL_SCALE}px`,
+              backgroundSize: `${CHUNK_PIXEL_SIZE * INITIAL_SCALE}px ${CHUNK_PIXEL_SIZE * INITIAL_SCALE}px`,
             }}
           />
 
@@ -396,7 +397,7 @@ const CanvasPage = () => {
           {chunkArea ? (
           <TransformWrapper
             ref={transformRef}
-            initialScale={0.4}
+            initialScale={INITIAL_SCALE}
             minScale={0.01}
             maxScale={1.0}
             centerOnInit
