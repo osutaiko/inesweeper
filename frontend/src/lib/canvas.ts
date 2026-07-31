@@ -26,6 +26,10 @@ export type CanvasChunkAreaResponse = {
   chunks: CanvasChunk[];
 };
 
+type CanvasChunkActionResponse = CanvasChunk & {
+  nextLockAt: string;
+};
+
 const MINE_BITMAP_BYTE_LENGTH = (CHUNK_SIZE * CHUNK_SIZE) / 8;
 const MINE_BITMAP_HEX_LENGTH = MINE_BITMAP_BYTE_LENGTH * 2;
 
@@ -166,7 +170,7 @@ export const solveCanvasChunk = async () => {
     throw new Error(body?.message ?? "Unable to solve chunk");
   }
 
-  return (await response.json()) as CanvasChunk;
+  return (await response.json()) as CanvasChunkActionResponse;
 };
 
 export const failCanvasChunk = async () => {
@@ -189,7 +193,7 @@ export const failCanvasChunk = async () => {
     throw new Error(body?.message ?? "Unable to fail chunk");
   }
 
-  return (await response.json()) as CanvasChunk;
+  return (await response.json()) as CanvasChunkActionResponse;
 };
 
 export const getActiveCanvasLock = async () => {

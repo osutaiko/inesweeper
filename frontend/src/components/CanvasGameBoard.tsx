@@ -36,7 +36,6 @@ import { getMsParts, timeLeftUntil } from "@/lib/utils";
 const CONTEXT_SIZE = 4;
 const SOLVER_SIZE = CHUNK_SIZE + CONTEXT_SIZE * 2;
 const FADE_SIZE_PX = 60;
-const CLAIM_COOLDOWN_MS = 5 * 60 * 1000;
 
 const SOLVER_CONFIG: BoardConfig = {
   width: SOLVER_SIZE,
@@ -168,18 +167,22 @@ const CanvasGameBoard = ({
   );
   const [board, setBoard] = useState<Board>(initialChordedBoard);
 
+  const startNextClaimCountdown = (nextLockAt: string) => {
+    setNextClaimAt(nextLockAt);
+    setNextClaimInMs(timeLeftUntil(nextLockAt));
+  };
+
   const doAfterLoss = (reason: "mine" | "expired") => {
     if (isGameOverRef.current) {
       return;
     }
 
     isGameOverRef.current = true;
-    const retryAt = new Date(Date.now() + CLAIM_COOLDOWN_MS).toISOString();
-    setNextClaimAt(retryAt);
-    setNextClaimInMs(timeLeftUntil(retryAt));
     setGameOverReason(reason);
     setIsGameOverDialogOpen(true);
-    void failCanvasChunk().catch(() => setGameOverReason("error"));
+    void failCanvasChunk()
+      .then(({ nextLockAt }) => startNextClaimCountdown(nextLockAt))
+      .catch(() => setGameOverReason("error"));
   };
 
   const doAfterWin = async () => {
@@ -188,12 +191,11 @@ const CanvasGameBoard = ({
     }
 
     isGameOverRef.current = true;
-    setNextClaimAt(chunk.lockedUntil);
-    setNextClaimInMs(timeLeftUntil(chunk.lockedUntil));
     setGameOverReason("win");
 
     try {
-      await solveCanvasChunk();
+      const { nextLockAt } = await solveCanvasChunk();
+      startNextClaimCountdown(nextLockAt);
     } catch {
       setGameOverReason("error");
     }

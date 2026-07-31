@@ -34,7 +34,8 @@ const chunkStateCode = {
 
 @Injectable()
 export class ChunkService {
-  private readonly claimDurationMs = 5 * 60 * 1000; // 5 minutes
+  private readonly solveDurationMs = 3 * 60 * 1000; // 3 minutes for chunk solve
+  private readonly claimCooldownMs = 5 * 60 * 1000; // 5 minutes for chunk retry
   private readonly chunkTable = 'canvas_chunks';
   private readonly maxChunkAreaSize = 10_000;
   private readonly maxMineBitmapAreaSize = 1_024;
@@ -456,7 +457,7 @@ export class ChunkService {
     }
 
     const lockedAt = new Date();
-    const lockedUntil = new Date(lockedAt.getTime() + this.claimDurationMs);
+    const lockedUntil = new Date(lockedAt.getTime() + this.solveDurationMs);
     this.ensureLockCooldownElapsed(user.id);
 
     const saved = await this.setChunkRecord(client, {
@@ -468,7 +469,10 @@ export class ChunkService {
       solvedAt: null,
       lockedUntil: lockedUntil.toISOString(),
     });
-    this.nextLockAtByUserId.set(user.id, lockedUntil.getTime());
+    this.nextLockAtByUserId.set(
+      user.id,
+      lockedUntil.getTime() + this.claimCooldownMs,
+    );
 
     return this.withChunkMineBitmap(saved, user.id, user.nickname);
   }
@@ -497,8 +501,13 @@ export class ChunkService {
       solverUserId: user.id,
       solvedAt: solvedAt.toISOString(),
     });
+    const nextLockAt = solvedAt.getTime() + this.claimCooldownMs;
+    this.nextLockAtByUserId.set(user.id, nextLockAt);
 
-    return this.withChunkMineBitmap(saved, user.id, user.nickname);
+    return {
+      ...this.withChunkMineBitmap(saved, user.id, user.nickname),
+      nextLockAt: new Date(nextLockAt).toISOString(),
+    };
   }
 
   async failChunk(req: Request) {
@@ -539,11 +548,12 @@ export class ChunkService {
       solverUserId: null,
       solvedAt: null,
     });
-    this.nextLockAtByUserId.set(
-      user.id,
-      failedAt + this.claimDurationMs,
-    );
+    const nextLockAt = failedAt + this.claimCooldownMs;
+    this.nextLockAtByUserId.set(user.id, nextLockAt);
 
-    return this.withChunkMineBitmap(saved, user.id, user.nickname);
+    return {
+      ...this.withChunkMineBitmap(saved, user.id, user.nickname),
+      nextLockAt: new Date(nextLockAt).toISOString(),
+    };
   }
 }
