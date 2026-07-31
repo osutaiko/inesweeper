@@ -184,6 +184,8 @@ const CanvasGameBoard = ({
     }
 
     isGameOverRef.current = true;
+    setNextClaimAt(chunk.lockedUntil);
+    setNextClaimInMs(timeLeftUntil(chunk.lockedUntil));
     setGameOverReason("win");
 
     try {
@@ -429,7 +431,7 @@ const CanvasGameBoard = ({
                       : ""}
               </DialogDescription>
             </DialogHeader>
-            `You may attempt to claim a chunk again in ${nextClaimInMinutes}:${String(nextClaimInSecondsPart).padStart(2, "0")}.
+            You may attempt to claim a chunk again in {nextClaimInMinutes}:{String(nextClaimInSecondsPart).padStart(2, "0")}.
             <DialogFooter>
               <Button
                 variant="outline"
