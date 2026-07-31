@@ -41,7 +41,7 @@ const updateChunkGrid = (
   const lineStep = scale < GRID_DETAIL_SCALE ? LOW_SCALE_GRID_STEP : 1;
   const spacing = chunkSpacing * lineStep;
   const offsetX = positionX + CHUNK_ORIGIN_OFFSET * scale;
-  const offsetY = positionY + CHUNK_ORIGIN_OFFSET * scale;
+  const offsetY = positionY - CHUNK_ORIGIN_OFFSET * scale;
 
   element.style.backgroundSize = `${spacing}px ${spacing}px`;
   element.style.backgroundPosition = `${offsetX}px ${offsetY}px`;
@@ -304,7 +304,7 @@ const CanvasPage = () => {
             style={{
               backgroundImage:
                 "linear-gradient(to right, var(--foreground) 1px, transparent 1px), linear-gradient(to bottom, var(--foreground) 1px, transparent 1px)",
-              backgroundPosition: `${CHUNK_ORIGIN_OFFSET * 0.4}px ${CHUNK_ORIGIN_OFFSET * 0.4}px`,
+              backgroundPosition: `${CHUNK_ORIGIN_OFFSET * 0.4}px ${-CHUNK_ORIGIN_OFFSET * 0.4}px`,
               backgroundSize: `${CHUNK_PIXEL_SIZE * 0.4}px ${CHUNK_PIXEL_SIZE * 0.4}px`,
             }}
           />
