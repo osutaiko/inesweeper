@@ -697,7 +697,7 @@ export const handleChord = (board: Board, row: number, col: number, config: Boar
   }
   //#endregion
 
-  if (typeof cell.state.num !== "number") return updatedBoard;
+    if (cell.state.num !== null && typeof cell.state.num !== "number") return updatedBoard;
   //#endregion
 
   const neighborCounts = getNeighborCounts(board, row, col, config);
