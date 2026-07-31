@@ -514,6 +514,8 @@ export class ChunkService {
       .select('*')
       .eq('locked_by_user_id', user.id)
       .eq('state', 'locked')
+      .order('locked_at', { ascending: false })
+      .limit(1)
       .maybeSingle();
 
     if (error) {

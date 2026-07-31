@@ -13,6 +13,7 @@ import {
 } from "./ui/dialog";
 import {
   buildCanvasMineLookup,
+  failCanvasChunk,
   solveCanvasChunk,
   type CanvasChunk,
   type CanvasChunkAreaResponse,
@@ -176,6 +177,7 @@ const CanvasGameBoard = ({
     setNextClaimInMs(timeLeftUntil(retryAt));
     setGameOverReason(reason);
     setIsGameOverDialogOpen(true);
+    void failCanvasChunk().catch(() => setGameOverReason("error"));
   };
 
   const doAfterWin = async () => {
@@ -268,16 +270,7 @@ const CanvasGameBoard = ({
     };
     const expireLock = () => {
       setRemainingMs(0);
-      if (!isGameOverRef.current) {
-        const retryAt = new Date(
-          Date.now() + CLAIM_COOLDOWN_MS,
-        ).toISOString();
-        isGameOverRef.current = true;
-        setNextClaimAt(retryAt);
-        setNextClaimInMs(timeLeftUntil(retryAt));
-        setGameOverReason("expired");
-        setIsGameOverDialogOpen(true);
-      }
+      doAfterLoss("expired");
     };
 
     updateRemainingMs();
@@ -428,7 +421,7 @@ const CanvasGameBoard = ({
                     ? "You revealed a mine..."
                     : gameOverReason === "expired"
                       ? "Claim attempt time expired..."
-                      : ""}
+                      : "Something went wrong"}
               </DialogDescription>
             </DialogHeader>
             You may attempt to claim a chunk again in {nextClaimInMinutes}:{String(nextClaimInSecondsPart).padStart(2, "0")}.

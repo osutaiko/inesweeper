@@ -169,6 +169,29 @@ export const solveCanvasChunk = async () => {
   return (await response.json()) as CanvasChunk;
 };
 
+export const failCanvasChunk = async () => {
+  const accessToken = await getAuthAccessToken();
+  if (!accessToken) {
+    throw new Error("Login required");
+  }
+
+  const response = await fetch(`${getBackendUrl()}/place/chunks/fail`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  if (!response.ok) {
+    const body = (await response.json().catch(() => null)) as {
+      message?: string;
+    } | null;
+    throw new Error(body?.message ?? "Unable to fail chunk");
+  }
+
+  return (await response.json()) as CanvasChunk;
+};
+
 export const getActiveCanvasLock = async () => {
   const accessToken = await getAuthAccessToken();
   if (!accessToken) {
