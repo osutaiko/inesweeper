@@ -26,7 +26,7 @@ export type CanvasChunkAreaResponse = {
   chunks: CanvasChunk[];
 };
 
-type CanvasChunkActionResponse = CanvasChunk & {
+type CanvasChunkFailureResponse = CanvasChunk & {
   nextLockAt: string;
 };
 
@@ -170,7 +170,7 @@ export const solveCanvasChunk = async () => {
     throw new Error(body?.message ?? "Unable to solve chunk");
   }
 
-  return (await response.json()) as CanvasChunkActionResponse;
+  return (await response.json()) as CanvasChunk;
 };
 
 export const failCanvasChunk = async () => {
@@ -193,7 +193,7 @@ export const failCanvasChunk = async () => {
     throw new Error(body?.message ?? "Unable to fail chunk");
   }
 
-  return (await response.json()) as CanvasChunkActionResponse;
+  return (await response.json()) as CanvasChunkFailureResponse;
 };
 
 export const getActiveCanvasLock = async () => {

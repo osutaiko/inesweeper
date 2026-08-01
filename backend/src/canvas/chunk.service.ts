@@ -501,13 +501,9 @@ export class ChunkService {
       solverUserId: user.id,
       solvedAt: solvedAt.toISOString(),
     });
-    const nextLockAt = solvedAt.getTime();
     this.nextLockAtByUserId.delete(user.id);
 
-    return {
-      ...this.withChunkMineBitmap(saved, user.id, user.nickname),
-      nextLockAt: new Date(nextLockAt).toISOString(),
-    };
+    return this.withChunkMineBitmap(saved, user.id, user.nickname);
   }
 
   async failChunk(req: Request) {

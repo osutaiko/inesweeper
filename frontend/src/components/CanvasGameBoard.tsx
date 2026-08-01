@@ -173,11 +173,6 @@ const CanvasGameBoard = ({
   );
   const [board, setBoard] = useState<Board>(initialChordedBoard);
 
-  const startNextClaimCountdown = (nextLockAt: string) => {
-    setNextClaimAt(nextLockAt);
-    setNextClaimInMs(timeLeftUntil(nextLockAt));
-  };
-
   const doAfterLoss = (reason: "mine" | "expired") => {
     if (isGameOverRef.current) {
       return;
@@ -187,7 +182,10 @@ const CanvasGameBoard = ({
     setGameOverReason(reason);
     setIsGameOverDialogOpen(true);
     void failCanvasChunk()
-      .then(({ nextLockAt }) => startNextClaimCountdown(nextLockAt))
+      .then(({ nextLockAt }) => {
+        setNextClaimAt(nextLockAt);
+        setNextClaimInMs(timeLeftUntil(nextLockAt));
+      })
       .catch(() => setGameOverReason("error"));
   };
 
@@ -200,8 +198,7 @@ const CanvasGameBoard = ({
     setGameOverReason("win");
 
     try {
-      const { nextLockAt } = await solveCanvasChunk();
-      startNextClaimCountdown(nextLockAt);
+      await solveCanvasChunk();
     } catch {
       setGameOverReason("error");
     }
