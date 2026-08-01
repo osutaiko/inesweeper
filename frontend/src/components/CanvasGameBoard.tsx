@@ -441,25 +441,16 @@ const CanvasGameBoard = ({
               </DialogDescription>
             </DialogHeader>
             {gameOverReason === "win" && (
-              <p>
-                You may attempt to claim another chunk in{" "}
-                <span className="underline text-destructive">
-                  {formattedNextClaimTime}
-                </span>
-                .
-              </p>
+              <p>You may attempt to claim another chunk immediately.</p>
             )}
-            {gameOverReason === "mine" && (
+            {(gameOverReason === "mine" || gameOverReason === "expired") && (
               <p>
                 You may attempt to claim a chunk again in{" "}
                 <span className="underline text-destructive">
                   {formattedNextClaimTime}
                 </span>
-                , after the 5 minute cooldown is over.
+                , after the 3 minute cooldown is over.
               </p>
-            )}
-            {gameOverReason === "expired" && (
-              <p>You may attempt to claim another chunk.</p>
             )}
             <DialogFooter>
               <Button

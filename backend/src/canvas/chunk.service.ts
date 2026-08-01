@@ -35,7 +35,7 @@ const chunkStateCode = {
 @Injectable()
 export class ChunkService {
   private readonly solveDurationMs = 3 * 60 * 1000; // 3 minutes for chunk solve
-  private readonly claimCooldownMs = 5 * 60 * 1000; // 5 minutes for chunk retry
+  private readonly failureCooldownMs = 3 * 60 * 1000; // 3 minutes after failed claim
   private readonly chunkTable = 'canvas_chunks';
   private readonly maxChunkAreaSize = 10_000;
   private readonly maxMineBitmapAreaSize = 1_024;
@@ -471,7 +471,7 @@ export class ChunkService {
     });
     this.nextLockAtByUserId.set(
       user.id,
-      lockedUntil.getTime() + this.claimCooldownMs,
+      lockedUntil.getTime() + this.failureCooldownMs,
     );
 
     return this.withChunkMineBitmap(saved, user.id, user.nickname);
@@ -501,8 +501,8 @@ export class ChunkService {
       solverUserId: user.id,
       solvedAt: solvedAt.toISOString(),
     });
-    const nextLockAt = solvedAt.getTime() + this.claimCooldownMs;
-    this.nextLockAtByUserId.set(user.id, nextLockAt);
+    const nextLockAt = solvedAt.getTime();
+    this.nextLockAtByUserId.delete(user.id);
 
     return {
       ...this.withChunkMineBitmap(saved, user.id, user.nickname),
@@ -548,7 +548,7 @@ export class ChunkService {
       solverUserId: null,
       solvedAt: null,
     });
-    const nextLockAt = failedAt + this.claimCooldownMs;
+    const nextLockAt = failedAt + this.failureCooldownMs;
     this.nextLockAtByUserId.set(user.id, nextLockAt);
 
     return {
