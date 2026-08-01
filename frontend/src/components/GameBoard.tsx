@@ -5,9 +5,10 @@ import { createBoard, handleClick, handleChord, handleFlag, handleBeforeFirstCli
 import { formatTimeMs } from "@/lib/utils";
 import { useMinesweeperControls } from "@/hooks/useMinesweeperControls";
 
-import { Laugh, Meh, Shovel, Skull, Smile } from "lucide-react";
+import { Laugh, Meh, Skull, Smile } from "lucide-react";
 import { Button } from "./ui/button";
 import { GameBoardGrid, getColorClass } from "./GameBoardGrid";
+import TouchFlagButton from "./TouchFlagButton";
 
 export const GameBoard: React.FC<{
   config: BoardConfig;
@@ -184,15 +185,6 @@ export const GameBoard: React.FC<{
     remainingBlueFlags,
   } = countRemainingFlags(board);
 
-  const getFlagButtonPositionClass = () => {
-    switch (flagButtonPosition) {
-      case "bottom-left": return "bottom-0 left-0 rounded-tl-none rounded-tr-md rounded-bl-none rounded-br-none";
-      case "center-left": return "top-1/2 left-0 rounded-tl-none rounded-tr-md rounded-bl-none rounded-br-md";
-      case "center-right": return "top-1/2 right-0 rounded-tl-md rounded-tr-none rounded-bl-md rounded-br-none";
-      default: return "bottom-0 right-0 rounded-tl-md rounded-tr-none rounded-bl-none rounded-br-none";
-    }
-  }
-
   useEffect(() => {
     if (isTouchscreen || !hoveredCell || isGameOver) {
       setShadedCells([]);
@@ -345,16 +337,13 @@ export const GameBoard: React.FC<{
         </div>
       </div>
       {isTouchscreen && isGameOver !== "win" && (
-        <Button
-          className={`fixed p-0 [&_svg]:size-1/2 ${getFlagButtonPositionClass()} text-primary ${isFlagToggled ? "bg-destructive hover:bg-destructive/90" : "bg-game-button hover:bg-game-button/90"}`}
-          style={{
-            width: flagButtonSize,
-            height: flagButtonSize,
-          }}
+        <TouchFlagButton
+          flagButtonSize={flagButtonSize}
+          flagButtonPosition={flagButtonPosition}
+          isFlagToggled={isFlagToggled}
+          isGameOver={Boolean(isGameOver)}
           onClick={() => isGameOver ? handleReset() : setIsFlagToggled(!isFlagToggled)}
-        >
-          {isGameOver ? (/* isGameOver === "win" ? <Laugh /> : */ <Skull />) : (isFlagToggled ? <span className="font-minesweeper leading-none" style={{ fontSize: `${flagButtonSize * 0.5}px` }}>`</span> : <Shovel />)}
-        </Button>
+        />
       )}
     </>
   );

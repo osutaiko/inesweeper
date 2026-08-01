@@ -22,7 +22,7 @@ type SolverData = {
 const CanvasSolvePage = () => {
   const navigate = useNavigate();
   const [solverData, setSolverData] = useState<SolverData | null>(null);
-  const { isTouchscreen } = useSiteLayout();
+  const { isTouchscreen, flagButtonSize, flagButtonPosition } = useSiteLayout();
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
@@ -101,6 +101,8 @@ const CanvasSolvePage = () => {
               chunk={solverData.chunk}
               chunkArea={solverData.chunkArea}
               isTouchscreen={isTouchscreen}
+              flagButtonSize={flagButtonSize}
+              flagButtonPosition={flagButtonPosition}
             />
           }
         </main>

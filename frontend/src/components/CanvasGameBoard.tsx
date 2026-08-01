@@ -3,6 +3,7 @@ import { ClockFading } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import { GameBoardGrid } from "./GameBoardGrid";
+import TouchFlagButton from "./TouchFlagButton";
 import { Button } from "./ui/button";
 import {
   Dialog,
@@ -52,6 +53,8 @@ type CanvasGameBoardProps = {
   chunk: CanvasChunk;
   chunkArea: CanvasChunkAreaResponse;
   isTouchscreen: boolean;
+  flagButtonSize: number;
+  flagButtonPosition: string;
 };
 
 const getTargetChunkBoard = (board: Board) =>
@@ -93,6 +96,8 @@ const CanvasGameBoard = ({
   chunk,
   chunkArea,
   isTouchscreen,
+  flagButtonSize,
+  flagButtonPosition,
 }: CanvasGameBoardProps) => {
   const navigate = useNavigate();
   const [remainingMs, setRemainingMs] = useState(() =>
@@ -100,6 +105,7 @@ const CanvasGameBoard = ({
   );
   const [nextClaimAt, setNextClaimAt] = useState<string | null>(null);
   const [nextClaimInMs, setNextClaimInMs] = useState(0);
+  const [isFlagToggled, setIsFlagToggled] = useState(false);
   const [gameOverReason, setGameOverReason] = useState<
     "win" | "mine" | "expired" | "error" | null
   >(null);
@@ -242,6 +248,7 @@ const CanvasGameBoard = ({
     touchHoldDelay: Number(
       localStorage.getItem("touchHoldDelay") ?? 200,
     ),
+    isFlagToggled,
     canReveal: isInsideTargetChunk,
     canFlag: (row, col) =>
       isInsideTargetChunk(row, col) &&
@@ -320,7 +327,8 @@ const CanvasGameBoard = ({
   );
 
   return (
-    <div className="flex h-min w-min select-none flex-col overflow-hidden rounded-md">
+    <>
+      <div className="flex h-min w-min select-none flex-col overflow-hidden rounded-md">
         <div className="border-x-[9px] border-t-[9px] border-game-border bg-game-border">
           <div className="relative flex items-center justify-between rounded-sm bg-game-hidden p-2">
             <div className="flex h-[40px] gap-x-2 overflow-hidden bg-game-button px-3">
@@ -368,7 +376,7 @@ const CanvasGameBoard = ({
             explodedCell={explodedCell}
             incorrectFlagCells={[]}
             shadedCells={[]}
-            isFlagToggled={false}
+            isFlagToggled={isFlagToggled}
             onMouseDown={handleMouseDown}
             onMouseUp={handleMouseUp}
             onTouchStart={handleTouchStart}
@@ -466,7 +474,16 @@ const CanvasGameBoard = ({
             </DialogFooter>
           </DialogContent>
         </Dialog>
-    </div>
+      </div>
+      {isTouchscreen && gameOverReason === null && (
+        <TouchFlagButton
+          flagButtonSize={flagButtonSize}
+          flagButtonPosition={flagButtonPosition}
+          isFlagToggled={isFlagToggled}
+          onClick={() => setIsFlagToggled((current) => !current)}
+        />
+      )}
+    </>
   );
 };
 

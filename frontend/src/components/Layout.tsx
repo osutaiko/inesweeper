@@ -46,6 +46,8 @@ import StatsButton from "./layout-actions/StatsButton";
 type SiteLayoutContextValue = {
   authUser: AuthUser | null;
   isTouchscreen: boolean;
+  flagButtonSize: number;
+  flagButtonPosition: string;
 };
 
 const SiteLayoutContext = createContext<SiteLayoutContextValue | null>(null);
@@ -288,7 +290,14 @@ const Layout = ({ children }: {
 
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-      <SiteLayoutContext.Provider value={{ authUser, isTouchscreen }}>
+      <SiteLayoutContext.Provider
+        value={{
+          authUser,
+          isTouchscreen,
+          flagButtonSize,
+          flagButtonPosition,
+        }}
+      >
         <div className="flex flex-col items-center min-h-screen overflow-hidden touch-none">
         {/* Header */}
         <header className="flex flex-row w-full gap-4 px-3 sm:px-8 py-2 sm:py-4 justify-between items-center border-b overflow-x-auto">
