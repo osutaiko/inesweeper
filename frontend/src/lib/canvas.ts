@@ -163,9 +163,11 @@ export const getCanvasChunkArea = async (
   fromChunkY: number,
   toChunkX: number,
   toChunkY: number,
+  signal?: AbortSignal,
 ) => {
   const response = await fetch(
     `${getBackendUrl()}/place/chunks/area/${fromChunkX}/${fromChunkY}/${toChunkX}/${toChunkY}`,
+    { signal },
   );
 
   if (!response.ok) {

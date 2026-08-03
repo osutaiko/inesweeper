@@ -158,6 +158,7 @@ const CanvasPage = () => {
     }
 
     let isActive = true;
+    const abortController = new AbortController();
     const [
       loadFromChunkX,
       loadFromChunkY,
@@ -174,6 +175,7 @@ const CanvasPage = () => {
           loadFromChunkY,
           loadToChunkX,
           loadToChunkY,
+          abortController.signal,
         );
 
         if (!isActive) {
@@ -198,6 +200,7 @@ const CanvasPage = () => {
 
     return () => {
       isActive = false;
+      abortController.abort();
     };
   }, [chunkAreaBounds]);
 
