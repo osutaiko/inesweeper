@@ -3,8 +3,8 @@ import { House, Locate, Square } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
-import { Button } from "./ui/button";
-import { Toaster } from "./ui/sonner";
+import { Button } from "../ui/button";
+import { Toaster } from "../ui/sonner";
 import {
   TransformComponent,
   TransformWrapper,
@@ -12,9 +12,9 @@ import {
 } from "react-zoom-pan-pinch";
 
 import CanvasChunk from "./CanvasChunk";
-import { useSiteLayout } from "./Layout";
+import { useSiteLayout } from "../Layout";
 import SelectedChunkOverlay from "./SelectedChunkOverlay";
-import { formatChunkCoordinates } from "@/lib/coordinates";
+import { formatChunkCoordinates } from "@/lib/canvas/coordinates";
 import {
   buildCanvasMineLookup,
   getActiveCanvasLock,
@@ -24,7 +24,7 @@ import {
   type CanvasChunk as CanvasChunkData,
   type CanvasChunkAreaResponse,
   type CanvasChunkMineLookup,
-} from "@/lib/canvas";
+} from "@/lib/canvas/api";
 import { getMsParts, timeLeftUntil } from "@/lib/utils";
 
 const CHUNK_PIXEL_SIZE = 480;

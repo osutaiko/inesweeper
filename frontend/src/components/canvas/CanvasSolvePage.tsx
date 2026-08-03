@@ -3,16 +3,16 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 import CanvasGameBoard from "./CanvasGameBoard";
-import { useSiteLayout } from "./Layout";
-import { ScrollArea, ScrollBar } from "./ui/scroll-area";
-import { Toaster } from "./ui/sonner";
+import { useSiteLayout } from "../Layout";
+import { ScrollArea, ScrollBar } from "../ui/scroll-area";
+import { Toaster } from "../ui/sonner";
 import { loadCurrentAuthUser } from "@/lib/auth";
 import {
   getActiveCanvasLock,
   getCanvasChunkArea,
   type CanvasChunk,
   type CanvasChunkAreaResponse,
-} from "@/lib/canvas";
+} from "@/lib/canvas/api";
 
 type SolverData = {
   chunk: CanvasChunk;

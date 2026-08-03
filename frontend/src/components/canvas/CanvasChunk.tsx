@@ -1,11 +1,11 @@
 import { useEffect, useRef } from "react";
 
-import { CHUNK_SIZE } from "@/lib/coordinates";
+import { CHUNK_SIZE } from "@/lib/canvas/coordinates";
 import {
   decodeMineBitmap,
   isMineInBitmap,
   type CanvasChunkMineLookup,
-} from "@/lib/canvas";
+} from "@/lib/canvas/api";
 import { LockKeyhole } from "lucide-react";
 
 const CELL_SIZE = 30;

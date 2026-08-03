@@ -3,8 +3,8 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import "./index.css";
 
 import Layout from "./components/Layout";
-import CanvasPage from "./components/CanvasPage";
-import CanvasSolvePage from "./components/CanvasSolvePage";
+import CanvasPage from "./components/canvas/CanvasPage";
+import CanvasSolvePage from "./components/canvas/CanvasSolvePage";
 import PrivacyPolicy from "./components/PrivacyPolicy";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";

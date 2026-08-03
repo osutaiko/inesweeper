@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { ClockFading } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-import { GameBoardGrid } from "./GameBoardGrid";
-import TouchFlagButton from "./TouchFlagButton";
-import { Button } from "./ui/button";
+import { GameBoardGrid } from "../GameBoardGrid";
+import TouchFlagButton from "../TouchFlagButton";
+import { Button } from "../ui/button";
 import {
   Dialog,
   DialogContent,
@@ -12,15 +12,18 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "./ui/dialog";
+} from "../ui/dialog";
 import {
   buildCanvasMineLookup,
   failCanvasChunk,
   solveCanvasChunk,
   type CanvasChunk,
   type CanvasChunkAreaResponse,
-} from "@/lib/canvas";
-import { CHUNK_SIZE, formatChunkCoordinates } from "@/lib/coordinates";
+} from "@/lib/canvas/api";
+import {
+  CHUNK_SIZE,
+  formatChunkCoordinates,
+} from "@/lib/canvas/coordinates";
 import { useMinesweeperControls } from "@/hooks/useMinesweeperControls";
 import {
   countRemainingFlags,

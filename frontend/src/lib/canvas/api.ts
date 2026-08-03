@@ -1,4 +1,4 @@
-import { CHUNK_SIZE } from "@/lib/coordinates";
+import { CHUNK_SIZE } from "./coordinates";
 import { getBackendUrl } from "@/lib/auth";
 import { getAuthAccessToken } from "@/lib/supabase";
 
