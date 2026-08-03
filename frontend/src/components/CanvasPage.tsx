@@ -32,6 +32,7 @@ const CHUNK_ORIGIN_OFFSET = -CHUNK_PIXEL_SIZE / 2;
 const INITIAL_SCALE = 0.2;
 const GRID_DETAIL_SCALE = 0.1;
 const LOW_SCALE_GRID_STEP = 10;
+const MAX_MINE_BITMAP_AREA_SIZE = 1_024;
 
 type ChunkGridTransform = {
   scale: number;
@@ -40,6 +41,9 @@ type ChunkGridTransform = {
 };
 
 type ChunkAreaBounds = [number, number, number, number];
+
+const getChunkAreaSize = ([fromX, fromY, toX, toY]: ChunkAreaBounds) =>
+  (toX - fromX + 1) * (toY - fromY + 1);
 
 const updateChunkGrid = (
   element: HTMLDivElement,
@@ -192,18 +196,49 @@ const CanvasPage = () => {
     const right = (gridRef.current.clientWidth - state.positionX) / state.scale;
     const top = -state.positionY / state.scale;
     const bottom = (gridRef.current.clientHeight - state.positionY) / state.scale;
-    const bounds: ChunkAreaBounds = [
-      Math.floor((left - CHUNK_ORIGIN_OFFSET) / CHUNK_PIXEL_SIZE) - 1, // 1 chunk buffer
-      -Math.floor((bottom - CHUNK_ORIGIN_OFFSET) / CHUNK_PIXEL_SIZE) - 1,
-      Math.floor((right - CHUNK_ORIGIN_OFFSET) / CHUNK_PIXEL_SIZE) + 1,
-      -Math.floor((top - CHUNK_ORIGIN_OFFSET) / CHUNK_PIXEL_SIZE) + 1,
+    const viewportBounds: ChunkAreaBounds = [
+      Math.floor((left - CHUNK_ORIGIN_OFFSET) / CHUNK_PIXEL_SIZE),
+      -Math.floor((bottom - CHUNK_ORIGIN_OFFSET) / CHUNK_PIXEL_SIZE),
+      Math.floor((right - CHUNK_ORIGIN_OFFSET) / CHUNK_PIXEL_SIZE),
+      -Math.floor((top - CHUNK_ORIGIN_OFFSET) / CHUNK_PIXEL_SIZE),
     ];
 
-    setChunkAreaBounds((current) =>
-      current?.every((value, index) => value === bounds[index])
-        ? current
-        : bounds,
-    );
+    setChunkAreaBounds((current) => {
+      const viewportAreaSize = getChunkAreaSize(viewportBounds);
+      const currentAreaSize = current ? getChunkAreaSize(current) : 0;
+      const needsMineBitmaps =
+        viewportAreaSize <= MAX_MINE_BITMAP_AREA_SIZE &&
+        currentAreaSize > MAX_MINE_BITMAP_AREA_SIZE;
+
+      if (
+        current &&
+        !needsMineBitmaps &&
+        viewportBounds[0] >= current[0] &&
+        viewportBounds[1] >= current[1] &&
+        viewportBounds[2] <= current[2] &&
+        viewportBounds[3] <= current[3]
+      ) {
+        return current;
+      }
+
+      const overscanX = Math.ceil(
+        (viewportBounds[2] - viewportBounds[0] + 1) / 2,
+      );
+      const overscanY = Math.ceil(
+        (viewportBounds[3] - viewportBounds[1] + 1) / 2,
+      );
+      const bounds: ChunkAreaBounds = [
+        viewportBounds[0] - overscanX,
+        viewportBounds[1] - overscanY,
+        viewportBounds[2] + overscanX,
+        viewportBounds[3] + overscanY,
+      ];
+
+      return viewportAreaSize <= MAX_MINE_BITMAP_AREA_SIZE &&
+        getChunkAreaSize(bounds) > MAX_MINE_BITMAP_AREA_SIZE
+        ? viewportBounds
+        : bounds;
+    });
   };
 
   useEffect(() => {
