@@ -178,7 +178,7 @@ const CanvasChunk = ({
         height: CHUNK_PIXEL_SIZE,
       }}
     >
-      {renderDetails && state === "locked" && (
+      {state === "locked" && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <LockKeyhole size={100} />
         </div>

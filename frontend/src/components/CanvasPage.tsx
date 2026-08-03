@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Locate } from "lucide-react";
+import { Locate, Square } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -83,6 +83,27 @@ const CanvasViewport = ({
       chunkByCoord.get(`${chunkX - 1}:${chunkY}`)?.state === "solved"
     );
   };
+  const claimableChunkIds = new Set<string>();
+
+  for (const chunk of chunkArea?.chunks ?? []) {
+    if (chunk.state !== "solved") {
+      continue;
+    }
+
+    for (const [chunkX, chunkY] of [
+      [chunk.chunkX, chunk.chunkY + 1],
+      [chunk.chunkX, chunk.chunkY - 1],
+      [chunk.chunkX + 1, chunk.chunkY],
+      [chunk.chunkX - 1, chunk.chunkY],
+    ]) {
+      const chunkId = `${chunkX}:${chunkY}`;
+      if (!chunkByCoord.has(chunkId)) {
+        claimableChunkIds.add(chunkId);
+      } else if (chunkByCoord.get(chunkId)?.state === "open") {
+        claimableChunkIds.add(chunkId);
+      }
+    }
+  }
 
   return (
     <div className="relative size-px">
@@ -113,6 +134,24 @@ const CanvasViewport = ({
           />
         </div>
       ))}
+      {[...claimableChunkIds].map((chunkId) => {
+        const [chunkX, chunkY] = chunkId.split(":").map(Number);
+
+        return (
+          <div
+            key={chunkId}
+            className="pointer-events-none absolute flex items-center justify-center"
+            style={{
+              left: chunkX * CHUNK_PIXEL_SIZE + CHUNK_ORIGIN_OFFSET,
+              top: -chunkY * CHUNK_PIXEL_SIZE + CHUNK_ORIGIN_OFFSET,
+              width: CHUNK_PIXEL_SIZE,
+              height: CHUNK_PIXEL_SIZE,
+            }}
+          >
+            <Square size={30} className="text-green-500 fill-green-500" />
+          </div>
+        );
+      })}
       {selectedChunkId && (
         <SelectedChunkOverlay
           chunkId={selectedChunkId}
