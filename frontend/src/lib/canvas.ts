@@ -32,6 +32,69 @@ type CanvasChunkFailureResponse = CanvasChunk & {
 
 const MINE_BITMAP_BYTE_LENGTH = (CHUNK_SIZE * CHUNK_SIZE) / 8;
 const MINE_BITMAP_HEX_LENGTH = MINE_BITMAP_BYTE_LENGTH * 2;
+const CHUNK_STATE_BY_CODE = {
+  o: "open",
+  l: "locked",
+  s: "solved",
+} as const;
+
+const decodeChunkStates = (
+  states: string,
+  fromChunkX: number,
+  fromChunkY: number,
+  toChunkX: number,
+  toChunkY: number,
+  mineBitmaps?: string,
+): CanvasChunkAreaResponse => {
+  const startX = Math.min(fromChunkX, toChunkX);
+  const endX = Math.max(fromChunkX, toChunkX);
+  const startY = Math.min(fromChunkY, toChunkY);
+  const endY = Math.max(fromChunkY, toChunkY);
+  const width = endX - startX + 1;
+  const chunks: CanvasChunk[] = [];
+  let solvedChunkIndex = 0;
+
+  for (let index = 0; index < states.length; index += 1) {
+    const stateCode = states[index] as keyof typeof CHUNK_STATE_BY_CODE;
+    if (stateCode === "o" && mineBitmaps === undefined) {
+      continue;
+    }
+
+    const mineBitmap =
+      stateCode === "s" && mineBitmaps
+        ? mineBitmaps.slice(
+            solvedChunkIndex * MINE_BITMAP_HEX_LENGTH,
+            (solvedChunkIndex + 1) * MINE_BITMAP_HEX_LENGTH,
+          )
+        : null;
+
+    if (stateCode === "s") {
+      solvedChunkIndex += 1;
+    }
+
+    chunks.push({
+      chunkX: startX + (index % width),
+      chunkY: endY - Math.floor(index / width),
+      state: CHUNK_STATE_BY_CODE[stateCode],
+      lockedByUserId: null,
+      lockedByName: null,
+      lockedAt: null,
+      lockedUntil: null,
+      solverUserId: null,
+      solverName: null,
+      solvedAt: null,
+      mineBitmap,
+    });
+  }
+
+  return {
+    fromChunkX: startX,
+    fromChunkY: startY,
+    toChunkX: endX,
+    toChunkY: endY,
+    chunks,
+  };
+};
 
 export const decodeMineBitmap = (mineBitmap: string | null) => {
   if (!mineBitmap || mineBitmap.length !== MINE_BITMAP_HEX_LENGTH) {
@@ -101,24 +164,37 @@ export const getCanvasChunkArea = async (
   toChunkX: number,
   toChunkY: number,
 ) => {
-  const accessToken = await getAuthAccessToken();
-
   const response = await fetch(
     `${getBackendUrl()}/place/chunks/area/${fromChunkX}/${fromChunkY}/${toChunkX}/${toChunkY}`,
-    {
-      headers: accessToken
-        ? {
-            Authorization: `Bearer ${accessToken}`,
-          }
-        : {},
-    },
   );
 
   if (!response.ok) {
     throw new Error("Chunk area request failed");
   }
 
-  return (await response.json()) as CanvasChunkAreaResponse;
+  if (response.headers.get("content-type")?.includes("application/json")) {
+    const { states, mineBitmaps } = (await response.json()) as {
+      states: string;
+      mineBitmaps: string;
+    };
+
+    return decodeChunkStates(
+      states,
+      fromChunkX,
+      fromChunkY,
+      toChunkX,
+      toChunkY,
+      mineBitmaps,
+    );
+  }
+
+  return decodeChunkStates(
+    await response.text(),
+    fromChunkX,
+    fromChunkY,
+    toChunkX,
+    toChunkY,
+  );
 };
 
 export const lockCanvasChunk = async (chunkX: number, chunkY: number) => {

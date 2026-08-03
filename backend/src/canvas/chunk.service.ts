@@ -21,10 +21,10 @@ type ChunkRow = {
   solved_at: string | null;
 };
 
-type UserProfileNameRow = {
-  user_id: string;
-  nickname: string;
-};
+type ChunkStateRow = Pick<
+  ChunkRow,
+  'chunk_x' | 'chunk_y' | 'state' | 'locked_until'
+>;
 
 const chunkStateCode = {
   open: 'o',
@@ -37,7 +37,7 @@ export class ChunkService {
   private readonly solveDurationMs = 3 * 60 * 1000; // 3 minutes for chunk solve
   private readonly failureCooldownMs = 3 * 60 * 1000; // 3 minutes after failed claim
   private readonly chunkTable = 'canvas_chunks';
-  private readonly maxChunkAreaSize = 10_000;
+  private readonly maxChunkAreaSize = 500_000;
   private readonly maxMineBitmapAreaSize = 1_024;
   private readonly nextLockAtByUserId = new Map<string, number>();
 
@@ -290,11 +290,10 @@ export class ChunkService {
       throw new BadRequestException('Requested chunk area is too large');
     }
 
-    const includeMineBitmaps = areaSize <= this.maxMineBitmapAreaSize;
     const now = Date.now();
     const { data, error } = await client
       .from(this.chunkTable)
-      .select('*')
+      .select('chunk_x, chunk_y, state, locked_until')
       .gte('chunk_x', startX)
       .lte('chunk_x', endX)
       .gte('chunk_y', startY)
@@ -304,95 +303,40 @@ export class ChunkService {
       throw new BadRequestException(error.message ?? 'Unable to read chunks');
     }
 
-    const rows = (data ?? []) as ChunkRow[];
-    const userIds = new Set<string>();
-
-    for (const row of rows) {
-      if (row.locked_by_user_id) {
-        userIds.add(row.locked_by_user_id);
-      }
-      if (row.solver_user_id) {
-        userIds.add(row.solver_user_id);
-      }
-    }
-
-    const nameByUserId = new Map<string, string>();
-    if (userIds.size > 0) {
-      const { data: profiles, error: profileError } = await client
-        .from('user_profiles')
-        .select('user_id, nickname')
-        .in('user_id', Array.from(userIds));
-
-      if (profileError) {
-        throw new BadRequestException(
-          profileError.message ?? 'Unable to read user names',
-        );
-      }
-
-      for (const profile of (profiles ?? []) as UserProfileNameRow[]) {
-        nameByUserId.set(profile.user_id, profile.nickname);
-      }
-    }
-
-    const chunkMap = new Map<string, ChunkRecord>();
-
-    for (const row of rows) {
-      if (
-        row.state === 'locked' &&
-        row.locked_until &&
-        new Date(row.locked_until).getTime() <= now
-      ) {
-        continue;
-      }
-
-      const chunk = this.rowToChunk(row);
-      chunkMap.set(`${chunk.chunkX}:${chunk.chunkY}`, chunk);
-    }
-
-    const chunks: Chunk[] = [];
+    const rows = (data ?? []) as ChunkStateRow[];
+    const stateByCoordinate = new Map(
+      rows
+        .filter(
+          (row) =>
+            row.state !== 'locked' ||
+            !row.locked_until ||
+            new Date(row.locked_until).getTime() > now,
+        )
+        .map((row) => [
+          `${row.chunk_x}:${row.chunk_y}`,
+          chunkStateCode[row.state],
+        ] as const),
+    );
+    const states: string[] = [];
+    const mineBitmaps: string[] = [];
+    const includeMineBitmaps = areaSize <= this.maxMineBitmapAreaSize;
 
     for (let chunkY = endY; chunkY >= startY; chunkY -= 1) {
       for (let chunkX = startX; chunkX <= endX; chunkX += 1) {
-        const chunk =
-          chunkMap.get(`${chunkX}:${chunkY}`) ??
-          ({
-            chunkX,
-            chunkY,
-            state: 'open',
-            lockedByUserId: null,
-            lockedAt: null,
-            lockedUntil: null,
-            solverUserId: null,
-            solvedAt: null,
-          } satisfies ChunkRecord);
-        chunks.push({
-          ...chunk,
-          lockedByName: chunk.lockedByUserId
-            ? nameByUserId.get(chunk.lockedByUserId) ?? null
-            : null,
-          solverName: chunk.solverUserId
-            ? nameByUserId.get(chunk.solverUserId) ?? null
-            : null,
-          mineBitmap: includeMineBitmaps
-            ? this.getChunkMineBitmap(chunk.chunkX, chunk.chunkY).mineBitmap
-            : null,
-        });
+        const state = stateByCoordinate.get(`${chunkX}:${chunkY}`) ?? 'o';
+        states.push(state);
+
+        if (includeMineBitmaps && state === 's') {
+          mineBitmaps.push(
+            this.getChunkMineBitmap(chunkX, chunkY).mineBitmap,
+          );
+        }
       }
     }
 
-    return {
-      fromChunkX: startX,
-      fromChunkY: startY,
-      toChunkX: endX,
-      toChunkY: endY,
-      width,
-      height,
-      states: chunks.map((chunk) => chunkStateCode[chunk.state]).join(''),
-      mineBitmaps: includeMineBitmaps
-        ? chunks.map((chunk) => chunk.mineBitmap)
-        : null,
-      chunks,
-    };
+    return includeMineBitmaps
+      ? { states: states.join(''), mineBitmaps: mineBitmaps.join('') }
+      : states.join('');
   }
 
   async getActiveLock(req: Request) {
