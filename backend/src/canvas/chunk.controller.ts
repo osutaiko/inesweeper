@@ -27,6 +27,14 @@ export class ChunkController {
     );
   }
 
+  @Get(':chunkX/:chunkY')
+  async getChunk(
+    @Param('chunkX', ParseIntPipe) chunkX: number,
+    @Param('chunkY', ParseIntPipe) chunkY: number,
+  ) {
+    return this.chunkService.getChunk(chunkX, chunkY);
+  }
+
   @Post(':chunkX/:chunkY/lock')
   async lockChunk(
     @Req() req: Request,

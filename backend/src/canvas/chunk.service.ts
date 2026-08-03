@@ -339,6 +339,37 @@ export class ChunkService {
       : states.join('');
   }
 
+  async getChunk(chunkX: number, chunkY: number) {
+    const client = this.authService.createServiceRoleClient();
+    const chunk = await this.getOrCreateChunkRecord(client, chunkX, chunkY);
+    const userId = chunk.lockedByUserId ?? chunk.solverUserId;
+    let userName: string | null = null;
+
+    if (userId) {
+      const { data, error } = await client
+        .from('user_profiles')
+        .select('nickname')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (error) {
+        throw new BadRequestException(error.message);
+      }
+
+      userName = (data as { nickname: string } | null)?.nickname ?? null;
+    }
+
+    return {
+      ...chunk,
+      lockedByName: chunk.lockedByUserId ? userName : null,
+      solverName: chunk.solverUserId ? userName : null,
+      mineBitmap:
+        chunk.state === 'solved'
+          ? this.getChunkMineBitmap(chunkX, chunkY).mineBitmap
+          : null,
+    };
+  }
+
   async getActiveLock(req: Request) {
     const user = await this.requireUser(req);
 

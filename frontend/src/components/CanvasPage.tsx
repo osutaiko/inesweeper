@@ -16,8 +16,10 @@ import { useSiteLayout } from "./Layout";
 import { formatChunkCoordinates } from "@/lib/coordinates";
 import {
   buildCanvasMineLookup,
+  getCanvasChunk,
   getCanvasChunkArea,
   lockCanvasChunk,
+  type CanvasChunk as CanvasChunkData,
   type CanvasChunkAreaResponse,
   type CanvasChunkMineLookup,
 } from "@/lib/canvas";
@@ -118,6 +120,8 @@ const CanvasPage = () => {
   const { authUser } = useSiteLayout();
   const [chunkArea, setChunkArea] = useState<CanvasChunkAreaResponse | null>(null);
   const [selectedChunkId, setSelectedChunkId] = useState<string | null>(null);
+  const [selectedChunk, setSelectedChunk] =
+    useState<CanvasChunkData | null>(null);
   const [lockingChunkId, setLockingChunkId] = useState<string | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const transformRef = useRef<ReactZoomPanPinchRef | null>(null);
@@ -204,13 +208,36 @@ const CanvasPage = () => {
     };
   }, [chunkAreaBounds]);
 
+  useEffect(() => {
+    if (!selectedChunkId) {
+      setSelectedChunk(null);
+      return;
+    }
+
+    let isActive = true;
+    const abortController = new AbortController();
+    const [chunkX, chunkY] = selectedChunkId.split(":").map(Number);
+
+    void getCanvasChunk(chunkX, chunkY, abortController.signal)
+      .then((chunk) => {
+        if (isActive) {
+          setSelectedChunk(chunk);
+        }
+      })
+      .catch(() => {
+        if (isActive) {
+          toast.error("Failed to load chunk");
+        }
+      });
+
+    return () => {
+      isActive = false;
+      abortController.abort();
+    };
+  }, [selectedChunkId]);
+
   const neighborMineLookup = chunkArea
     ? buildCanvasMineLookup(chunkArea.chunks)
-    : null;
-  const selectedChunk = selectedChunkId
-    ? chunkArea?.chunks.find(
-        (chunk) => `${chunk.chunkX}:${chunk.chunkY}` === selectedChunkId,
-      ) ?? null
     : null;
   const selectedChunkOwnerName =
     selectedChunk?.state === "locked"
@@ -427,6 +454,7 @@ const CanvasPage = () => {
                 wrapperProps={{
                   onPointerDown: (event) => {
                     setSelectedChunkId(null);
+                    setSelectedChunk(null);
                     gestureRef.current = {
                       startX: event.clientX,
                       startY: event.clientY,
@@ -450,6 +478,7 @@ const CanvasPage = () => {
                   },
                   onWheel: () => {
                     setSelectedChunkId(null);
+                    setSelectedChunk(null);
                   },
                 }}
               >

@@ -199,6 +199,23 @@ export const getCanvasChunkArea = async (
   );
 };
 
+export const getCanvasChunk = async (
+  chunkX: number,
+  chunkY: number,
+  signal?: AbortSignal,
+) => {
+  const response = await fetch(
+    `${getBackendUrl()}/place/chunks/${chunkX}/${chunkY}`,
+    { signal },
+  );
+
+  if (!response.ok) {
+    throw new Error("Chunk request failed");
+  }
+
+  return (await response.json()) as CanvasChunk;
+};
+
 export const lockCanvasChunk = async (chunkX: number, chunkY: number) => {
   const accessToken = await getAuthAccessToken();
   if (!accessToken) {
