@@ -231,7 +231,9 @@ export class ChunkService {
     const nextLockAt = this.nextLockAtByUserId.get(userId) ?? 0;
 
     if (nextLockAt > Date.now()) {
-      throw new ConflictException(`Must wait ${nextLockAt - Date.now()} ms before locking another chunk`);
+      throw new ConflictException(
+        `Must wait ${Math.ceil((nextLockAt - Date.now()) / 1000)} seconds before locking another chunk`,
+      );
     }
   }
 
