@@ -34,6 +34,8 @@ type ChunkGridTransform = {
   positionY: number;
 };
 
+type ChunkAreaBounds = [number, number, number, number];
+
 const updateChunkGrid = (
   element: HTMLDivElement,
   { scale, positionX, positionY }: ChunkGridTransform,
@@ -124,15 +126,44 @@ const CanvasPage = () => {
     startY: 0,
     dragged: false,
   });
-  const initialLoadRadius = 10;
-  const neighborChunkBuffer = 1;
-  const loadFromChunkX = -initialLoadRadius - neighborChunkBuffer;
-  const loadFromChunkY = -initialLoadRadius - neighborChunkBuffer;
-  const loadToChunkX = initialLoadRadius + neighborChunkBuffer;
-  const loadToChunkY = initialLoadRadius + neighborChunkBuffer;
+  const [chunkAreaBounds, setChunkAreaBounds] =
+    useState<ChunkAreaBounds | null>(null);
+
+  const updateChunkAreaBounds = (state: ChunkGridTransform) => {
+    if (!gridRef.current) {
+      return;
+    }
+
+    const left = -state.positionX / state.scale;
+    const right = (gridRef.current.clientWidth - state.positionX) / state.scale;
+    const top = -state.positionY / state.scale;
+    const bottom = (gridRef.current.clientHeight - state.positionY) / state.scale;
+    const bounds: ChunkAreaBounds = [
+      Math.floor((left - CHUNK_ORIGIN_OFFSET) / CHUNK_PIXEL_SIZE) - 1, // 1 chunk buffer
+      -Math.floor((bottom - CHUNK_ORIGIN_OFFSET) / CHUNK_PIXEL_SIZE) - 1,
+      Math.floor((right - CHUNK_ORIGIN_OFFSET) / CHUNK_PIXEL_SIZE) + 1,
+      -Math.floor((top - CHUNK_ORIGIN_OFFSET) / CHUNK_PIXEL_SIZE) + 1,
+    ];
+
+    setChunkAreaBounds((current) =>
+      current?.every((value, index) => value === bounds[index])
+        ? current
+        : bounds,
+    );
+  };
 
   useEffect(() => {
+    if (!chunkAreaBounds) {
+      return;
+    }
+
     let isActive = true;
+    const [
+      loadFromChunkX,
+      loadFromChunkY,
+      loadToChunkX,
+      loadToChunkY,
+    ] = chunkAreaBounds;
 
     const loadArea = async () => {
       const loadingToast = toast.loading("Loading...");
@@ -168,12 +199,7 @@ const CanvasPage = () => {
     return () => {
       isActive = false;
     };
-  }, [
-    loadFromChunkX,
-    loadFromChunkY,
-    loadToChunkX,
-    loadToChunkY,
-  ]);
+  }, [chunkAreaBounds]);
 
   const neighborMineLookup = chunkArea
     ? buildCanvasMineLookup(chunkArea.chunks)
@@ -359,7 +385,6 @@ const CanvasPage = () => {
             </div>
           }
 
-          {chunkArea ? (
           <TransformWrapper
             ref={transformRef}
             initialScale={INITIAL_SCALE}
@@ -375,12 +400,15 @@ const CanvasPage = () => {
               if (gridRef.current) {
                 updateChunkGrid(gridRef.current, state);
               }
+              updateChunkAreaBounds(state);
             }}
             onTransform={(_, transform) => {
               if (gridRef.current) {
                 updateChunkGrid(gridRef.current, transform);
               }
             }}
+            onPanningStop={({ state }) => updateChunkAreaBounds(state)}
+            onZoomStop={({ state }) => updateChunkAreaBounds(state)}
           >
             {() => (
               <TransformComponent
@@ -438,7 +466,6 @@ const CanvasPage = () => {
               </TransformComponent>
             )}
           </TransformWrapper>
-          ) : null}
       </main>
     </>
   );
