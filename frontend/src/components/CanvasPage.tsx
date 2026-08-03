@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Locate, Square } from "lucide-react";
+import { House, Locate, Square } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -241,6 +241,16 @@ const CanvasPage = () => {
     });
   };
 
+  const returnToDefaultView = () => {
+    transformRef.current?.centerView(INITIAL_SCALE, 500, "easeOut");
+    window.setTimeout(() => {
+      const state = transformRef.current?.state;
+      if (state) {
+        updateChunkAreaBounds(state);
+      }
+    }, 500);
+  };
+
   useEffect(() => {
     if (!authUser) {
       setActiveLock(null);
@@ -463,6 +473,15 @@ const CanvasPage = () => {
               backgroundSize: `${CHUNK_PIXEL_SIZE * INITIAL_SCALE}px ${CHUNK_PIXEL_SIZE * INITIAL_SCALE}px`,
             }}
           />
+
+          <Button
+            className="absolute left-4 top-4 z-50"
+            onClick={returnToDefaultView}
+            size="icon"
+            title="Return to default view"
+          >
+            <House />
+          </Button>
 
           {activeLock &&
             <div className="absolute top-0 md:top-4 left-1/2 gap-0 -translate-x-1/2 z-50 bg-card border flex flex-col w-full max-w-[600px] px-4 py-2 md:py-4 shadow-lg">
