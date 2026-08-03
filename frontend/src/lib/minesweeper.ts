@@ -525,10 +525,10 @@ export const getCellNumber = (board: Board, row: number, col: number, config: Bo
 };
 
 // Click action for reveal
-export const handleClick = (board: Board, row: number, col: number, config: BoardConfig): Board => {
+export const handleClick = (board: Board, row: number, col: number, config: BoardConfig, canReveal?: (row: number, col: number) => boolean): Board => {
   let updatedBoard = cloneBoard(board);
   const cell = updatedBoard[row][col];
-  if (cell.state.type !== "hidden") return board;
+  if (cell.state.type !== "hidden" || canReveal?.(row, col) === false) return board;
 
   const cellNumber = getCellNumber(updatedBoard, row, col, config);
   
@@ -554,7 +554,7 @@ export const handleClick = (board: Board, row: number, col: number, config: Boar
     // Recursively reveal all neighbors of null tiles
     iterateNeighbors(updatedBoard, row, col, config, (nx, ny, neighbor) => {
       if (neighbor.mineNum === 0) {
-        updatedBoard = handleClick(updatedBoard, nx, ny, config);
+        updatedBoard = handleClick(updatedBoard, nx, ny, config, canReveal);
       }
     });
   }
@@ -631,13 +631,13 @@ export const getNeighborCounts = (board: Board, row: number, col: number, config
 };
 
 // Chord action
-export const handleChord = (board: Board, row: number, col: number, config: BoardConfig): Board => {
+export const handleChord = (board: Board, row: number, col: number, config: BoardConfig, canReveal?: (row: number, col: number) => boolean): Board => {
   let updatedBoard = cloneBoard(board);
   const cell = updatedBoard[row][col];
   const revealSurroundingHiddens = () => {
     iterateNeighbors(updatedBoard, row, col, config, (nx, ny, neighbor) => {
       if (neighbor.state.type === "hidden") {
-        updatedBoard = handleClick(updatedBoard, nx, ny, config);
+        updatedBoard = handleClick(updatedBoard, nx, ny, config, canReveal);
       }
     });
   };

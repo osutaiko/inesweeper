@@ -75,7 +75,7 @@ const chordInitialBorderCells = (board: Board) => {
   const chordNullCell = (row: number, col: number) => {
     const cell = board[row][col];
     if (cell.state.type === "revealed" && cell.state.num === null) {
-      chordedBoard = handleChord(chordedBoard, row, col, SOLVER_CONFIG);
+      chordedBoard = handleChord(chordedBoard, row, col, SOLVER_CONFIG, isInsideTargetChunk);
     }
   };
 
@@ -268,7 +268,7 @@ const CanvasGameBoard = ({
     },
     onChord: (row, col) => {
       applyBoardAction((currentBoard) =>
-        handleChord(currentBoard, row, col, SOLVER_CONFIG),
+        handleChord(currentBoard, row, col, SOLVER_CONFIG, isInsideTargetChunk),
       );
     },
   });
