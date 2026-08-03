@@ -304,7 +304,7 @@ const Layout = ({ children }: {
           <a href="/">
             <div className="flex flex-row items-center gap-3">
               <img src={InesweeperLogo} alt="Inesweeper Logo" className="w-[40px] h-[40px] min-w-[40px] min-h-[40px]" />
-              <h2 className="font-minesweeper hidden min-[510px]:block text-lg sm:text-2xl">
+              <h2 className="font-minesweeper hidden md:block text-lg sm:text-2xl">
                 <span className="text-red-500">I</span>
                 <span className="text-green-500">N</span>
                 <span className="text-blue-500">E</span>
@@ -317,7 +317,7 @@ const Layout = ({ children }: {
               {isPlace ? (
                 <Link to="/">
                   <ArrowLeft />
-                  Singleplayer
+                  Solo
                 </Link>
               ) : (
                 <Link to="/place">
