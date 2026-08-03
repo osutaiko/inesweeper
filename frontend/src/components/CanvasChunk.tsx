@@ -6,8 +6,7 @@ import {
   isMineInBitmap,
   type CanvasChunkMineLookup,
 } from "@/lib/canvas";
-import { LockKeyhole, MapPin, Navigation2 } from "lucide-react";
-import { useTransformComponent } from "react-zoom-pan-pinch";
+import { LockKeyhole } from "lucide-react";
 
 const CELL_SIZE = 30;
 const CHUNK_PIXEL_SIZE = CHUNK_SIZE * CELL_SIZE;
@@ -19,7 +18,6 @@ type CanvasChunkProps = {
   colorClassName: string;
   mineBitmap: string | null;
   neighborMineLookup: CanvasChunkMineLookup | null;
-  isSelected: boolean;
   onClick: () => void;
 };
 
@@ -159,11 +157,8 @@ const CanvasChunk = ({
   colorClassName,
   mineBitmap,
   neighborMineLookup,
-  isSelected,
   onClick,
 }: CanvasChunkProps) => {
-  const chunkId = `${chunkX}:${chunkY}`;
-  const scale = useTransformComponent(({ state }) => state.scale);
   const renderDetails = mineBitmap !== null;
   const renderCells = renderDetails && state === "solved";
   const backgroundClassName = renderDetails
@@ -176,7 +171,6 @@ const CanvasChunk = ({
 
   return (
     <div
-      id={`chunk-${chunkId}`}
       className={`relative grid ${backgroundClassName}`}
       onClick={onClick}
       style={{
@@ -184,20 +178,6 @@ const CanvasChunk = ({
         height: CHUNK_PIXEL_SIZE,
       }}
     >
-      {isSelected && (
-        <>
-          <div className="pointer-events-none absolute inset-0 z-30 bg-blue-500 opacity-20" />
-          <div
-            className="pointer-events-none absolute top-full left-1/2 z-40 size-[40px]"
-            style={{
-              transform: `translateX(-50%) scale(${1 / scale})`,
-              transformOrigin: "top center",
-            }}
-          >
-            <Navigation2 className="size-full text-blue-500 fill-white" />
-          </div>
-        </>
-      )}
       {renderDetails && state === "locked" && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <LockKeyhole size={100} />

@@ -13,6 +13,7 @@ import {
 
 import CanvasChunk from "./CanvasChunk";
 import { useSiteLayout } from "./Layout";
+import SelectedChunkOverlay from "./SelectedChunkOverlay";
 import { formatChunkCoordinates } from "@/lib/coordinates";
 import {
   buildCanvasMineLookup,
@@ -106,11 +107,17 @@ const CanvasViewport = ({
             }
             mineBitmap={chunk.mineBitmap}
             neighborMineLookup={neighborMineLookup}
-            isSelected={selectedChunkId === `${chunk.chunkX}:${chunk.chunkY}`}
             onClick={() => onChunkClick(`${chunk.chunkX}:${chunk.chunkY}`)}
           />
         </div>
       ))}
+      {selectedChunkId && (
+        <SelectedChunkOverlay
+          chunkId={selectedChunkId}
+          chunkOriginOffset={CHUNK_ORIGIN_OFFSET}
+          chunkPixelSize={CHUNK_PIXEL_SIZE}
+        />
+      )}
     </div>
   );
 };
@@ -469,7 +476,27 @@ const CanvasPage = () => {
                       gestureRef.current.dragged = true;
                     }
                   },
-                  onPointerUp: () => {
+                  onPointerUp: (event) => {
+                    const transform = transformRef.current?.state;
+
+                    if (!gestureRef.current.dragged && transform) {
+                      const viewport = event.currentTarget.getBoundingClientRect();
+                      const contentX =
+                        (event.clientX - viewport.left - transform.positionX) /
+                        transform.scale;
+                      const contentY =
+                        (event.clientY - viewport.top - transform.positionY) /
+                        transform.scale;
+                      const chunkX = Math.floor(
+                        (contentX - CHUNK_ORIGIN_OFFSET) / CHUNK_PIXEL_SIZE,
+                      );
+                      const chunkY = -Math.floor(
+                        (contentY - CHUNK_ORIGIN_OFFSET) / CHUNK_PIXEL_SIZE,
+                      );
+
+                      setSelectedChunkId(`${chunkX}:${chunkY}`);
+                    }
+
                     gestureRef.current.startX = 0;
                     gestureRef.current.startY = 0;
                   },
