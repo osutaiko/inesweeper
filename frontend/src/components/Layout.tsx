@@ -42,6 +42,8 @@ import AuthButton from "./layout-actions/AuthButton";
 import InfoButton from "./layout-actions/InfoButton";
 import SettingsButton from "./layout-actions/SettingsButton";
 import StatsButton from "./layout-actions/StatsButton";
+import CanvasInfoButton from "./canvas/InfoButton";
+import CanvasStatsButton from "./canvas/StatsButton";
 
 type SiteLayoutContextValue = {
   authUser: AuthUser | null;
@@ -345,13 +347,22 @@ const Layout = ({ children }: {
               setTouchHoldDelay={setTouchHoldDelay}
               resetPreferences={resetPreferences}
             />
-            <StatsButton
-              isDesktop={isDesktop}
-              displayedRecords={displayedRecords}
-              globalRecords={globalRecords}
-              isAuthed={Boolean(authUser)}
-            />
-            <InfoButton />
+            {isPlace || isPlaceSolve ? (
+              <>
+                <CanvasStatsButton />
+                <CanvasInfoButton />
+              </>
+            ) : (
+              <>
+                <StatsButton
+                  isDesktop={isDesktop}
+                  displayedRecords={displayedRecords}
+                  globalRecords={globalRecords}
+                  isAuthed={Boolean(authUser)}
+                />
+                <InfoButton />
+              </>
+            )}
             <AuthButton authUser={authUser} />
           </div>
         </header>
