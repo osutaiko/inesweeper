@@ -17,6 +17,7 @@ import SelectedChunkOverlay from "./SelectedChunkOverlay";
 import { formatChunkCoordinates } from "@/lib/coordinates";
 import {
   buildCanvasMineLookup,
+  getActiveCanvasLock,
   getCanvasChunk,
   getCanvasChunkArea,
   lockCanvasChunk,
@@ -24,6 +25,7 @@ import {
   type CanvasChunkAreaResponse,
   type CanvasChunkMineLookup,
 } from "@/lib/canvas";
+import { getMsParts, timeLeftUntil } from "@/lib/utils";
 
 const CHUNK_PIXEL_SIZE = 480;
 const CHUNK_ORIGIN_OFFSET = -CHUNK_PIXEL_SIZE / 2;
@@ -129,6 +131,8 @@ const CanvasPage = () => {
   const [selectedChunkId, setSelectedChunkId] = useState<string | null>(null);
   const [selectedChunk, setSelectedChunk] =
     useState<CanvasChunkData | null>(null);
+  const [activeLock, setActiveLock] = useState<CanvasChunkData | null>(null);
+  const [activeLockRemainingMs, setActiveLockRemainingMs] = useState(0);
   const [lockingChunkId, setLockingChunkId] = useState<string | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const transformRef = useRef<ReactZoomPanPinchRef | null>(null);
@@ -162,6 +166,52 @@ const CanvasPage = () => {
         : bounds,
     );
   };
+
+  useEffect(() => {
+    if (!authUser) {
+      setActiveLock(null);
+      return;
+    }
+
+    let isActive = true;
+
+    void getActiveCanvasLock()
+      .then((chunk) => {
+        if (isActive) {
+          setActiveLock(chunk);
+        }
+      })
+      .catch(() => {
+        if (isActive) {
+          setActiveLock(null);
+        }
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, [authUser]);
+
+  useEffect(() => {
+    if (!activeLock) {
+      setActiveLockRemainingMs(0);
+      return;
+    }
+
+    const updateRemainingMs = () => {
+      const remainingMs = timeLeftUntil(activeLock.lockedUntil);
+      setActiveLockRemainingMs(remainingMs);
+
+      if (remainingMs === 0) {
+        setActiveLock(null);
+      }
+    };
+
+    updateRemainingMs();
+    const interval = window.setInterval(updateRemainingMs, 1000);
+
+    return () => window.clearInterval(interval);
+  }, [activeLock]);
 
   useEffect(() => {
     if (!chunkAreaBounds) {
@@ -258,17 +308,11 @@ const CanvasPage = () => {
       : selectedChunk?.state === "solved"
         ? selectedChunk.solvedAt
         : null;
-  const hasActiveLock = authUser
-    ? (chunkArea?.chunks ?? []).some(
-        (chunk) =>
-          chunk.state === "locked" &&
-          chunk.lockedByUserId === authUser.id,
-      )
-    : false;
+  const activeLockTime = getMsParts(activeLockRemainingMs);
   const canStartSolving =
     Boolean(authUser) &&
     selectedChunk?.state === "open" &&
-    !hasActiveLock &&
+    !activeLock &&
     (chunkArea?.chunks ?? []).some(
       (chunk) =>
         chunk.state === "solved" &&
@@ -296,6 +340,7 @@ const CanvasPage = () => {
             }
           : currentArea,
       );
+      setActiveLock(lockedChunk);
       navigate("/place/solve");
     } catch (error) {
       toast.error(
@@ -344,6 +389,24 @@ const CanvasPage = () => {
               backgroundSize: `${CHUNK_PIXEL_SIZE * INITIAL_SCALE}px ${CHUNK_PIXEL_SIZE * INITIAL_SCALE}px`,
             }}
           />
+
+          {activeLock &&
+            <div className="absolute top-0 md:top-4 left-1/2 gap-0 -translate-x-1/2 z-50 bg-card border flex flex-col w-full max-w-[600px] px-4 py-2 md:py-4 shadow-lg">
+              <h3 className="text-center text-base md:text-lg mb-3">
+                You currently have a locked chunk!
+              </h3>
+              <p className="text-center">
+                Expires in{" "}
+                <span className="text-destructive">
+                  {activeLockTime.minutes}:
+                  {String(activeLockTime.seconds).padStart(2, "0")}
+                </span>
+              </p>
+              <Button className="mt-2" onClick={() => navigate("/place/solve")}>
+                Solve Now
+              </Button>
+            </div>
+          }
 
           {selectedChunk &&
             <div className="absolute bottom-0 md:bottom-4 left-1/2 gap-0 -translate-x-1/2 z-50 bg-card border flex flex-col w-full max-w-[600px] px-4 py-2 md:py-4 shadow-lg">
