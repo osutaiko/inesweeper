@@ -7,7 +7,7 @@ import {
   type ReactNode,
 } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ThemeProvider } from "./theme-provider";
 import { DifficultyName, TimeRecord, VariantName } from "@/lib/types";
 import { boardConfigLibrary, difficultyMap, variantGroups } from "@/lib/constants";
@@ -63,7 +63,9 @@ export const useSiteLayout = () => {
 const Layout = ({ children }: {
   children?: ReactNode;
 }) => {
-  const isPlace = useLocation().pathname.startsWith("/place");
+  const pathname = useLocation().pathname;
+  const isPlace = pathname === "/place";
+  const isPlaceSolve = pathname === "/place/solve";
   const DEFAULT_ZOOM = 100;
   const DEFAULT_FLAG_BUTTON_SIZE = 72;
   const DEFAULT_FLAG_BUTTON_POSITION = "bottom-right";
@@ -313,16 +315,21 @@ const Layout = ({ children }: {
             </div>
           </a>
           <div className="flex flex-row gap-2">
-            <Button asChild variant="secondary" className="pr-3">
-              {isPlace ? (
+            <Button asChild variant="link" className="gap-1">
+              {isPlaceSolve ? (
+                <Link to="/place">
+                  <ChevronLeft />
+                  Back to map
+                </Link>
+              ) : isPlace ? (
                 <Link to="/">
-                  <ArrowLeft />
+                  <ChevronLeft />
                   Solo
                 </Link>
               ) : (
                 <Link to="/place">
                   Place
-                  <ArrowRight />
+                  <ChevronRight />
                 </Link>
               )}
             </Button>
