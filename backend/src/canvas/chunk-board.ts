@@ -20,6 +20,12 @@ const getBoardSecretEnv = () => {
     );
   }
 
+  if (!/^[0-9a-fA-F]{64}$/.test(value)) {
+    throw new Error(
+      'CANVAS_BOARD_SECRET must be a hex string of length 64 (256b)',
+    );
+  }
+
   return value;
 };
 
