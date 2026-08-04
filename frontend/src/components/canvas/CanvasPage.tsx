@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { House, Locate, Share2, Square } from "lucide-react";
+import { House, ScanSquare, Share2, Square } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -254,6 +254,21 @@ const CanvasPage = () => {
 
   const returnToDefaultView = () => {
     transformRef.current?.centerView(INITIAL_SCALE, 500, "easeOut");
+    window.setTimeout(() => {
+      const state = transformRef.current?.state;
+      if (state) {
+        updateChunkAreaBounds(state);
+      }
+    }, 500);
+  };
+
+  const locateChunk = (chunkX: number, chunkY: number) => {
+    transformRef.current?.zoomToElement(
+      `chunk-${chunkX}:${chunkY}`,
+      0.6,
+      500,
+      "easeOut",
+    );
     window.setTimeout(() => {
       const state = transformRef.current?.state;
       if (state) {
@@ -552,18 +567,15 @@ const CanvasPage = () => {
                 <div className="flex gap-2">
                   <Button
                     onClick={() =>
-                      transformRef.current?.zoomToElement(
-                        `chunk-${selectedChunk.chunkX}:${selectedChunk.chunkY}`,
-                        0.6,
-                        500,
-                        "easeOut",
-                      )
-                    }
+                      locateChunk(
+                        selectedChunk.chunkX,
+                        selectedChunk.chunkY,
+                      )}
                     size="icon"
                     title="Locate chunk"
                     variant="secondary"
                   >
-                    <Locate />
+                    <ScanSquare />
                   </Button>
                   <Button
                     onClick={() => void handleShareChunk(selectedChunk)}
