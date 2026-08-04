@@ -39,6 +39,9 @@ const Toaster = ({ ...props }: ToasterProps) => {
         },
       }}
       {...props}
+      mobileOffset={{ top: 73, right: 16 }} // FIXME: avoid magic numbers
+      offset={{ top: 89, right: 16 }}
+      position="top-right"
     />
   )
 }
