@@ -44,6 +44,16 @@ const InfoButton = () => (
             <p>
               You are given 3 minutes to solve the 16x16 board. You can chord on cells of neighboring chunks but not reveal/flag on them.
             </p>
+            <p>
+              Only neighboring chunks that are already solved provide visible clues.
+              Their cells can be chorded, but cannot be revealed or flagged.
+            </p>
+            <p>
+              Unlike classic Minesweeper, your first click is not guaranteed to be safe. 
+            </p>
+            <small>
+              Leaving or refreshing the page while solving (unfortunately) resets your claim progress, but the claim timer continues.
+            </small>
           </div>
 
           <div className="flex flex-col gap-1">
@@ -65,8 +75,11 @@ const InfoButton = () => (
               The community board is infinite but divided into 16x16 <b>"chunks"</b>.
             </p>
             <p>
-              Each cell independently has a <b>15.625%</b> (40/256) chance of containing a mine, same as the intermediate difficulty in normal Minesweeper.
+              Each cell independently has a <b>15.625%</b> (40/256) chance of containing a mine, the same density as the intermediate difficulty in normal Minesweeper.
               That is, each 16x16 chunk has 40 mines on average, but the exact number varies.
+            </p>
+            <p>
+              Each chunk has a fixed mine layout and failed claim attempts do not regenerate the board.
             </p>
           </div>
         </div>
