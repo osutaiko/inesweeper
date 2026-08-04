@@ -48,6 +48,7 @@ import CanvasStatsButton from "./canvas/StatsButton";
 type SiteLayoutContextValue = {
   authUser: AuthUser | null;
   isTouchscreen: boolean;
+  zoom: number;
   flagButtonSize: number;
   flagButtonPosition: string;
 };
@@ -298,6 +299,7 @@ const Layout = ({ children }: {
         value={{
           authUser,
           isTouchscreen,
+          zoom,
           flagButtonSize,
           flagButtonPosition,
         }}

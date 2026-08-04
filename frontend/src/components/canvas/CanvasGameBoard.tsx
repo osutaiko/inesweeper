@@ -56,6 +56,7 @@ type CanvasGameBoardProps = {
   chunk: CanvasChunk;
   chunkArea: CanvasChunkAreaResponse;
   isTouchscreen: boolean;
+  zoom: number;
   flagButtonSize: number;
   flagButtonPosition: string;
 };
@@ -99,6 +100,7 @@ const CanvasGameBoard = ({
   chunk,
   chunkArea,
   isTouchscreen,
+  zoom,
   flagButtonSize,
   flagButtonPosition,
 }: CanvasGameBoardProps) => {
@@ -330,7 +332,20 @@ const CanvasGameBoard = ({
 
   return (
     <>
-      <div className="flex h-min w-min select-none flex-col overflow-hidden rounded-md">
+      <div
+        className="select-none"
+        style={{
+          width: `${(30 * SOLVER_SIZE + 16) * (zoom / 100)}px`,
+          height: `${(30 * SOLVER_SIZE + 81) * (zoom / 100)}px`,
+        }}
+      >
+      <div
+        className="flex h-min w-min flex-col overflow-hidden rounded-md"
+        style={{
+          transform: `scale(${zoom / 100})`,
+          transformOrigin: "top left",
+        }}
+      >
         <div className="border-x-[9px] border-t-[9px] border-game-border bg-game-border">
           <div className="relative flex items-center justify-between rounded-sm bg-game-hidden p-2">
             <div className="flex h-[40px] gap-x-2 overflow-hidden bg-game-button px-3">
@@ -467,6 +482,7 @@ const CanvasGameBoard = ({
             </DialogFooter>
           </DialogContent>
         </Dialog>
+      </div>
       </div>
       {isTouchscreen && gameOverReason === null && (
         <TouchFlagButton
