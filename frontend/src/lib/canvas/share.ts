@@ -15,14 +15,14 @@ export const formatChunkShareText = (
   const coordinates = formatChunkCoordinates(chunk.chunkX, chunk.chunkY);
 
   if (chunk.state !== "solved") {
-    return `Inesweeper Place 🚩 Chunk ${coordinates}\nNot claimed yet... Be the first one to claim!\n\n${PLACE_URL}`;
+    return `Inesweeper Place 🚩 Chunk ${coordinates}\nNot claimed yet... Be the first one to claim!\n\n<${PLACE_URL}>`;
   }
 
   const solvedBy = chunk.solverName ?? "[Unknown]";
   const header = `Inesweeper Place 🚩 Chunk ${coordinates}\nSolved by ${solvedBy}`;
   const mineBitmap = decodeMineBitmap(chunk.mineBitmap);
   if (!mineBitmap) {
-    return `${header}\n\n${PLACE_URL}`;
+    return `${header}\n\n<${PLACE_URL}>`;
   }
 
   const isMineAt = (worldX: number, worldY: number) => {
