@@ -1,4 +1,13 @@
-import { Controller, Get, Param, ParseIntPipe, Post, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
+import { ThrottlerGuard } from '@nestjs/throttler';
 import type { Request } from 'express';
 
 import { ChunkService } from './chunk.service';
@@ -13,6 +22,7 @@ export class ChunkController {
   }
 
   @Get('area/:fromChunkX/:fromChunkY/:toChunkX/:toChunkY')
+  @UseGuards(ThrottlerGuard)
   async getChunkArea(
     @Param('fromChunkX', ParseIntPipe) fromChunkX: number,
     @Param('fromChunkY', ParseIntPipe) fromChunkY: number,
