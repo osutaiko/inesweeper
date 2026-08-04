@@ -100,6 +100,16 @@ const CanvasViewport = ({
       [chunk.chunkX + 1, chunk.chunkY],
       [chunk.chunkX - 1, chunk.chunkY],
     ]) {
+      if (
+        !chunkArea ||
+        chunkX <= chunkArea.fromChunkX ||
+        chunkX >= chunkArea.toChunkX ||
+        chunkY <= chunkArea.fromChunkY ||
+        chunkY >= chunkArea.toChunkY
+      ) {
+        continue;
+      }
+
       const chunkId = `${chunkX}:${chunkY}`;
       if (!chunkByCoord.has(chunkId)) {
         claimableChunkIds.add(chunkId);
