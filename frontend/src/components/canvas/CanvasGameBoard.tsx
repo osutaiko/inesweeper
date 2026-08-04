@@ -39,7 +39,6 @@ import { getMsParts, timeLeftUntil } from "@/lib/utils";
 
 const CONTEXT_SIZE = 4;
 const SOLVER_SIZE = CHUNK_SIZE + CONTEXT_SIZE * 2;
-const FADE_SIZE_PX = 60;
 
 const SOLVER_CONFIG: BoardConfig = {
   width: SOLVER_SIZE,
@@ -402,6 +401,16 @@ const CanvasGameBoard = ({
             onHoveredCellChange={() => {}}
             getCellClassName={(row, col) => {
               const classes = [];
+              const contextDistance = Math.max(
+                CONTEXT_SIZE - row, row - (CONTEXT_SIZE + CHUNK_SIZE - 1),
+                CONTEXT_SIZE - col, col - (CONTEXT_SIZE + CHUNK_SIZE - 1),
+              );
+
+              if (contextDistance === 3) {
+                classes.push("opacity-60");
+              } else if (contextDistance === 4) {
+                classes.push("opacity-30");
+              }
 
               if (row === CONTEXT_SIZE) {
                 classes.push("border-t border-t-foreground");
@@ -417,12 +426,6 @@ const CanvasGameBoard = ({
               }
 
               return classes.join(" ");
-            }}
-          />
-          <div
-            className="pointer-events-none absolute inset-0"
-            style={{
-              background: `linear-gradient(to right, var(--game-border), transparent ${FADE_SIZE_PX}px, transparent calc(100% - ${FADE_SIZE_PX}px), var(--game-border)), linear-gradient(to bottom, var(--game-border), transparent ${FADE_SIZE_PX}px, transparent calc(100% - ${FADE_SIZE_PX}px), var(--game-border))`,
             }}
           />
           <div
