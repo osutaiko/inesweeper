@@ -62,7 +62,7 @@ const StatsButton = () => {
             </TableHeader>
             <TableBody>
               <TableRow>
-                <TableCell className="px-2">You</TableCell>
+                <TableCell className="px-2">Me</TableCell>
                 <TableCell className="text-right">
                   {formatCount(stats?.yourChunksSolved)}
                 </TableCell>
