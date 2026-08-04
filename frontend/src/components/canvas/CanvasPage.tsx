@@ -422,20 +422,7 @@ const CanvasPage = () => {
     setLockingChunkId(chunkId);
 
     try {
-      const lockedChunk = await lockCanvasChunk(chunkX, chunkY);
-      setChunkArea((currentArea) =>
-        currentArea
-          ? {
-              ...currentArea,
-              chunks: currentArea.chunks.map((chunk) =>
-                chunk.chunkX === chunkX && chunk.chunkY === chunkY
-                  ? lockedChunk
-                  : chunk,
-              ),
-            }
-          : currentArea,
-      );
-      setActiveLock(lockedChunk);
+      await lockCanvasChunk(chunkX, chunkY);
       navigate("/place/solve");
     } catch (error) {
       toast.error(
