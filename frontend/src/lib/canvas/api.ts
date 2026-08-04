@@ -26,6 +26,15 @@ export type CanvasChunkAreaResponse = {
   chunks: CanvasChunk[];
 };
 
+export type CanvasStats = {
+  chunksSolved: number;
+  yourChunksSolved: number | null;
+  leaderboard: {
+    nickname: string;
+    chunksSolved: number;
+  }[];
+};
+
 type CanvasChunkFailureResponse = CanvasChunk & {
   nextLockAt: string;
 };
@@ -315,4 +324,19 @@ export const getActiveCanvasLock = async () => {
   }
 
   return (await response.json()) as CanvasChunk | null;
+};
+
+export const getCanvasStats = async () => {
+  const accessToken = await getAuthAccessToken();
+  const response = await fetch(`${getBackendUrl()}/place/chunks/stats`, {
+    headers: accessToken
+      ? { Authorization: `Bearer ${accessToken}` }
+      : undefined,
+  });
+
+  if (!response.ok) {
+    throw new Error("Unable to load Place stats");
+  }
+
+  return (await response.json()) as CanvasStats;
 };

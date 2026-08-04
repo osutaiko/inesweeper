@@ -27,6 +27,11 @@ export class ChunkController {
     );
   }
 
+  @Get('stats')
+  async getStats(@Req() req: Request) {
+    return this.chunkService.getStats(req);
+  }
+
   @Get(':chunkX/:chunkY')
   async getChunk(
     @Param('chunkX', ParseIntPipe) chunkX: number,

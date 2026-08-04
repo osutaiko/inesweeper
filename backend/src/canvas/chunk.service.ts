@@ -341,6 +341,22 @@ export class ChunkService {
       : states.join('');
   }
 
+  async getStats(req: Request) {
+    const user = req.headers.authorization
+      ? await this.requireUser(req)
+      : null;
+    const client = this.authService.createServiceRoleClient();
+    const { data, error } = await client.rpc('get_canvas_stats', {
+      target_user_id: user?.id ?? null,
+    });
+
+    if (error) {
+      throw new BadRequestException(error.message);
+    }
+
+    return data;
+  }
+
   async getChunk(chunkX: number, chunkY: number) {
     const client = this.authService.createServiceRoleClient();
     const chunk = await this.getOrCreateChunkRecord(client, chunkX, chunkY);
