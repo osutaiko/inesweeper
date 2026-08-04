@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { House, Locate, Square } from "lucide-react";
+import { House, Locate, Share2, Square } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -15,6 +15,7 @@ import CanvasChunk from "./CanvasChunk";
 import { useSiteLayout } from "../Layout";
 import SelectedChunkOverlay from "./SelectedChunkOverlay";
 import { formatChunkCoordinates } from "@/lib/canvas/coordinates";
+import { formatChunkShareText } from "@/lib/canvas/share";
 import {
   buildCanvasMineLookup,
   getActiveCanvasLock,
@@ -445,6 +446,17 @@ const CanvasPage = () => {
     }
   };
 
+  const handleShareChunk = async (chunk: CanvasChunkData) => {
+    try {
+      await navigator.clipboard.writeText(
+        formatChunkShareText(chunk, neighborMineLookup),
+      );
+      toast("Copied to clipboard");
+    } catch {
+      toast.error("Failed to copy to clipboard");
+    }
+  };
+
   const formatChunkTimestamp = (
     value: string | null,
     includeDate: boolean,
@@ -550,21 +562,31 @@ const CanvasPage = () => {
                     )}
                   </span>
                 </div>
-                <Button
-                  onClick={() =>
-                    transformRef.current?.zoomToElement(
-                      `chunk-${selectedChunk.chunkX}:${selectedChunk.chunkY}`,
-                      0.6,
-                      500,
-                      "easeOut",
-                    )
-                  }
-                  size="icon"
-                  title="Locate chunk"
-                  variant="secondary"
-                >
-                  <Locate />
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() =>
+                      transformRef.current?.zoomToElement(
+                        `chunk-${selectedChunk.chunkX}:${selectedChunk.chunkY}`,
+                        0.6,
+                        500,
+                        "easeOut",
+                      )
+                    }
+                    size="icon"
+                    title="Locate chunk"
+                    variant="secondary"
+                  >
+                    <Locate />
+                  </Button>
+                  <Button
+                    onClick={() => void handleShareChunk(selectedChunk)}
+                    size="icon"
+                    title="Share chunk"
+                    variant="secondary"
+                  >
+                    <Share2 />
+                  </Button>
+                </div>
               </div>
               {canStartSolving && (
                 <Button
