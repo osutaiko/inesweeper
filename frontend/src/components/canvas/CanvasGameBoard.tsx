@@ -321,7 +321,9 @@ const CanvasGameBoard = ({
     minutes: nextClaimInMinutes,
     seconds: nextClaimInSecondsPart,
   } = getMsParts(nextClaimInSeconds * 1000);
-  const formattedNextClaimTime = `${nextClaimInMinutes}:${String(nextClaimInSecondsPart).padStart(2, "0")}`;
+  const formattedNextClaimTime = nextClaimAt
+    ? `${nextClaimInMinutes}:${String(nextClaimInSecondsPart).padStart(2, "0")}`
+    : "-:--";
   const { remainingPosFlags } = countRemainingFlags(
     getTargetChunkBoard(board),
   );
