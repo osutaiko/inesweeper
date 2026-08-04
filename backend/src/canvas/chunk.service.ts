@@ -35,7 +35,7 @@ const chunkStateCode = {
 @Injectable()
 export class ChunkService {
   private readonly solveDurationMs = 3 * 60 * 1000; // 3 minutes for chunk solve
-  private readonly failureCooldownMs = 3 * 60 * 1000; // 3 minutes after failed claim
+  private readonly failureCooldownMs = 60 * 1000; // 60 seconds after failed claim
   private readonly chunkTable = 'canvas_chunks';
   private readonly maxChunkAreaSize = 500_000;
   private readonly maxMineBitmapAreaSize = 1_024;

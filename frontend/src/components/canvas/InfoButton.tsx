@@ -56,7 +56,7 @@ const InfoButton = () => (
             <h4 className="font-medium">Failed claims</h4>
             <p>
               Clicking on a mine or running out of time immediately unlocks the chunk for other users to try.
-              You must wait <b>3 minutes</b> before attempting another claim.
+              You must wait <b>60 seconds</b> before attempting another claim.
             </p>
           </div>
           <div className="flex flex-col gap-1">

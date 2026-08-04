@@ -449,7 +449,7 @@ const CanvasGameBoard = ({
                 <span className="underline text-destructive">
                   {formattedNextClaimTime}
                 </span>
-                , after the 3 minute cooldown is over.
+                , after the 60-second cooldown is over.
               </p>
             )}
             <DialogFooter>
