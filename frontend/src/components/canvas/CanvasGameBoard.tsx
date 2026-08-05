@@ -339,7 +339,7 @@ const CanvasGameBoard = ({
         }}
       >
       <div
-        className="flex h-min w-min flex-col overflow-hidden rounded-md"
+        className="flex h-min w-min select-none flex-col overflow-hidden rounded-md"
         style={{
           transform: `scale(${zoom / 100})`,
           transformOrigin: "top left",
