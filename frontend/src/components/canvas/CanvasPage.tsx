@@ -620,7 +620,6 @@ const CanvasPage = () => {
             limitToBounds={false}
             smooth={false}
             wheel={{ step: 0.05 }}
-            panning={{ velocityDisabled: true }}
             onInit={({ state }) => {
               if (gridRef.current) {
                 updateChunkGrid(gridRef.current, state);
