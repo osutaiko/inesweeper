@@ -1,11 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Patch,
-  Req,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Req } from '@nestjs/common';
 import type { Request } from 'express';
 
 import { AuthService } from './auth.service';

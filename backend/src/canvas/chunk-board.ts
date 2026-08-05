@@ -15,9 +15,7 @@ const getBoardSecretEnv = () => {
   const value = process.env['CANVAS_BOARD_SECRET']?.trim();
 
   if (!value) {
-    throw new Error(
-      'Requires CANVAS_BOARD_SECRET env to generate chunk',
-    );
+    throw new Error('Requires CANVAS_BOARD_SECRET env to generate chunk');
   }
 
   if (!/^[0-9a-fA-F]{64}$/.test(value)) {
@@ -35,21 +33,14 @@ const getBoardKey = () => {
   return boardKey;
 };
 
-const getChunkStream = (
-  chunkX: number,
-  chunkY: number,
-) => {
+const getChunkStream = (chunkX: number, chunkY: number) => {
   const nonce = Buffer.alloc(12);
   nonce.writeUInt32BE(1, 0);
   nonce.writeInt32BE(chunkX, 4);
   nonce.writeInt32BE(chunkY, 8);
 
   return Buffer.from(
-    chacha20(
-      getBoardKey(),
-      nonce,
-      new Uint8Array(CHUNK_SIZE * CHUNK_SIZE),
-    ),
+    chacha20(getBoardKey(), nonce, new Uint8Array(CHUNK_SIZE * CHUNK_SIZE)),
   );
 };
 
@@ -59,10 +50,7 @@ const setBitmapBit = (bitmap: Buffer, bitIndex: number) => {
   bitmap[byteIndex] |= bitMask;
 };
 
-export const isMineAtWorldCoordinate = (
-  worldX: number,
-  worldY: number,
-) => {
+export const isMineAtWorldCoordinate = (worldX: number, worldY: number) => {
   const chunkX = Math.floor(worldX / CHUNK_SIZE);
   const chunkY = Math.floor(worldY / CHUNK_SIZE);
   const localX = worldX - chunkX * CHUNK_SIZE;

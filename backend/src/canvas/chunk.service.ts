@@ -301,10 +301,7 @@ export class ChunkService {
     const height = endY - startY + 1;
     const areaSize = width * height;
 
-    if (
-      !Number.isSafeInteger(areaSize) ||
-      areaSize > this.maxChunkAreaSize
-    ) {
+    if (!Number.isSafeInteger(areaSize) || areaSize > this.maxChunkAreaSize) {
       throw new BadRequestException('Requested chunk area is too large');
     }
 
@@ -330,10 +327,13 @@ export class ChunkService {
             !row.locked_until ||
             new Date(row.locked_until).getTime() > now,
         )
-        .map((row) => [
-          `${row.chunk_x}:${row.chunk_y}`,
-          chunkStateCode[row.state],
-        ] as const),
+        .map(
+          (row) =>
+            [
+              `${row.chunk_x}:${row.chunk_y}`,
+              chunkStateCode[row.state],
+            ] as const,
+        ),
     );
     const states: string[] = [];
     const mineBitmaps: string[] = [];
@@ -345,9 +345,7 @@ export class ChunkService {
         states.push(state);
 
         if (includeMineBitmaps && state === 's') {
-          mineBitmaps.push(
-            this.getChunkMineBitmap(chunkX, chunkY).mineBitmap,
-          );
+          mineBitmaps.push(this.getChunkMineBitmap(chunkX, chunkY).mineBitmap);
         }
       }
     }
@@ -361,9 +359,7 @@ export class ChunkService {
   }
 
   async getStats(req: Request) {
-    const user = req.headers.authorization
-      ? await this.requireUser(req)
-      : null;
+    const user = req.headers.authorization ? await this.requireUser(req) : null;
     const client = this.authService.createServiceRoleClient();
     const { data, error } = await client.rpc('get_canvas_stats', {
       target_user_id: user?.id ?? null,

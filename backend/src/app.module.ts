@@ -12,9 +12,9 @@ import { GameLogsModule } from './game-logs/game-logs.module';
       envFilePath: '.env',
     }),
     ThrottlerModule.forRoot([
-      { name: "short", ttl: 1_000, limit: 3 },
-      { name: "medium", ttl: 10_000, limit: 20 },
-      { name: "long", ttl: 60_000, limit: 100 },
+      { name: 'short', ttl: 1_000, limit: 3 },
+      { name: 'medium', ttl: 10_000, limit: 20 },
+      { name: 'long', ttl: 60_000, limit: 100 },
     ]),
     AuthModule,
     CanvasModule,

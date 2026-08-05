@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import type { Request } from 'express';
 import { AuthService } from '../auth/auth.service';
 
@@ -24,14 +28,9 @@ type BestTimeRow = {
 
 @Injectable()
 export class GameLogsService {
-  constructor(
-    private readonly authService: AuthService,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
-  async recordCompletedGame(
-    req: Request,
-    input: CompletedGameRunInput,
-  ) {
+  async recordCompletedGame(req: Request, input: CompletedGameRunInput) {
     const user = await this.authService.getCurrentUser(req);
 
     if (!user) {
@@ -67,7 +66,9 @@ export class GameLogsService {
       .single();
 
     if (error || !data) {
-      throw new BadRequestException(error?.message ?? 'Unable to record game log');
+      throw new BadRequestException(
+        error?.message ?? 'Unable to record game log',
+      );
     }
 
     await this.recordBestTime(req, {
@@ -124,7 +125,9 @@ export class GameLogsService {
       .single();
 
     if (error || !data) {
-      throw new BadRequestException(error?.message ?? 'Unable to save best time');
+      throw new BadRequestException(
+        error?.message ?? 'Unable to save best time',
+      );
     }
 
     return data as BestTimeRow;
@@ -146,7 +149,9 @@ export class GameLogsService {
       .order('updated_at', { ascending: false });
 
     if (error || !data) {
-      throw new BadRequestException(error?.message ?? 'Unable to load best times');
+      throw new BadRequestException(
+        error?.message ?? 'Unable to load best times',
+      );
     }
 
     return data as BestTimeRow[];
@@ -162,7 +167,9 @@ export class GameLogsService {
       .order('updated_at', { ascending: true });
 
     if (error || !data) {
-      throw new BadRequestException(error?.message ?? 'Unable to load global best times');
+      throw new BadRequestException(
+        error?.message ?? 'Unable to load global best times',
+      );
     }
 
     const bestTimesByBoard = new Map<string, BestTimeRow>();

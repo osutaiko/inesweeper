@@ -20,7 +20,8 @@ type UserProfileRow = {
 export class AuthService {
   private readonly supabaseUrl = process.env.SUPABASE_URL;
   private readonly supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
-  private readonly supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  private readonly supabaseServiceRoleKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   private assertSupabaseConfig() {
     if (!this.supabaseUrl || !this.supabaseAnonKey) {
@@ -70,7 +71,7 @@ export class AuthService {
         },
       },
     });
-  };
+  }
 
   createServiceRoleClient() {
     this.assertServiceRoleConfig();

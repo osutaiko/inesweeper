@@ -19,17 +19,26 @@ export type ChunkCellCoordinate = ChunkCoordinate &
   WorldCoordinate &
   LocalCoordinate;
 
-export const getChunkOrigin = (chunkX: number, chunkY: number): WorldCoordinate => ({
+export const getChunkOrigin = (
+  chunkX: number,
+  chunkY: number,
+): WorldCoordinate => ({
   worldX: chunkX * CHUNK_SIZE,
   worldY: chunkY * CHUNK_SIZE,
 });
 
-export const worldToChunkCoordinate = (worldX: number, worldY: number): ChunkCoordinate => ({
+export const worldToChunkCoordinate = (
+  worldX: number,
+  worldY: number,
+): ChunkCoordinate => ({
   chunkX: Math.floor(worldX / CHUNK_SIZE),
   chunkY: Math.floor(worldY / CHUNK_SIZE),
 });
 
-export const worldToLocalCoordinate = (worldX: number, worldY: number): LocalCoordinate => {
+export const worldToLocalCoordinate = (
+  worldX: number,
+  worldY: number,
+): LocalCoordinate => {
   const { chunkX, chunkY } = worldToChunkCoordinate(worldX, worldY);
 
   return {
