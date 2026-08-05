@@ -47,6 +47,23 @@ const CHUNK_STATE_BY_CODE = {
   s: "solved",
 } as const;
 
+const decodeChunkStateBits = (packedStates: string, expectedStateCount: number) => {
+  const binaryString = atob(packedStates);
+  const states: string[] = [];
+
+  for (let byteIndex = 0; byteIndex < binaryString.length; byteIndex += 1) {
+    const byteValue = binaryString.charCodeAt(byteIndex);
+
+    for (let shift = 0; shift < 8; shift += 2) {
+      const stateBits = (byteValue >> shift) & 3;
+
+      states.push(stateBits === 0 ? "o" : stateBits === 1 ? "s" : stateBits === 2 ? "l" : "o");
+    }
+  }
+
+  return states.slice(0, expectedStateCount).join("");
+};
+
 const decodeChunkStates = (
   states: string,
   fromChunkX: number,
@@ -60,11 +77,13 @@ const decodeChunkStates = (
   const startY = Math.min(fromChunkY, toChunkY);
   const endY = Math.max(fromChunkY, toChunkY);
   const width = endX - startX + 1;
+  const expectedStateCount = width * (endY - startY + 1);
   const chunks: CanvasChunk[] = [];
   let solvedChunkIndex = 0;
+  const stateStream = decodeChunkStateBits(states, expectedStateCount);
 
-  for (let index = 0; index < states.length; index += 1) {
-    const stateCode = states[index] as keyof typeof CHUNK_STATE_BY_CODE;
+  for (let index = 0; index < stateStream.length; index += 1) {
+    const stateCode = stateStream[index] as keyof typeof CHUNK_STATE_BY_CODE;
     if (stateCode === "o" && mineBitmaps === undefined) {
       continue;
     }

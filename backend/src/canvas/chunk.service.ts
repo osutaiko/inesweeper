@@ -32,6 +32,22 @@ const chunkStateCode = {
   solved: 's',
 } as const satisfies Record<ChunkRecord['state'], string>;
 
+const packChunkStates = (states: string) => {
+  const packed = Buffer.alloc(Math.ceil(states.length / 4));
+
+  for (let index = 0; index < states.length; index += 1) {
+    const state = states[index];
+    const byteIndex = index >> 2;
+    const bitOffset = (index & 3) << 1;
+    const stateBits =
+      state === 'o' ? 0 : state === 's' ? 1 : state === 'l' ? 2 : 0;
+
+    packed[byteIndex] |= stateBits << bitOffset;
+  }
+
+  return packed.toString('base64');
+};
+
 @Injectable()
 export class ChunkService {
   private readonly solveDurationMs = 3 * 60 * 1000; // 3 minutes for chunk solve
@@ -337,8 +353,11 @@ export class ChunkService {
     }
 
     return includeMineBitmaps
-      ? { states: states.join(''), mineBitmaps: mineBitmaps.join('') }
-      : states.join('');
+      ? {
+          states: packChunkStates(states.join('')),
+          mineBitmaps: mineBitmaps.join(''),
+        }
+      : packChunkStates(states.join(''));
   }
 
   async getStats(req: Request) {
