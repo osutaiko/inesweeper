@@ -54,6 +54,10 @@ export const useMinesweeperControls = ({
       return;
     }
 
+    if (e.button === 1) {
+      e.preventDefault();
+    }
+
     if (e.button === 0) {
       setIsLmbDown(true);
     } else if (e.button === 2) {
