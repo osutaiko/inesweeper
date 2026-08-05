@@ -40,7 +40,7 @@ type CanvasChunkFailureResponse = CanvasChunk & {
 };
 
 const MINE_BITMAP_BYTE_LENGTH = (CHUNK_SIZE * CHUNK_SIZE) / 8;
-const MINE_BITMAP_HEX_LENGTH = MINE_BITMAP_BYTE_LENGTH * 2;
+const MINE_BITMAP_BASE64_LENGTH = Math.ceil(MINE_BITMAP_BYTE_LENGTH / 3) * 4;
 const CHUNK_STATE_BY_CODE = {
   o: "open",
   l: "locked",
@@ -72,8 +72,8 @@ const decodeChunkStates = (
     const mineBitmap =
       stateCode === "s" && mineBitmaps
         ? mineBitmaps.slice(
-            solvedChunkIndex * MINE_BITMAP_HEX_LENGTH,
-            (solvedChunkIndex + 1) * MINE_BITMAP_HEX_LENGTH,
+            solvedChunkIndex * MINE_BITMAP_BASE64_LENGTH,
+            (solvedChunkIndex + 1) * MINE_BITMAP_BASE64_LENGTH,
           )
         : null;
 
@@ -106,23 +106,20 @@ const decodeChunkStates = (
 };
 
 export const decodeMineBitmap = (mineBitmap: string | null) => {
-  if (!mineBitmap || mineBitmap.length !== MINE_BITMAP_HEX_LENGTH) {
+  if (!mineBitmap || mineBitmap.length !== MINE_BITMAP_BASE64_LENGTH) {
+    return null;
+  }
+
+  const binaryString = atob(mineBitmap);
+
+  if (binaryString.length !== MINE_BITMAP_BYTE_LENGTH) {
     return null;
   }
 
   const decoded = new Uint8Array(MINE_BITMAP_BYTE_LENGTH);
 
   for (let index = 0; index < MINE_BITMAP_BYTE_LENGTH; index += 1) {
-    const byteValue = Number.parseInt(
-      mineBitmap.slice(index * 2, index * 2 + 2),
-      16,
-    );
-
-    if (!Number.isFinite(byteValue)) {
-      return null;
-    }
-
-    decoded[index] = byteValue;
+    decoded[index] = binaryString.charCodeAt(index);
   }
 
   return decoded;

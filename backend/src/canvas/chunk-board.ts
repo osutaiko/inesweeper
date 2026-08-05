@@ -89,6 +89,6 @@ export const buildChunkMineBitmap = (
   return {
     chunkX,
     chunkY,
-    mineBitmap: mineBitmap.toString('hex'),
+    mineBitmap: mineBitmap.toString('base64'),
   };
 };
