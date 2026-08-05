@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { House, ScanSquare, Share2, Square } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -403,9 +403,10 @@ const CanvasPage = () => {
     };
   }, [selectedChunkId]);
 
-  const neighborMineLookup = chunkArea
-    ? buildCanvasMineLookup(chunkArea.chunks)
-    : null;
+  const neighborMineLookup = useMemo(
+    () => chunkArea ? buildCanvasMineLookup(chunkArea.chunks) : null,
+    [chunkArea],
+  );
   const selectedChunkOwnerName =
     selectedChunk?.state === "locked"
       ? selectedChunk.lockedByName
