@@ -33,7 +33,7 @@ const CHUNK_ORIGIN_OFFSET = -CHUNK_PIXEL_SIZE / 2;
 const INITIAL_SCALE = 0.2;
 const GRID_DETAIL_SCALE = 0.1;
 const LOW_SCALE_GRID_STEP = 10;
-const MAX_MINE_BITMAP_AREA_SIZE = 1_024;
+const MAX_MINE_BITMAP_AREA_SIZE = 512;
 
 type ChunkGridTransform = {
   scale: number;
@@ -213,21 +213,27 @@ const CanvasPage = () => {
       Math.floor((right - CHUNK_ORIGIN_OFFSET) / CHUNK_PIXEL_SIZE),
       -Math.floor((top - CHUNK_ORIGIN_OFFSET) / CHUNK_PIXEL_SIZE),
     ];
+    const contextBounds: ChunkAreaBounds = [
+      viewportBounds[0] - 1,
+      viewportBounds[1] - 1,
+      viewportBounds[2] + 1,
+      viewportBounds[3] + 1,
+    ];
 
     setChunkAreaBounds((current) => {
-      const viewportAreaSize = getChunkAreaSize(viewportBounds);
+      const contextAreaSize = getChunkAreaSize(contextBounds);
       const currentAreaSize = current ? getChunkAreaSize(current) : 0;
       const needsMineBitmaps =
-        viewportAreaSize <= MAX_MINE_BITMAP_AREA_SIZE &&
+        contextAreaSize <= MAX_MINE_BITMAP_AREA_SIZE &&
         currentAreaSize > MAX_MINE_BITMAP_AREA_SIZE;
 
       if (
         current &&
         !needsMineBitmaps &&
-        viewportBounds[0] >= current[0] &&
-        viewportBounds[1] >= current[1] &&
-        viewportBounds[2] <= current[2] &&
-        viewportBounds[3] <= current[3]
+        contextBounds[0] >= current[0] &&
+        contextBounds[1] >= current[1] &&
+        contextBounds[2] <= current[2] &&
+        contextBounds[3] <= current[3]
       ) {
         return current;
       }
@@ -245,9 +251,9 @@ const CanvasPage = () => {
         viewportBounds[3] + overscanY,
       ];
 
-      return viewportAreaSize <= MAX_MINE_BITMAP_AREA_SIZE &&
+      return contextAreaSize <= MAX_MINE_BITMAP_AREA_SIZE &&
         getChunkAreaSize(bounds) > MAX_MINE_BITMAP_AREA_SIZE
-        ? viewportBounds
+        ? contextBounds
         : bounds;
     });
   };

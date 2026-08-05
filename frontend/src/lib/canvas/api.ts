@@ -79,7 +79,6 @@ const decodeChunkStates = (
   const width = endX - startX + 1;
   const expectedStateCount = width * (endY - startY + 1);
   const chunks: CanvasChunk[] = [];
-  let solvedChunkIndex = 0;
   const stateStream = decodeChunkStateBits(states, expectedStateCount);
 
   for (let index = 0; index < stateStream.length; index += 1) {
@@ -89,16 +88,12 @@ const decodeChunkStates = (
     }
 
     const mineBitmap =
-      stateCode === "s" && mineBitmaps
+      mineBitmaps
         ? mineBitmaps.slice(
-            solvedChunkIndex * MINE_BITMAP_BASE64_LENGTH,
-            (solvedChunkIndex + 1) * MINE_BITMAP_BASE64_LENGTH,
+            index * MINE_BITMAP_BASE64_LENGTH,
+            (index + 1) * MINE_BITMAP_BASE64_LENGTH,
           )
         : null;
-
-    if (stateCode === "s") {
-      solvedChunkIndex += 1;
-    }
 
     chunks.push({
       chunkX: startX + (index % width),

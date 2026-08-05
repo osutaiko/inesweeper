@@ -54,7 +54,7 @@ export class ChunkService {
   private readonly failureCooldownMs = 30 * 1000; // 30 seconds after failed claim
   private readonly chunkTable = 'canvas_chunks';
   private readonly maxChunkAreaSize = 500_000;
-  private readonly maxMineBitmapAreaSize = 1_024;
+  private readonly maxMineBitmapAreaSize = 512;
   private readonly nextLockAtByUserId = new Map<string, number>();
 
   constructor(private readonly authService: AuthService) {}
@@ -344,7 +344,7 @@ export class ChunkService {
         const state = stateByCoordinate.get(`${chunkX}:${chunkY}`) ?? 'o';
         states.push(state);
 
-        if (includeMineBitmaps && state === 's') {
+        if (includeMineBitmaps) {
           mineBitmaps.push(this.getChunkMineBitmap(chunkX, chunkY).mineBitmap);
         }
       }
