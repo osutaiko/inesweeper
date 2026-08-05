@@ -319,7 +319,7 @@ const Layout = ({ children }: {
             </div>
           </a>
           <div className="flex flex-row gap-2">
-            <Button asChild variant="link" className="gap-1">
+            <Button asChild variant="link" className="font-medium text-foreground underline decoration-amber-500 decoration-2 hover:decoration-foreground">
               {isPlaceSolve ? (
                 <Link to="/place">Back to map</Link>
               ) : isPlace ? (
