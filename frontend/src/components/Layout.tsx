@@ -321,20 +321,11 @@ const Layout = ({ children }: {
           <div className="flex flex-row gap-2">
             <Button asChild variant="link" className="gap-1">
               {isPlaceSolve ? (
-                <Link to="/place">
-                  <ChevronLeft />
-                  Back to map
-                </Link>
+                <Link to="/place">Back to map</Link>
               ) : isPlace ? (
-                <Link to="/">
-                  <ChevronLeft />
-                  Solo
-                </Link>
+                <Link to="/">Solo</Link>
               ) : (
-                <Link to="/place">
-                  Place
-                  <ChevronRight />
-                </Link>
+                <Link to="/place">Place</Link>
               )}
             </Button>
             <SettingsButton
