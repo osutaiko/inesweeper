@@ -485,7 +485,7 @@ const CanvasPage = () => {
     <>
       <Toaster />
       <main
-        className="relative flex w-full overflow-hidden bg-background h-[calc(100vh-57px)] sm:h-[calc(100vh-73px)]"
+        className="relative flex w-full overflow-hidden bg-background h-[calc(100dvh-57px)] sm:h-[calc(100dvh-73px)]"
       >
           <div
             ref={gridRef}
