@@ -664,6 +664,11 @@ const CanvasPage = () => {
                     }
                   },
                   onPointerUp: (event) => {
+                    if (event.button !== 0) {
+                      gestureRef.current.dragged = false;
+                      return;
+                    }
+
                     const transform = transformRef.current?.state;
 
                     if (!gestureRef.current.dragged && transform) {
