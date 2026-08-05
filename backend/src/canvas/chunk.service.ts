@@ -477,11 +477,6 @@ export class ChunkService {
       solvedAt: null,
       lockedUntil: lockedUntil.toISOString(),
     });
-    this.nextLockAtByUserId.set(
-      user.id,
-      lockedUntil.getTime() + this.failureCooldownMs,
-    );
-
     return this.withChunkMineBitmap(saved, user.id, user.nickname);
   }
 
