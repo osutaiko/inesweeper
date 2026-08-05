@@ -1,4 +1,13 @@
-import { useEffect, useRef, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+import { Link, useLocation } from "react-router-dom";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ThemeProvider } from "./theme-provider";
 import { DifficultyName, TimeRecord, VariantName } from "@/lib/types";
 import { boardConfigLibrary, difficultyMap, variantGroups } from "@/lib/constants";
@@ -21,6 +30,7 @@ import {
   SelectValue,
 } from "./ui/select";
 import { ScrollArea, ScrollBar } from "./ui/scroll-area";
+import { Button } from "./ui/button";
 
 import InesweeperLogo from "@/assets/images/inesweeper-logo.svg";
 import {
@@ -32,8 +42,33 @@ import AuthButton from "./layout-actions/AuthButton";
 import InfoButton from "./layout-actions/InfoButton";
 import SettingsButton from "./layout-actions/SettingsButton";
 import StatsButton from "./layout-actions/StatsButton";
+import CanvasInfoButton from "./canvas/InfoButton";
+import CanvasStatsButton from "./canvas/StatsButton";
 
-const Layout = () => {
+type SiteLayoutContextValue = {
+  authUser: AuthUser | null;
+  isTouchscreen: boolean;
+  zoom: number;
+  flagButtonSize: number;
+  flagButtonPosition: string;
+};
+
+const SiteLayoutContext = createContext<SiteLayoutContextValue | null>(null);
+
+export const useSiteLayout = () => {
+  const context = useContext(SiteLayoutContext);
+  if (!context) {
+    throw new Error("useSiteLayout must be used within Layout");
+  }
+  return context;
+};
+
+const Layout = ({ children }: {
+  children?: ReactNode;
+}) => {
+  const pathname = useLocation().pathname;
+  const isPlace = pathname === "/place";
+  const isPlaceSolve = pathname === "/place/solve";
   const DEFAULT_ZOOM = 100;
   const DEFAULT_FLAG_BUTTON_SIZE = 72;
   const DEFAULT_FLAG_BUTTON_POSITION = "bottom-right";
@@ -260,21 +295,39 @@ const Layout = () => {
 
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-      <div className="flex flex-col items-center min-h-screen overflow-hidden touch-none">
+      <SiteLayoutContext.Provider
+        value={{
+          authUser,
+          isTouchscreen,
+          zoom,
+          flagButtonSize,
+          flagButtonPosition,
+        }}
+      >
+        <div className="flex flex-col items-center min-h-screen overflow-hidden touch-none">
         {/* Header */}
         <header className="flex flex-row w-full gap-4 px-3 sm:px-8 py-2 sm:py-4 justify-between items-center border-b overflow-x-auto">
           <a href="/">
             <div className="flex flex-row items-center gap-3">
               <img src={InesweeperLogo} alt="Inesweeper Logo" className="w-[40px] h-[40px] min-w-[40px] min-h-[40px]" />
-              <h2 className="font-minesweeper hidden min-[510px]:block text-lg sm:text-2xl">
+              <h2 className="font-minesweeper hidden md:block text-lg sm:text-2xl">
                 <span className="text-red-500">I</span>
                 <span className="text-green-500">N</span>
                 <span className="text-blue-500">E</span>
-                sweeper
+                {isPlace || isPlaceSolve ? 's-place' : 'sweeper'}
               </h2>
             </div>
           </a>
           <div className="flex flex-row gap-2">
+            <Button asChild variant="link" className="font-medium text-foreground underline decoration-amber-500 decoration-2 hover:decoration-foreground">
+              {isPlaceSolve ? (
+                <Link to="/place">Back to map</Link>
+              ) : isPlace ? (
+                <Link to="/">Solo</Link>
+              ) : (
+                <Link to="/place">Place</Link>
+              )}
+            </Button>
             <SettingsButton
               isTouchscreen={isTouchscreen}
               zoom={zoom}
@@ -287,24 +340,34 @@ const Layout = () => {
               setTouchHoldDelay={setTouchHoldDelay}
               resetPreferences={resetPreferences}
             />
-            <StatsButton
-              isDesktop={isDesktop}
-              displayedRecords={displayedRecords}
-              globalRecords={globalRecords}
-              isAuthed={Boolean(authUser)}
-            />
-            <InfoButton />
+            {isPlace || isPlaceSolve ? (
+              <>
+                <CanvasStatsButton />
+                <CanvasInfoButton />
+              </>
+            ) : (
+              <>
+                <StatsButton
+                  isDesktop={isDesktop}
+                  displayedRecords={displayedRecords}
+                  globalRecords={globalRecords}
+                  isAuthed={Boolean(authUser)}
+                />
+                <InfoButton />
+              </>
+            )}
             <AuthButton authUser={authUser} />
           </div>
         </header>
-
-        {/* Main Play Area */}
-        <ScrollArea
-          ref={scrollAreaRef}
-          className="flex w-full h-[calc(100vh-57px)] sm:h-[calc(100vh-73px)]" /* FIXME: need way to avoid using magic */
-        >
-          <main
-            className={`flex flex-col min-h-[calc(100vh-57px)] sm:min-h-[calc(100vh-73px)] gap-4 justify-center items-center ${isTouchscreen ? 'px-[160px]' : 'px-4'} py-6`}
+          
+          {/* Main Play Area */}
+          {children ?? (
+            <ScrollArea
+              ref={scrollAreaRef}
+              className="flex w-full h-[calc(100vh-57px)] sm:h-[calc(100vh-73px)]" /* FIXME: need way to avoid using magic */
+            >
+              <main
+                className={`flex flex-col min-h-[calc(100vh-57px)] sm:min-h-[calc(100vh-73px)] gap-4 justify-center items-center ${isTouchscreen ? 'px-[160px]' : 'px-4'} py-6`}
           >
             <GameBoard 
               key={`${variant}-${difficulty}`}
@@ -355,10 +418,12 @@ const Layout = () => {
                 </SelectContent>
               </Select>
             </div>
-          </main>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
-      </div>
+              </main>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
+          )}
+        </div>
+      </SiteLayoutContext.Provider>
     </ThemeProvider>
   );
 };

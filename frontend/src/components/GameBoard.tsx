@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Board, BoardConfig, Cell, TimeRecord } from "@/lib/types";
 import { createDemoBoard } from "@/lib/constants";
-import { createBoard, handleClick, handleChord, handleFlag, handleBeforeFirstClick as updateBoardBeforeFirstClick, isWin, isLoss, countRemainingFlags, extractMinesFromBoard, iterateNeighbors } from "@/lib/minesweeper";
+import { createBoard, handleClick, handleChord, handleFlag, handleBeforeFirstClick as updateBoardBeforeFirstClick, isWin, isLoss, countRemainingFlags, extractMinesFromBoard, flagAllMines, iterateNeighbors } from "@/lib/minesweeper";
 import { formatTimeMs } from "@/lib/utils";
+import { useMinesweeperControls } from "@/hooks/useMinesweeperControls";
 
-import { Laugh, Meh, Shovel, Skull, Smile, Square } from "lucide-react";
+import { Laugh, Meh, Skull, Smile } from "lucide-react";
 import { Button } from "./ui/button";
-import { CompassArrow } from "./CompassArrow";
+import { GameBoardGrid, getColorClass } from "./GameBoardGrid";
+import TouchFlagButton from "./TouchFlagButton";
 
 export const GameBoard: React.FC<{
   config: BoardConfig;
@@ -18,12 +20,8 @@ export const GameBoard: React.FC<{
   addRecord: (record: TimeRecord) => void;
 }> = ({ config, zoom, flagButtonSize, flagButtonPosition, touchHoldDelay, isTouchscreen, addRecord }) => {
   const isDemoBoard = false;
-  const isColorsVariant = config.mineTypeDeviant === "rgb";
-
   const [board, setBoard] = useState<Board>(isDemoBoard ? createDemoBoard() : (createBoard(config) || []));
   const [isFirstClick, setIsFirstClick] = useState(true);
-  const [isLmbDown, setIsLmbDown] = useState(false);
-  const [isRmbDown, setIsRmbDown] = useState(false);
   const [isFlagToggled, setIsFlagToggled] = useState(false);
   const [isGameOver, setIsGameOver] = useState<"win" | "loss" | null>(null);
   const [startTime, setStartTime] = useState<number | null>(null);
@@ -32,26 +30,13 @@ export const GameBoard: React.FC<{
   const [shadedCells, setShadedCells] = useState<{ row: number, col: number }[]>([]);
   const [explodedCell, setExplodedCell] = useState<{ row: number, col: number } | null>(null);
   const [incorrectFlagCells, setIncorrectFlagCells] = useState<{ row: number, col: number }[] | null>(null);
-  const [touchStartPos, setTouchStartPos] = useState({ x: 0, y: 0 });
-
-  const DRAG_THRESHOLD = 10;
   const animationFrameRef = useRef<number | null>(null);
-  const touchHoldTimerRef = useRef<number | null>(null);
-  const touchHoldFiredRef = useRef(false);
-
-  const clearTouchHoldTimer = () => {
-    if (touchHoldTimerRef.current !== null) {
-      window.clearTimeout(touchHoldTimerRef.current);
-      touchHoldTimerRef.current = null;
-    }
-  };
 
   const handleReset = () => {
     const newBoard = createBoard(config);
     setBoard(newBoard || []);
     setIsFirstClick(true);
-    setIsLmbDown(false);
-    setIsRmbDown(false);
+    resetControls();
     setIsFlagToggled(false);
     setIsGameOver(null);
     setStartTime(null);
@@ -59,8 +44,6 @@ export const GameBoard: React.FC<{
     setHoveredCell(null);
     setExplodedCell(null);
     setIncorrectFlagCells(null);
-    clearTouchHoldTimer();
-    touchHoldFiredRef.current = false;
   };
 
   const handleBeforeFirstClick = (row: number, col: number) => {
@@ -123,18 +106,7 @@ export const GameBoard: React.FC<{
       const correctedElapsed = startTime !== null ? Date.now() - startTime : timeElapsed;
       setTimeElapsed(correctedElapsed);
 
-      const updatedBoard = board.map(row =>
-        row.map(cell => {
-          if (cell.mineNum !== 0) {
-            return {
-              state: { type: "flagged", flagNum: cell.mineNum },
-              mineNum: cell.mineNum,
-            } as Cell;
-          }
-          return cell;
-        })
-      );
-      setBoard(updatedBoard);
+      setBoard(flagAllMines(board));
 
       addRecord({
         boardConfig: config,
@@ -172,130 +144,37 @@ export const GameBoard: React.FC<{
     }
   }, [JSON.stringify(board)]);
 
-  useEffect(() => {
-    return () => {
-      clearTouchHoldTimer();
-    };
-  }, []);
-
-  const handleTouchStart = (e: React.TouchEvent, row: number, col: number) => {
-    if (isGameOver || !isTouchscreen ) {
-      return;
-    }
-
-    clearTouchHoldTimer();
-    touchHoldFiredRef.current = false;
-
-    const touch = e.touches[0];
-    setTouchStartPos({ x: touch.clientX, y: touch.clientY });
-
-    touchHoldTimerRef.current = window.setTimeout(() => {
-      touchHoldFiredRef.current = true;
-
-      if (!isFlagToggled && board[row][col].state.type !== "revealed") {
-        setBoard(handleFlag(board, row, col, config));
-        return;
+  const {
+    isLmbDown,
+    handleMouseDown,
+    handleMouseUp,
+    handleTouchStart,
+    handleTouchMove,
+    handleTouchEnd,
+    resetControls,
+  } = useMinesweeperControls({
+    disabled: Boolean(isGameOver),
+    isTouchscreen,
+    touchHoldDelay,
+    isFlagToggled,
+    canReveal: () => true,
+    canFlag: (row, col) => board[row][col].state.type !== "revealed",
+    canChord: () => true,
+    canTouchChord: (row, col) =>
+      board[row][col].state.type === "revealed",
+    onReveal: (row, col) => {
+      if (isFirstClick) {
+        handleBeforeFirstClick(row, col);
       }
-
-      if (board[row][col].state.type !== "revealed") {
-        if (isFirstClick) {
-          handleBeforeFirstClick(row, col);
-        }
-        setBoard(handleClick(board, row, col, config));
-      }
-    }, touchHoldDelay);
-
-    return;
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (isGameOver || !isTouchscreen) {
-      return;
-    }
-
-    const touch = e.touches[0];
-    const dx = Math.abs(touch.clientX - touchStartPos.x);
-    const dy = Math.abs(touch.clientY - touchStartPos.y);
-    if (dx > DRAG_THRESHOLD || dy > DRAG_THRESHOLD) {
-      clearTouchHoldTimer();
-    }
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent, row: number, col: number) => {
-    if (isGameOver || !isTouchscreen) {
-      return;
-    }
-
-    clearTouchHoldTimer();
-
-    if (touchHoldFiredRef.current) {
-      touchHoldFiredRef.current = false;
-      return;
-    }
-
-    const touch = e.changedTouches[0];
-    const dx = Math.abs(touch.clientX - touchStartPos.x);
-    const dy = Math.abs(touch.clientY - touchStartPos.y);
-    if (dx > DRAG_THRESHOLD || dy > DRAG_THRESHOLD) {
-      return;
-    }
-
-    if (board[row][col].state.type === "revealed") {
-      setBoard(handleChord(board, row, col, config));
-      return;
-    }
-
-    if (isFlagToggled) {
+      setBoard(handleClick(board, row, col, config));
+    },
+    onFlag: (row, col) => {
       setBoard(handleFlag(board, row, col, config));
-      return;
-    }
-
-    if (isFirstClick) {
-      handleBeforeFirstClick(row, col);
-    }
-    setBoard(handleClick(board, row, col, config));
-    return;
-  };
-
-  const handleMouseDown = (e: React.MouseEvent, row: number, col: number) => {
-    if (isGameOver || isTouchscreen) {
-      return;
-    }
-
-    if (e.button === 0) {
-      setIsLmbDown(true);
-    } else if (e.button === 2) {
-      setIsRmbDown(true);
-      if (!isLmbDown) {
-        setBoard(handleFlag(board, row, col, config));
-      }
-    }
-  };
-
-  const handleMouseUp = (e: React.MouseEvent, row: number, col: number) => {
-    if (isGameOver || isTouchscreen) {
-      return;
-    }
-
-    if (e.button === 0) {
-      setIsLmbDown(false);
-      if (isRmbDown) {
-        setBoard(handleChord(board, row, col, config));
-      } else {
-        if (isFirstClick) {
-          handleBeforeFirstClick(row, col);
-        }
-        setBoard(handleClick(board, row, col, config));
-      }
-    } else if (e.button === 1) {
+    },
+    onChord: (row, col) => {
       setBoard(handleChord(board, row, col, config));
-    } else if (e.button === 2) {
-      setIsRmbDown(false);
-      if (isLmbDown) {
-        setBoard(handleChord(board, row, col, config));
-      }
-    }
-  };
+    },
+  });
 
   const {
     remainingPosFlags,
@@ -305,48 +184,6 @@ export const GameBoard: React.FC<{
     remainingYellowFlags,
     remainingBlueFlags,
   } = countRemainingFlags(board);
-
-  const getNumberColorClass = (num: number | null) => {
-  ["text-game-number-1", "text-game-number-2", "text-game-number-3", "text-game-number-4", "text-game-number-5", "text-game-number-6", "text-game-number-7", "text-game-number-8", "text-game-number-0", "text-game-number--1", "text-game-number--2", "text-game-number--3", "text-game-number--4", "text-game-number--5", "text-game-number--6", "text-game-number--7", "text-game-number--8"];
-  
-  if (num === null) {
-    return "";
-  }
-  if (num === 0) {
-    return "text-game-number-0";
-  }
-
-  if (num > 0) {
-    return `text-game-number-${num % 8 === 0 ? 8 : num % 8}`;
-  } else {
-    return `text-game-number--${(-num % 8 === 0 ? 8 : -num % 8)}`;
-  }
-};
-
-  const getColorClass = (mineNum: number) => {
-    if (mineNum === 1) return "text-red-500";
-    if (mineNum === 2) return "text-yellow-500";
-    return "text-blue-500";
-  };
-
-  const getColorMixClass = (mask: number) => {
-    if (mask === 1) return "text-red-500";
-    if (mask === 2) return "text-yellow-500";
-    if (mask === 3) return "text-orange-500";
-    if (mask === 4) return "text-blue-500";
-    if (mask === 5) return "text-purple-500";
-    if (mask === 6) return "text-green-500";
-    return "text-stone-500";
-  };
-
-  const getFlagButtonPositionClass = () => {
-    switch (flagButtonPosition) {
-      case "bottom-left": return "bottom-0 left-0 rounded-tl-none rounded-tr-md rounded-bl-none rounded-br-none";
-      case "center-left": return "top-1/2 left-0 rounded-tl-none rounded-tr-md rounded-bl-none rounded-br-md";
-      case "center-right": return "top-1/2 right-0 rounded-tl-md rounded-tr-none rounded-bl-md rounded-br-none";
-      default: return "bottom-0 right-0 rounded-tl-md rounded-tr-none rounded-bl-none rounded-br-none";
-    }
-  }
 
   useEffect(() => {
     if (isTouchscreen || !hoveredCell || isGameOver) {
@@ -481,144 +318,32 @@ export const GameBoard: React.FC<{
             }}
             onContextMenu={(e) => e.preventDefault()}
           >
-            {board.map((row, rowIndex) =>
-              row.map((cell, colIndex) => {
-                const specialNum = cell.state.type === "revealed" && typeof cell.state.num === "object" ? cell.state.num : null;
-                const getBgClass = () => {
-                  if (cell.state.type === "revealed") {
-                    if (isGameOver === "loss" && explodedCell && explodedCell.row === rowIndex && explodedCell.col === colIndex) {
-                      return "bg-game-explodedmine";
-                    }
-                    return "bg-game-revealed";
-                  } else if (cell.state.type === "flagged") {
-                    if (isGameOver === "loss" && incorrectFlagCells!.some(({ row: r, col: c }) => r === rowIndex && c === colIndex)) {
-                      return "bg-game-wrongflag";
-                    }
-                    if (shadedCells.some(({ row: shadedRow, col: shadedCol }) => shadedRow === rowIndex && shadedCol === colIndex)) {
-                      return "bg-game-hover";
-                    }
-                    return "bg-game-hidden";
-                  } else {
-                    if (shadedCells.some(({ row: shadedRow, col: shadedCol }) => shadedRow === rowIndex && shadedCol === colIndex)) {
-                      return "bg-game-hover";
-                    }
-                    return "bg-game-hidden";
-                  }
-                };
-
-                return (
-                  <div
-                    key={`${rowIndex}-${colIndex}`}
-                    className={`relative flex justify-center items-center font-minesweeper border border-game-border ${getBgClass()} rounded-sm overflow-hidden`}
-                    onMouseDown={(e) => handleMouseDown(e, rowIndex, colIndex)}
-                    onMouseUp={(e) => handleMouseUp(e, rowIndex, colIndex)}
-                    onTouchStart={(e) => handleTouchStart(e, rowIndex, colIndex)}
-                    onTouchMove={handleTouchMove}
-                    onTouchEnd={(e) => handleTouchEnd(e, rowIndex, colIndex)}
-                    onMouseEnter={() => setHoveredCell({ row: rowIndex, col: colIndex })}
-                    onMouseLeave={() => setHoveredCell(null)}
-                  >
-                    {((config.cellNumberDeviant === "amplified" || config.cellNumberDeviant === "contrast") && (!(cell.state.type === "revealed" && cell.mineNum === 0)) && ((rowIndex + colIndex) % 2 === 1)) ?
-                      <div className="pointer-events-none absolute inset-0">
-                        <div className="absolute left-0 top-0 h-[14px] w-[5px] rounded-br-md bg-game-redborder" />
-                        <div className="absolute left-0 top-0 h-[5px] w-[14px] rounded-br-md bg-game-redborder" />
-                      </div> : <></>
-                    }
-                    {((config.cellNumberDeviant === "contrast") && (!(cell.state.type === "revealed" && cell.mineNum === 0)) && ((rowIndex + colIndex) % 2 === 0)) ?
-                      <div className="pointer-events-none absolute inset-0">
-                        <div className="absolute right-0 top-0 h-[14px] w-[5px] rounded-bl-md bg-game-blueborder" />
-                        <div className="absolute right-0 top-0 h-[5px] w-[14px] rounded-bl-md bg-game-blueborder" />
-                      </div> : <></>
-                    }
-                    {cell.state.type === "revealed" && (
-                      cell.mineNum ? (
-                        (() => {
-                          const mineNum = cell.mineNum;
-                          const mineCount = isColorsVariant ? 1 : Math.abs(mineNum);
-                          const mineClass = `${mineCount > 1 ? "text-[9px]" : "mt-[2px] ml-[2px] text-[18px]"} leading-[11.5px] ${isColorsVariant ? getColorClass(mineNum) : mineNum > 0 ? "text-black" : "text-white"}`;
-
-                          return (
-                            <div className="flex flex-wrap justify-center items-center">
-                              {Array.from({ length: mineCount }).map((_, idx) => (
-                                <span
-                                  key={`bomb-${idx}`}
-                                  className={mineClass}
-                                >
-                                  *
-                                </span>
-                              ))}
-                            </div>
-                          );
-                        })()
-                      ) : (
-                        specialNum?.type === "colors" ? (
-                          <Square className={`size-[18px] ${getColorMixClass(specialNum.mask)}`} fill="currentColor" />
-                        ) : specialNum?.type === "compass" ? (
-                          <CompassArrow angleIndex={specialNum.angleIndex} />
-                        ) : specialNum?.type === "nearest2" ? (
-                          <span
-                            className={`${
-                              specialNum.distances[0] === 1 ? "text-[16px]" : "text-[8px]"
-                            } ${getNumberColorClass(specialNum.distances[1])}`}
-                          >
-                            {specialNum.distances[1]}
-                          </span>
-                        ) : (
-                          <span
-                            className={`inline-block origin-center ml-[2px] text-lg ${getNumberColorClass(cell.state.num)}`}
-                            style={typeof cell.state.num === "number" && (Math.abs(cell.state.num) >= 10 || cell.state.num < 0) ? { transform: "scaleX(0.75)" } : undefined}
-                          >
-                            {cell.state.num}
-                          </span>
-                        )
-                      )
-                    )}
-                    {cell.state.type === "flagged" && (
-                      isColorsVariant ? (
-                        <span className={`font-minesweeper leading-none ${getColorClass(cell.state.flagNum)} text-[18px]`}>
-                          `
-                        </span>
-                      ) : (
-                        <div className="flex flex-wrap pt-[1px] gap-y-[1px] justify-center items-center">
-                          {(() => {
-                            const flagNum = cell.state.flagNum;
-                            return Array.from({ length: Math.abs(flagNum) }).map((_, idx) => (
-                              <span
-                                key={`flag-${idx}`}
-                                className={`${
-                                  flagNum < 0 ? "rotate-180 text-blue-500 mr-[2px]" : "text-red-500 ml-[2px] leading-none"
-                                } ${Math.abs(flagNum) > 1 ? "text-[10px]" : "text-[18px]"}`}
-                              >
-                                `
-                              </span>
-                            ));
-                          })()}
-                        </div>
-                      )
-                    )}
-                    {cell.state.type === "hidden" && isFlagToggled && (
-                      <span className="text-[18px] ml-[2px] leading-none opacity-15">
-                        `
-                      </span>
-                    )}
-                  </div>
-                );
-              })
-            )}
+            <GameBoardGrid
+              board={board}
+              config={config}
+              isGameOver={isGameOver}
+              explodedCell={explodedCell}
+              incorrectFlagCells={incorrectFlagCells}
+              shadedCells={shadedCells}
+              isFlagToggled={isFlagToggled}
+              onMouseDown={handleMouseDown}
+              onMouseUp={handleMouseUp}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              onHoveredCellChange={setHoveredCell}
+            />
           </div>
         </div>
       </div>
       {isTouchscreen && isGameOver !== "win" && (
-        <Button
-          className={`fixed p-0 [&_svg]:size-1/2 ${getFlagButtonPositionClass()} text-primary ${isFlagToggled ? "bg-destructive hover:bg-destructive/90" : "bg-game-button hover:bg-game-button/90"}`}
-          style={{
-            width: flagButtonSize,
-            height: flagButtonSize,
-          }}
+        <TouchFlagButton
+          flagButtonSize={flagButtonSize}
+          flagButtonPosition={flagButtonPosition}
+          isFlagToggled={isFlagToggled}
+          isGameOver={Boolean(isGameOver)}
           onClick={() => isGameOver ? handleReset() : setIsFlagToggled(!isFlagToggled)}
-        >
-          {isGameOver ? (/* isGameOver === "win" ? <Laugh /> : */ <Skull />) : (isFlagToggled ? <span className="font-minesweeper leading-none" style={{ fontSize: `${flagButtonSize * 0.5}px` }}>`</span> : <Shovel />)}
-        </Button>
+        />
       )}
     </>
   );

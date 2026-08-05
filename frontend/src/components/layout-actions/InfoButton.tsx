@@ -14,7 +14,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Github, Info } from "lucide-react";
+import { Info } from "lucide-react";
+import { siGithub } from "simple-icons";
 
 import { Link } from "react-router-dom";
 
@@ -115,7 +116,10 @@ const InfoButton = () => (
           </Button>
         </Link>
         <a href="https://github.com/osutaiko/inesweeper" target="_blank" rel="noopener noreferrer">
-          <Github />
+          <svg role="img" viewBox="0 0 24 24" className="size-6 fill-current">
+            <title>GitHub</title>
+            <path d={siGithub.path} />
+          </svg>
         </a>
       </div>
     </DialogContent>
