@@ -23,7 +23,7 @@ type ChunkRow = {
 
 type ChunkStateRow = Pick<
   ChunkRow,
-  'chunk_x' | 'chunk_y' | 'state' | 'locked_until'
+  'chunk_x' | 'chunk_y' | 'state' | 'locked_until' | 'solver_user_id'
 >;
 
 const chunkStateCode = {
@@ -43,6 +43,18 @@ const packChunkStates = (states: string) => {
       state === 'o' ? 0 : state === 's' ? 1 : state === 'l' ? 2 : 0;
 
     packed[byteIndex] |= stateBits << bitOffset;
+  }
+
+  return packed.toString('base64');
+};
+
+const packChunkBits = (bits: boolean[]) => {
+  const packed = Buffer.alloc(Math.ceil(bits.length / 8));
+
+  for (let index = 0; index < bits.length; index += 1) {
+    if (bits[index]) {
+      packed[index >> 3] |= 1 << (index & 7);
+    }
   }
 
   return packed.toString('base64');
@@ -286,6 +298,7 @@ export class ChunkService {
   }
 
   async getChunkArea(
+    req: Request,
     fromChunkX: number,
     fromChunkY: number,
     toChunkX: number,
@@ -305,10 +318,11 @@ export class ChunkService {
       throw new BadRequestException('Requested chunk area is too large');
     }
 
+    const user = req.headers.authorization ? await this.requireUser(req) : null;
     const now = Date.now();
     const { data, error } = await client
       .from(this.chunkTable)
-      .select('chunk_x, chunk_y, state, locked_until')
+      .select('chunk_x, chunk_y, state, locked_until, solver_user_id')
       .gte('chunk_x', startX)
       .lte('chunk_x', endX)
       .gte('chunk_y', startY)
@@ -319,6 +333,9 @@ export class ChunkService {
     }
 
     const rows = (data ?? []) as ChunkStateRow[];
+    const rowByCoordinate = new Map(
+      rows.map((row) => [`${row.chunk_x}:${row.chunk_y}`, row] as const),
+    );
     const stateByCoordinate = new Map(
       rows
         .filter(
@@ -337,12 +354,19 @@ export class ChunkService {
     );
     const states: string[] = [];
     const mineBitmaps: string[] = [];
+    const mySolvedBits: boolean[] = [];
     const includeMineBitmaps = areaSize <= this.maxMineBitmapAreaSize;
 
     for (let chunkY = endY; chunkY >= startY; chunkY -= 1) {
       for (let chunkX = startX; chunkX <= endX; chunkX += 1) {
+        const row = rowByCoordinate.get(`${chunkX}:${chunkY}`);
         const state = stateByCoordinate.get(`${chunkX}:${chunkY}`) ?? 'o';
         states.push(state);
+        mySolvedBits.push(
+          user !== null &&
+            row?.state === 'solved' &&
+            row.solver_user_id === user.id,
+        );
 
         if (includeMineBitmaps) {
           mineBitmaps.push(this.getChunkMineBitmap(chunkX, chunkY).mineBitmap);
@@ -350,12 +374,11 @@ export class ChunkService {
       }
     }
 
-    return includeMineBitmaps
-      ? {
-          states: packChunkStates(states.join('')),
-          mineBitmaps: mineBitmaps.join(''),
-        }
-      : packChunkStates(states.join(''));
+    return {
+      states: packChunkStates(states.join('')),
+      mineBitmaps: includeMineBitmaps ? mineBitmaps.join('') : null,
+      mySolvedMask: packChunkBits(mySolvedBits),
+    };
   }
 
   async getStats(req: Request) {

@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { House, ScanSquare, Share2, Square } from "lucide-react";
+import { House, Minus, Plus, ScanSquare, Share2, Square } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 import { Button } from "../ui/button";
+import { Toggle } from "../ui/toggle";
 import { Toaster } from "../ui/sonner";
 import {
   TransformComponent,
@@ -64,6 +65,7 @@ type CanvasViewportProps = {
   neighborMineLookup: CanvasChunkMineLookup | null;
   chunkArea: CanvasChunkAreaResponse | null;
   selectedChunkId: string | null;
+  showMySolvedOnly: boolean;
   onChunkClick: (chunkId: string) => void;
 };
 
@@ -71,6 +73,7 @@ const CanvasViewport = ({
   neighborMineLookup,
   chunkArea,
   selectedChunkId,
+  showMySolvedOnly,
   onChunkClick,
 }: CanvasViewportProps) => {
   const chunkByCoord = new Map(
@@ -125,7 +128,13 @@ const CanvasViewport = ({
       {(chunkArea?.chunks ?? []).map((chunk) => (
         <div
           key={`${chunk.chunkX}:${chunk.chunkY}`}
-          className="absolute"
+          className={`absolute ${
+            showMySolvedOnly &&
+            chunk.state === "solved" &&
+            !chunk.isSolvedByMe
+              ? "opacity-25"
+              : ""
+          }`}
           style={{
             left: chunk.chunkX * CHUNK_PIXEL_SIZE + CHUNK_ORIGIN_OFFSET,
             top: -chunk.chunkY * CHUNK_PIXEL_SIZE + CHUNK_ORIGIN_OFFSET,
@@ -188,6 +197,7 @@ const CanvasPage = () => {
   const [activeLock, setActiveLock] = useState<CanvasChunkData | null>(null);
   const [activeLockRemainingMs, setActiveLockRemainingMs] = useState(0);
   const [lockingChunkId, setLockingChunkId] = useState<string | null>(null);
+  const [showMySolvedOnly, setShowMySolvedOnly] = useState(false);
   const gridRef = useRef<HTMLDivElement>(null);
   const transformRef = useRef<ReactZoomPanPinchRef | null>(null);
   const gestureRef = useRef({
@@ -266,6 +276,14 @@ const CanvasPage = () => {
         updateChunkAreaBounds(state);
       }
     }, 500);
+  };
+
+  const zoomIn = () => {
+    transformRef.current?.zoomIn(0.15, 150, "easeOut");
+  };
+
+  const zoomOut = () => {
+    transformRef.current?.zoomOut(0.15, 150, "easeOut");
   };
 
   const locateChunk = (chunkX: number, chunkY: number) => {
@@ -505,14 +523,48 @@ const CanvasPage = () => {
             }}
           />
 
-          <Button
-            className="absolute left-4 top-4 z-50"
-            onClick={returnToDefaultView}
-            size="icon"
-            title="Return to default view"
-          >
-            <House />
-          </Button>
+          <div className="absolute left-2 top-2 md:left-4 md:top-4 z-50 flex flex-col gap-2 bg-card border px-2 py-2 shadow-lg md:py-4">
+            <div className="flex items-stretch gap-1">
+              <Button
+                onClick={returnToDefaultView}
+                size="icon"
+                title="Return to default view"
+                variant="secondary"
+              >
+                <House />
+              </Button>
+              <div className="flex flex-col gap-1 h-10">
+                <Button
+                  className="h-full w-10 [&_svg]:size-3"
+                  onClick={zoomIn}
+                  size="icon"
+                  title="Zoom in"
+                  variant="secondary"
+                >
+                  <Plus size={8} />
+                </Button>
+                <Button
+                  className="h-full w-10 [&_svg]:size-3"
+                  onClick={zoomOut}
+                  size="icon"
+                  title="Zoom out"
+                  variant="secondary"
+                >
+                  <Minus size={2} />
+                </Button>
+              </div>
+            </div>
+            <Toggle
+              className="h-min p-1"
+              disabled={!authUser}
+              variant="outline"
+              onPressedChange={(pressed) => setShowMySolvedOnly(pressed)}
+              title="Toggle solved filter"
+              pressed={showMySolvedOnly}
+            >
+              {showMySolvedOnly ? 'Owned' : 'All'}
+            </Toggle>
+          </div>
 
           {activeLock &&
             <div className="absolute top-0 md:top-4 left-1/2 gap-0 -translate-x-1/2 z-50 bg-card border flex flex-col w-full max-w-[600px] px-4 py-2 md:py-4 shadow-lg">
@@ -711,6 +763,7 @@ const CanvasPage = () => {
                   neighborMineLookup={neighborMineLookup}
                   chunkArea={chunkArea}
                   selectedChunkId={selectedChunkId}
+                  showMySolvedOnly={showMySolvedOnly}
                   onChunkClick={(chunkId) => {
                     if (gestureRef.current.dragged) {
                       gestureRef.current.dragged = false;

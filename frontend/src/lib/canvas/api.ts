@@ -16,6 +16,7 @@ export type CanvasChunk = {
   solverName: string | null;
   solvedAt: string | null;
   mineBitmap: string | null;
+  isSolvedByMe?: boolean;
 };
 
 export type CanvasChunkAreaResponse = {
@@ -24,6 +25,7 @@ export type CanvasChunkAreaResponse = {
   toChunkX: number;
   toChunkY: number;
   chunks: CanvasChunk[];
+  mySolvedMask: string | null;
 };
 
 export type CanvasStats = {
@@ -64,13 +66,36 @@ const decodeChunkStateBits = (packedStates: string, expectedStateCount: number) 
   return states.slice(0, expectedStateCount).join("");
 };
 
+const decodeChunkBitMask = (
+  packedBits: string | null,
+  expectedBitCount: number,
+) => {
+  if (!packedBits) {
+    return Array.from({ length: expectedBitCount }, () => false);
+  }
+
+  const binaryString = atob(packedBits);
+  const bits: boolean[] = [];
+
+  for (let byteIndex = 0; byteIndex < binaryString.length; byteIndex += 1) {
+    const byteValue = binaryString.charCodeAt(byteIndex);
+
+    for (let shift = 0; shift < 8; shift += 1) {
+      bits.push((byteValue & (1 << shift)) !== 0);
+    }
+  }
+
+  return bits.slice(0, expectedBitCount);
+};
+
 const decodeChunkStates = (
   states: string,
   fromChunkX: number,
   fromChunkY: number,
   toChunkX: number,
   toChunkY: number,
-  mineBitmaps?: string,
+  mineBitmaps?: string | null,
+  mySolvedMask?: string | null,
 ): CanvasChunkAreaResponse => {
   const startX = Math.min(fromChunkX, toChunkX);
   const endX = Math.max(fromChunkX, toChunkX);
@@ -80,10 +105,15 @@ const decodeChunkStates = (
   const expectedStateCount = width * (endY - startY + 1);
   const chunks: CanvasChunk[] = [];
   const stateStream = decodeChunkStateBits(states, expectedStateCount);
+  const solvedByMeStream = decodeChunkBitMask(mySolvedMask ?? null, expectedStateCount);
 
   for (let index = 0; index < stateStream.length; index += 1) {
     const stateCode = stateStream[index] as keyof typeof CHUNK_STATE_BY_CODE;
-    if (stateCode === "o" && mineBitmaps === undefined) {
+    if (
+      stateCode === "o" &&
+      mineBitmaps === undefined &&
+      mySolvedMask === undefined
+    ) {
       continue;
     }
 
@@ -107,6 +137,7 @@ const decodeChunkStates = (
       solverName: null,
       solvedAt: null,
       mineBitmap,
+      isSolvedByMe: solvedByMeStream[index] ?? false,
     });
   }
 
@@ -116,6 +147,7 @@ const decodeChunkStates = (
     toChunkX: endX,
     toChunkY: endY,
     chunks,
+    mySolvedMask: mySolvedMask ?? null,
   };
 };
 
@@ -185,9 +217,17 @@ export const getCanvasChunkArea = async (
   toChunkY: number,
   signal?: AbortSignal,
 ) => {
+  const accessToken = await getAuthAccessToken();
   const response = await fetch(
     `${getBackendUrl()}/place/chunks/area/${fromChunkX}/${fromChunkY}/${toChunkX}/${toChunkY}`,
-    { signal },
+    {
+      signal,
+      headers: accessToken
+        ? {
+            Authorization: `Bearer ${accessToken}`,
+          }
+        : undefined,
+    },
   );
 
   if (!response.ok) {
@@ -195,9 +235,10 @@ export const getCanvasChunkArea = async (
   }
 
   if (response.headers.get("content-type")?.includes("application/json")) {
-    const { states, mineBitmaps } = (await response.json()) as {
+    const { states, mineBitmaps, mySolvedMask } = (await response.json()) as {
       states: string;
-      mineBitmaps: string;
+      mineBitmaps: string | null;
+      mySolvedMask: string | null;
     };
 
     return decodeChunkStates(
@@ -207,6 +248,7 @@ export const getCanvasChunkArea = async (
       toChunkX,
       toChunkY,
       mineBitmaps,
+      mySolvedMask,
     );
   }
 
