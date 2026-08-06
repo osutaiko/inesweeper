@@ -355,8 +355,6 @@ export class ChunkService {
     const mineBitmaps: string[] = [];
     const edgeNibbleMaps: string[] = [];
     const mySolvedBits: boolean[] = [];
-    const includeMineBitmaps = areaSize <= this.maxMineBitmapAreaSize;
-
     for (let chunkY = endY; chunkY >= startY; chunkY -= 1) {
       for (let chunkX = startX; chunkX <= endX; chunkX++) {
         const row = rowByCoordinate.get(`${chunkX}:${chunkY}`);
@@ -368,7 +366,7 @@ export class ChunkService {
             row.solver_user_id === user.id,
         );
 
-        if (includeMineBitmaps && row?.state === 'solved') {
+        if (areaSize <= this.maxMineBitmapAreaSize) {
           mineBitmaps.push(buildChunkMineBitmap(chunkX, chunkY));
           edgeNibbleMaps.push(buildChunkEdgeNibbleMap(chunkX, chunkY));
         }
@@ -377,8 +375,8 @@ export class ChunkService {
 
     return {
       states: packChunkStates(states.join('')),
-      mineBitmaps: includeMineBitmaps ? mineBitmaps.join('') : null,
-      edgeNibbleMaps: includeMineBitmaps ? edgeNibbleMaps.join('') : null,
+      mineBitmaps: areaSize <= this.maxMineBitmapAreaSize ? mineBitmaps.join('') : null,
+      edgeNibbleMaps: areaSize <= this.maxMineBitmapAreaSize ? edgeNibbleMaps.join('') : null,
       mySolvedMask: packChunkBits(mySolvedBits),
     };
   }

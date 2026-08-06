@@ -129,34 +129,17 @@ const decodeChunkStates = (
   const chunks: CanvasChunk[] = [];
   const stateStream = decodeChunkStateBits(states, expectedStateCount);
   const solvedByMeStream = decodeChunkBitMask(mySolvedMask, expectedStateCount);
-  let mineBitmapOffset = 0;
-  let edgeNibbleMapOffset = 0;
+  const mineBitmapChunkLength = MINE_BITMAP_BASE64_LENGTH;
+  const edgeNibbleMapChunkLength = EDGE_NIBBLE_MAP_BASE64_LENGTH;
 
   for (let index = 0; index < stateStream.length; index ++) {
     const stateCode = stateStream[index] as keyof typeof CHUNK_STATE_BY_CODE;
-    const mineBitmap =
-      mineBitmaps && stateCode === "s"
-        ? mineBitmaps.slice(
-            mineBitmapOffset,
-            mineBitmapOffset + MINE_BITMAP_BASE64_LENGTH,
-          )
-        : null;
-
-    if (stateCode === "s") {
-      mineBitmapOffset += MINE_BITMAP_BASE64_LENGTH;
-    }
-
-    const edgeNibbleMap =
-      edgeNibbleMaps && stateCode === "s"
-        ? edgeNibbleMaps.slice(
-            edgeNibbleMapOffset,
-            edgeNibbleMapOffset + EDGE_NIBBLE_MAP_BASE64_LENGTH,
-          )
-        : null;
-
-    if (stateCode === "s") {
-      edgeNibbleMapOffset += EDGE_NIBBLE_MAP_BASE64_LENGTH;
-    }
+    const mineBitmap = mineBitmaps
+      ? mineBitmaps.slice(index * mineBitmapChunkLength, (index + 1) * mineBitmapChunkLength)
+      : null;
+    const edgeNibbleMap = edgeNibbleMaps
+      ? edgeNibbleMaps.slice(index * edgeNibbleMapChunkLength, (index + 1) * edgeNibbleMapChunkLength)
+      : null;
 
     chunks.push({
       chunkX: startX + (index % width),
