@@ -1,14 +1,24 @@
 import { chacha20 } from '@noble/ciphers/chacha.js';
 
-import { CHUNK_SIZE } from './coordinates';
-
-export type ChunkMineBitmap = {
-  chunkX: number;
-  chunkY: number;
-  mineBitmap: string;
-};
+import { CHUNK_SIZE, worldToChunkCoordinate } from './coordinates';
 
 const MINE_THRESHOLD = 40;
+const CHUNK_BOUNDARY_COORDINATES = [
+  ...Array.from({ length: CHUNK_SIZE }, (_, localX) => ({ localX, localY: CHUNK_SIZE - 1 })),
+  ...Array.from({ length: CHUNK_SIZE - 2 }, (_, index) => ({
+    localX: CHUNK_SIZE - 1,
+    localY: CHUNK_SIZE - 2 - index,
+  })),
+  ...Array.from({ length: CHUNK_SIZE }, (_, index) => ({
+    localX: CHUNK_SIZE - 1 - index,
+    localY: 0,
+  })),
+  ...Array.from({ length: CHUNK_SIZE - 2 }, (_, index) => ({
+    localX: 0,
+    localY: index + 1,
+  })),
+] as const;
+
 let boardKey: Buffer | null = null;
 
 const getBoardSecretEnv = () => {
@@ -50,6 +60,19 @@ const setBitmapBit = (bitmap: Buffer, bitIndex: number) => {
   bitmap[byteIndex] |= bitMask;
 };
 
+const packChunkNibbles = (values: number[]) => {
+  const packed = Buffer.alloc(Math.ceil(values.length / 2));
+
+  for (let index = 0; index < values.length; index++) {
+    const value = values[index] ?? 0;
+    const byteIndex = index >> 1;
+    const shift = (index & 1) << 2;
+    packed[byteIndex] |= (value & 0x0f) << shift;
+  }
+
+  return packed.toString('base64');
+};
+
 export const isMineAtWorldCoordinate = (worldX: number, worldY: number) => {
   const chunkX = Math.floor(worldX / CHUNK_SIZE);
   const chunkY = Math.floor(worldY / CHUNK_SIZE);
@@ -64,19 +87,55 @@ export const isMineAtWorldCoordinate = (worldX: number, worldY: number) => {
 export const buildChunkMineBitmap = (
   chunkX: number,
   chunkY: number,
-): ChunkMineBitmap => {
+): string => {
   const chunkStream = getChunkStream(chunkX, chunkY);
   const mineBitmap = Buffer.alloc((CHUNK_SIZE * CHUNK_SIZE) / 8);
 
-  for (let cellIndex = 0; cellIndex < CHUNK_SIZE * CHUNK_SIZE; cellIndex += 1) {
+  for (let cellIndex = 0; cellIndex < CHUNK_SIZE * CHUNK_SIZE; cellIndex++) {
     if (chunkStream[cellIndex] < MINE_THRESHOLD) {
       setBitmapBit(mineBitmap, cellIndex);
     }
   }
 
-  return {
-    chunkX,
-    chunkY,
-    mineBitmap: mineBitmap.toString('base64'),
-  };
+  return mineBitmap.toString('base64');
 };
+
+export const buildChunkEdgeNibbleMap = (
+  chunkX: number,
+  chunkY: number,
+): string => {
+  const edgeNibbleMap = CHUNK_BOUNDARY_COORDINATES.map(({ localX, localY }) => {
+    const worldX = chunkX * CHUNK_SIZE + localX;
+    const worldY = chunkY * CHUNK_SIZE + localY;
+    let count = 0;
+
+    for (let dy = -1; dy <= 1; dy++) {
+      for (let dx = -1; dx <= 1; dx++) {
+        if (dx === 0 && dy === 0) {
+          continue;
+        }
+
+        const neighborWorldX = worldX + dx;
+        const neighborWorldY = worldY + dy;
+        const neighborChunk = worldToChunkCoordinate(
+          neighborWorldX,
+          neighborWorldY,
+        );
+
+        if (
+          neighborChunk.chunkX !== chunkX ||
+          neighborChunk.chunkY !== chunkY
+        ) {
+          if (isMineAtWorldCoordinate(neighborWorldX, neighborWorldY)) {
+            count++;
+          }
+        }
+      }
+    }
+
+    return count;
+  });
+
+  return packChunkNibbles(edgeNibbleMap);
+};
+

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { House, Minus, Plus, ScanSquare, Share2, Square } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -18,14 +18,12 @@ import SelectedChunkOverlay from "./SelectedChunkOverlay";
 import { formatChunkCoordinates } from "@/lib/canvas/coordinates";
 import { formatChunkShareText } from "@/lib/canvas/share";
 import {
-  buildCanvasMineLookup,
   getActiveCanvasLock,
   getCanvasChunk,
   getCanvasChunkArea,
   lockCanvasChunk,
   type CanvasChunk as CanvasChunkData,
   type CanvasChunkAreaResponse,
-  type CanvasChunkMineLookup,
 } from "@/lib/canvas/api";
 import { getMsParts, timeLeftUntil } from "@/lib/utils";
 
@@ -62,7 +60,6 @@ const updateChunkGrid = (
 };
 
 type CanvasViewportProps = {
-  neighborMineLookup: CanvasChunkMineLookup | null;
   chunkArea: CanvasChunkAreaResponse | null;
   selectedChunkId: string | null;
   showMySolvedOnly: boolean;
@@ -70,7 +67,6 @@ type CanvasViewportProps = {
 };
 
 const CanvasViewport = ({
-  neighborMineLookup,
   chunkArea,
   selectedChunkId,
   showMySolvedOnly,
@@ -151,11 +147,11 @@ const CanvasViewport = ({
                     hasSolvedNeighbor(chunk.chunkX, chunk.chunkY)
                   ? "bg-game-chunklocked"
                   : ""
-            }
-            mineBitmap={chunk.mineBitmap}
-            neighborMineLookup={neighborMineLookup}
-            onClick={() => onChunkClick(`${chunk.chunkX}:${chunk.chunkY}`)}
-          />
+              }
+              mineBitmap={chunk.mineBitmap}
+              edgeNibbleMap={chunk.edgeNibbleMap}
+              onClick={() => onChunkClick(`${chunk.chunkX}:${chunk.chunkY}`)}
+            />
         </div>
       ))}
       {[...claimableChunkIds].map((chunkId) => {
@@ -427,10 +423,6 @@ const CanvasPage = () => {
     };
   }, [selectedChunkId]);
 
-  const neighborMineLookup = useMemo(
-    () => chunkArea ? buildCanvasMineLookup(chunkArea.chunks) : null,
-    [chunkArea],
-  );
   const selectedChunkOwnerName =
     selectedChunk?.state === "locked"
       ? selectedChunk.lockedByName
@@ -475,9 +467,7 @@ const CanvasPage = () => {
 
   const handleShareChunk = async (chunk: CanvasChunkData) => {
     try {
-      await navigator.clipboard.writeText(
-        formatChunkShareText(chunk, neighborMineLookup),
-      );
+      await navigator.clipboard.writeText(formatChunkShareText(chunk));
       toast("Copied to clipboard");
     } catch {
       toast.error("Failed to copy to clipboard");
@@ -762,7 +752,6 @@ const CanvasPage = () => {
                 }}
               >
                 <CanvasViewport
-                  neighborMineLookup={neighborMineLookup}
                   chunkArea={chunkArea}
                   selectedChunkId={selectedChunkId}
                   showMySolvedOnly={showMySolvedOnly}

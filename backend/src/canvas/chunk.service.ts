@@ -7,7 +7,10 @@ import {
 import type { Request } from 'express';
 
 import { AuthService } from '../auth/auth.service';
-import { buildChunkMineBitmap } from './chunk-board';
+import {
+  buildChunkEdgeNibbleMap,
+  buildChunkMineBitmap,
+} from './chunk-board';
 import type { Chunk, ChunkRecord } from './chunk.types';
 
 type ChunkRow = {
@@ -35,7 +38,7 @@ const chunkStateCode = {
 const packChunkStates = (states: string) => {
   const packed = Buffer.alloc(Math.ceil(states.length / 4));
 
-  for (let index = 0; index < states.length; index += 1) {
+  for (let index = 0; index < states.length; index++) {
     const state = states[index];
     const byteIndex = index >> 2;
     const bitOffset = (index & 3) << 1;
@@ -51,7 +54,7 @@ const packChunkStates = (states: string) => {
 const packChunkBits = (bits: boolean[]) => {
   const packed = Buffer.alloc(Math.ceil(bits.length / 8));
 
-  for (let index = 0; index < bits.length; index += 1) {
+  for (let index = 0; index < bits.length; index++) {
     if (bits[index]) {
       packed[index >> 3] |= 1 << (index & 7);
     }
@@ -195,10 +198,6 @@ export class ChunkService {
     } satisfies ChunkRecord;
   }
 
-  private getChunkMineBitmap(chunkX: number, chunkY: number) {
-    return buildChunkMineBitmap(chunkX, chunkY);
-  }
-
   private withChunkMineBitmap(
     chunk: ChunkRecord,
     userId: string | null,
@@ -217,15 +216,15 @@ export class ChunkService {
         ...chunk,
         ...names,
         mineBitmap: null,
+        edgeNibbleMap: null,
       };
     }
-
-    const mineBitmap = this.getChunkMineBitmap(chunk.chunkX, chunk.chunkY);
 
     return {
       ...chunk,
       ...names,
-      mineBitmap: mineBitmap.mineBitmap,
+      mineBitmap: buildChunkMineBitmap(chunk.chunkX, chunk.chunkY),
+      edgeNibbleMap: buildChunkEdgeNibbleMap(chunk.chunkX, chunk.chunkY),
     };
   }
 
@@ -354,11 +353,12 @@ export class ChunkService {
     );
     const states: string[] = [];
     const mineBitmaps: string[] = [];
+    const edgeNibbleMaps: string[] = [];
     const mySolvedBits: boolean[] = [];
     const includeMineBitmaps = areaSize <= this.maxMineBitmapAreaSize;
 
     for (let chunkY = endY; chunkY >= startY; chunkY -= 1) {
-      for (let chunkX = startX; chunkX <= endX; chunkX += 1) {
+      for (let chunkX = startX; chunkX <= endX; chunkX++) {
         const row = rowByCoordinate.get(`${chunkX}:${chunkY}`);
         const state = stateByCoordinate.get(`${chunkX}:${chunkY}`) ?? 'o';
         states.push(state);
@@ -368,8 +368,9 @@ export class ChunkService {
             row.solver_user_id === user.id,
         );
 
-        if (includeMineBitmaps) {
-          mineBitmaps.push(this.getChunkMineBitmap(chunkX, chunkY).mineBitmap);
+        if (includeMineBitmaps && row?.state === 'solved') {
+          mineBitmaps.push(buildChunkMineBitmap(chunkX, chunkY));
+          edgeNibbleMaps.push(buildChunkEdgeNibbleMap(chunkX, chunkY));
         }
       }
     }
@@ -377,6 +378,7 @@ export class ChunkService {
     return {
       states: packChunkStates(states.join('')),
       mineBitmaps: includeMineBitmaps ? mineBitmaps.join('') : null,
+      edgeNibbleMaps: includeMineBitmaps ? edgeNibbleMaps.join('') : null,
       mySolvedMask: packChunkBits(mySolvedBits),
     };
   }
@@ -421,7 +423,11 @@ export class ChunkService {
       solverName: chunk.solverUserId ? userName : null,
       mineBitmap:
         chunk.state === 'solved'
-          ? this.getChunkMineBitmap(chunkX, chunkY).mineBitmap
+          ? buildChunkMineBitmap(chunkX, chunkY)
+          : null,
+        edgeNibbleMap:
+          chunk.state === 'solved'
+          ? buildChunkEdgeNibbleMap(chunkX, chunkY)
           : null,
     };
   }

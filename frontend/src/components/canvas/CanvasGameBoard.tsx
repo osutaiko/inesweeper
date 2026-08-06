@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ClockFading } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -14,15 +14,19 @@ import {
   DialogTitle,
 } from "../ui/dialog";
 import {
-  buildCanvasMineLookup,
+  decodeEdgeNibbleMap,
+  decodeMineBitmap,
+  isMineInBitmap,
   failCanvasChunk,
   solveCanvasChunk,
   type CanvasChunk,
   type CanvasChunkAreaResponse,
 } from "@/lib/canvas/api";
 import {
+  CHUNK_EDGE_INDEX_BY_LOCAL,
   CHUNK_SIZE,
   formatChunkCoordinates,
+  iterateAdjacentOffsets,
 } from "@/lib/canvas/coordinates";
 import { useMinesweeperControls } from "@/hooks/useMinesweeperControls";
 import {
@@ -75,19 +79,27 @@ const chordInitialBorderCells = (board: Board) => {
   let chordedBoard = board;
   const borderStart = CONTEXT_SIZE - 1;
   const borderEnd = CONTEXT_SIZE + CHUNK_SIZE;
+
   const chordNullCell = (row: number, col: number) => {
     const cell = board[row][col];
+
     if (cell.state.type === "revealed" && cell.state.num === null) {
-      chordedBoard = handleChord(chordedBoard, row, col, SOLVER_CONFIG, isInsideTargetChunk);
+      chordedBoard = handleChord(
+        chordedBoard,
+        row,
+        col,
+        SOLVER_CONFIG,
+        isInsideTargetChunk,
+      );
     }
   };
 
-  for (let position = borderStart; position <= borderEnd; position += 1) {
+  for (let position = borderStart; position <= borderEnd; position++) {
     chordNullCell(borderStart, position);
     chordNullCell(borderEnd, position);
   }
 
-  for (let position = CONTEXT_SIZE; position < borderEnd; position += 1) {
+  for (let position = CONTEXT_SIZE; position < borderEnd; position++) {
     chordNullCell(position, borderStart);
     chordNullCell(position, borderEnd);
   }
@@ -130,52 +142,84 @@ const CanvasGameBoard = ({
       areaChunk,
     ]),
   );
-  const mineLookup = buildCanvasMineLookup(chunks);
-  const minWorldX = chunk.chunkX * CHUNK_SIZE - CONTEXT_SIZE;
-  const maxWorldY =
-    chunk.chunkY * CHUNK_SIZE + CHUNK_SIZE - 1 + CONTEXT_SIZE;
+  const initialBoard: Board = useMemo(
+    () =>
+      Array.from({ length: SOLVER_SIZE }, (_, row) =>
+        Array.from({ length: SOLVER_SIZE }, (_, col) => {
+          const worldX = (chunk.chunkX * CHUNK_SIZE) - CONTEXT_SIZE + col;
+          const worldY = (chunk.chunkY * CHUNK_SIZE) + CHUNK_SIZE - 1 + CONTEXT_SIZE - row;
+          const cellChunkX = Math.floor(worldX / CHUNK_SIZE);
+          const cellChunkY = Math.floor(worldY / CHUNK_SIZE);
+          const chunkAtCell = chunkByCoord.get(`${cellChunkX}:${cellChunkY}`);
+          const isSolvedContext = chunkAtCell?.state === "solved";
+          const localX = worldX - cellChunkX * CHUNK_SIZE;
+          const localY = worldY - cellChunkY * CHUNK_SIZE;
+          const mineBitmapBytes = decodeMineBitmap(chunkAtCell?.mineBitmap ?? null);
+          const isMine =
+            mineBitmapBytes !== null &&
+            isMineInBitmap(mineBitmapBytes, localX, localY);
+          let neighborCount = 0;
 
-  const initialBoard: Board = Array.from({ length: SOLVER_SIZE }, (_, row) =>
-    Array.from({ length: SOLVER_SIZE }, (_, col) => {
-      const worldX = minWorldX + col;
-      const worldY = maxWorldY - row;
-      const cellChunkX = Math.floor(worldX / CHUNK_SIZE);
-      const cellChunkY = Math.floor(worldY / CHUNK_SIZE);
-      const isSolvedContext =
-        chunkByCoord.get(`${cellChunkX}:${cellChunkY}`)?.state === "solved";
-      const mineNum = mineLookup(worldX, worldY) ? 1 : 0;
-      let neighborCount = 0;
+          if (isSolvedContext && mineBitmapBytes && !isMine) {
+            iterateAdjacentOffsets((dx, dy) => {
+              const neighborLocalX = localX + dx;
+              const neighborLocalY = localY + dy;
 
-      if (isSolvedContext && !mineNum) {
-        for (let deltaY = -1; deltaY <= 1; deltaY += 1) {
-          for (let deltaX = -1; deltaX <= 1; deltaX += 1) {
-            if (
-              (deltaX !== 0 || deltaY !== 0) &&
-              mineLookup(worldX + deltaX, worldY + deltaY)
-            ) {
-              neighborCount += 1;
-            }
+              if (
+                neighborLocalX < 0 ||
+                neighborLocalX >= CHUNK_SIZE ||
+                neighborLocalY < 0 ||
+                neighborLocalY >= CHUNK_SIZE
+              ) {
+                return;
+              }
+
+              if (
+                isMineInBitmap(
+                  mineBitmapBytes,
+                  neighborLocalX,
+                  neighborLocalY,
+                )
+              ) {
+                neighborCount++;
+              }
+            });
           }
-        }
-      }
 
-      return {
-        mineNum,
-        state: isSolvedContext
-          ? mineNum
-            ? { type: "flagged" as const, flagNum: 1 }
-            : {
-              type: "revealed" as const,
-              num: neighborCount || null,
-            }
-          : { type: "hidden" as const },
-      };
-    }),
+          const edgeNibbleMap =
+            chunkAtCell?.edgeNibbleMap === null
+              ? null
+              : decodeEdgeNibbleMap(chunkAtCell?.edgeNibbleMap ?? null);
+          const boundaryIndex =
+            CHUNK_EDGE_INDEX_BY_LOCAL.get(`${localX}:${localY}`) ?? -1;
+          const boundaryCount =
+            boundaryIndex >= 0 && edgeNibbleMap
+              ? edgeNibbleMap[boundaryIndex] ?? 0
+              : 0;
+
+          return {
+            mineNum: isMine ? 1 : 0,
+            state: isSolvedContext
+              ? isMine
+                ? { type: "flagged" as const, flagNum: 1 }
+                : {
+                    type: "revealed" as const,
+                    num: (neighborCount + boundaryCount) || null,
+                  }
+              : { type: "hidden" as const },
+          };
+        }),
+      ),
+    [chunk.chunkX, chunk.chunkY, chunkByCoord],
   );
   const [initialChordedBoard] = useState<Board>(() =>
     chordInitialBorderCells(initialBoard),
   );
   const [board, setBoard] = useState<Board>(initialChordedBoard);
+
+  useEffect(() => {
+    setBoard(initialChordedBoard);
+  }, [initialChordedBoard]);
 
   const doAfterLoss = (reason: "mine" | "expired") => {
     if (isGameOverRef.current) {
@@ -500,3 +544,5 @@ const CanvasGameBoard = ({
 };
 
 export default CanvasGameBoard;
+
+

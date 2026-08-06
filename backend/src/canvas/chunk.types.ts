@@ -1,5 +1,3 @@
-import type { ChunkMineBitmap } from './chunk-board';
-
 export type Chunk = {
   chunkX: number;
   chunkY: number;
@@ -11,7 +9,8 @@ export type Chunk = {
   solverUserId: string | null;
   solverName: string | null;
   solvedAt: string | null;
-  mineBitmap: ChunkMineBitmap['mineBitmap'] | null;
+  mineBitmap: string | null;
+  edgeNibbleMap: string | null;
 };
 
 export type ChunkRecord = {

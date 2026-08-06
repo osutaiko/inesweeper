@@ -1,11 +1,11 @@
 import { useEffect, useRef } from "react";
 
-import { CHUNK_SIZE } from "@/lib/canvas/coordinates";
 import {
-  decodeMineBitmap,
-  isMineInBitmap,
-  type CanvasChunkMineLookup,
-} from "@/lib/canvas/api";
+  CHUNK_EDGE_INDEX_BY_LOCAL,
+  CHUNK_SIZE,
+  iterateAdjacentOffsets,
+} from "@/lib/canvas/coordinates";
+import { decodeEdgeNibbleMap, decodeMineBitmap, isMineInBitmap } from "@/lib/canvas/api";
 import { LockKeyhole } from "lucide-react";
 
 const CELL_SIZE = 30;
@@ -17,43 +17,21 @@ type CanvasChunkProps = {
   state: "open" | "locked" | "solved";
   colorClassName: string;
   mineBitmap: string | null;
-  neighborMineLookup: CanvasChunkMineLookup | null;
+  edgeNibbleMap: string | null;
   onClick: () => void;
 };
 
 const getNumberColorProperty = (num: number) =>
   `--game-number-${num % 8 === 0 ? 8 : num % 8}`;
 
-const getNeighborCount = (
-  neighborMineLookup: CanvasChunkMineLookup,
-  worldX: number,
-  worldY: number,
-) => {
-  let neighborCount = 0;
-
-  for (let deltaY = -1; deltaY <= 1; deltaY += 1) {
-    for (let deltaX = -1; deltaX <= 1; deltaX += 1) {
-      if (deltaX === 0 && deltaY === 0) {
-        continue;
-      }
-
-      if (neighborMineLookup(worldX + deltaX, worldY + deltaY)) {
-        neighborCount += 1;
-      }
-    }
-  }
-
-  return neighborCount;
-};
-
 const CanvasChunkPreview = ({
   chunkX,
   chunkY,
   mineBitmap,
-  neighborMineLookup,
+  edgeNibbleMap,
 }: Pick<
   CanvasChunkProps,
-  "chunkX" | "chunkY" | "mineBitmap" | "neighborMineLookup"
+  "chunkX" | "chunkY" | "mineBitmap" | "edgeNibbleMap"
 >) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -69,6 +47,7 @@ const CanvasChunkPreview = ({
     }
 
     const mineBitmapBytes = decodeMineBitmap(mineBitmap);
+    const edgeNibbleMapBytes = decodeEdgeNibbleMap(edgeNibbleMap);
     const draw = () => {
       const styles = getComputedStyle(document.documentElement);
       const gameBorder = styles.getPropertyValue("--game-border");
@@ -80,19 +59,52 @@ const CanvasChunkPreview = ({
       context.textAlign = "center";
       context.textBaseline = "middle";
 
-      for (let displayRow = 0; displayRow < CHUNK_SIZE; displayRow += 1) {
+      for (let displayRow = 0; displayRow < CHUNK_SIZE; displayRow++) {
         const localY = CHUNK_SIZE - 1 - displayRow;
 
-        for (let localX = 0; localX < CHUNK_SIZE; localX += 1) {
-          const worldX = chunkX * CHUNK_SIZE + localX;
-          const worldY = chunkY * CHUNK_SIZE + localY;
+        for (let localX = 0; localX < CHUNK_SIZE; localX++) {
           const isMine =
             mineBitmapBytes !== null &&
             isMineInBitmap(mineBitmapBytes, localX, localY);
-          const neighborCount =
-            !isMine && neighborMineLookup
-              ? getNeighborCount(neighborMineLookup, worldX, worldY)
+          const internalNeighborCount =
+            !isMine && mineBitmapBytes
+              ? (() => {
+                  let count = 0;
+
+                  iterateAdjacentOffsets((dx, dy) => {
+                    const neighborLocalX = localX + dx;
+                    const neighborLocalY = localY + dy;
+
+                    if (
+                      neighborLocalX < 0 ||
+                      neighborLocalX >= CHUNK_SIZE ||
+                      neighborLocalY < 0 ||
+                      neighborLocalY >= CHUNK_SIZE
+                    ) {
+                      return;
+                    }
+
+                    if (
+                      isMineInBitmap(
+                        mineBitmapBytes,
+                        neighborLocalX,
+                        neighborLocalY,
+                      )
+                    ) {
+                      count++;
+                    }
+                  });
+
+                  return count;
+                })()
               : 0;
+          const edgeCount =
+            !isMine && edgeNibbleMapBytes
+              ? edgeNibbleMapBytes[
+                  CHUNK_EDGE_INDEX_BY_LOCAL.get(`${localX}:${localY}`) ?? -1
+                ] ?? 0
+              : 0;
+          const neighborCount = internalNeighborCount + edgeCount;
           const cellX = localX * CELL_SIZE;
           const cellY = displayRow * CELL_SIZE;
 
@@ -137,7 +149,7 @@ const CanvasChunkPreview = ({
     });
 
     return () => themeObserver.disconnect();
-  }, [chunkX, chunkY, mineBitmap, neighborMineLookup]);
+  }, [chunkX, chunkY, edgeNibbleMap, mineBitmap]);
 
   return (
     <canvas
@@ -156,7 +168,7 @@ const CanvasChunk = ({
   state,
   colorClassName,
   mineBitmap,
-  neighborMineLookup,
+  edgeNibbleMap,
   onClick,
 }: CanvasChunkProps) => {
   const renderDetails = mineBitmap !== null;
@@ -188,7 +200,7 @@ const CanvasChunk = ({
           chunkX={chunkX}
           chunkY={chunkY}
           mineBitmap={mineBitmap}
-          neighborMineLookup={neighborMineLookup}
+          edgeNibbleMap={edgeNibbleMap}
         />
       )}
     </div>
@@ -196,3 +208,5 @@ const CanvasChunk = ({
 };
 
 export default CanvasChunk;
+
+

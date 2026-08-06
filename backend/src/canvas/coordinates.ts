@@ -64,8 +64,8 @@ export const getChunkCellCoordinate = (
 export const listChunkLocalCoordinates = () => {
   const coordinates: LocalCoordinate[] = [];
 
-  for (let localY = 0; localY < CHUNK_SIZE; localY += 1) {
-    for (let localX = 0; localX < CHUNK_SIZE; localX += 1) {
+  for (let localY = 0; localY < CHUNK_SIZE; localY++) {
+    for (let localX = 0; localX < CHUNK_SIZE; localX++) {
       coordinates.push({ localX, localY });
     }
   }
