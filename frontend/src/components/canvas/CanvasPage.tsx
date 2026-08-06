@@ -523,7 +523,7 @@ const CanvasPage = () => {
             }}
           />
 
-          <div className="absolute left-2 top-2 md:left-4 md:top-4 z-50 flex flex-col gap-2 bg-card border px-2 py-2 shadow-lg md:py-4">
+          <div className="absolute left-2 top-2 md:left-4 md:top-4 z-50 flex flex-col gap-2 bg-card border px-2 py-2 shadow-lg">
             <div className="flex items-stretch gap-1">
               <Button
                 onClick={returnToDefaultView}
@@ -554,16 +554,18 @@ const CanvasPage = () => {
                 </Button>
               </div>
             </div>
-            <Toggle
-              className="h-min p-1"
-              disabled={!authUser}
-              variant="outline"
-              onPressedChange={(pressed) => setShowMySolvedOnly(pressed)}
-              title="Toggle solved filter"
-              pressed={showMySolvedOnly}
-            >
-              {showMySolvedOnly ? 'Owned' : 'All'}
-            </Toggle>
+            {showMySolvedOnly &&
+              <Toggle
+                className="h-min p-1"
+                disabled={!authUser}
+                variant="outline"
+                onPressedChange={(pressed) => setShowMySolvedOnly(pressed)}
+                title="Toggle solved filter"
+                pressed={showMySolvedOnly}
+              >
+                {showMySolvedOnly ? 'Owned' : 'All'}
+              </Toggle>
+            }
           </div>
 
           {activeLock &&
