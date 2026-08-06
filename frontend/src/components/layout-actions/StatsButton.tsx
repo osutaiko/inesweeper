@@ -43,7 +43,7 @@ const ScoreTable = ({ isDesktop, records, compareRecords }: ScoreTableProps) => 
       </TableRow>
     </TableHeader>
     <TableBody>
-      {Object.keys(boardConfigLibrary).map((mode) => (
+      {Object.keys(boardConfigLibrary).filter((mode) => mode !== "nearest2").map((mode) => (
         <TableRow key={mode}>
           <TableCell className="px-4 py-2 font-bold">
             {variantMap[mode as keyof typeof variantMap]}

@@ -120,7 +120,7 @@ export const variantGroups: VariantGroup[] = [
       { value: "crossed", label: variantMap.crossed },
       { value: "knight", label: variantMap.knight },
       { value: "compass", label: variantMap.compass },
-      { value: "nearest2", label: variantMap.nearest2 },
+      // { value: "nearest2", label: variantMap.nearest2 },
     ],
   },
   {
