@@ -554,7 +554,7 @@ const CanvasPage = () => {
                 </Button>
               </div>
             </div>
-            {showMySolvedOnly &&
+            {authUser &&
               <Toggle
                 className="h-min p-1"
                 disabled={!authUser}
