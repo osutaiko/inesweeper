@@ -4,6 +4,7 @@ import { createDemoBoard } from "@/lib/constants";
 import { createBoard, handleClick, handleChord, handleFlag, handleBeforeFirstClick as updateBoardBeforeFirstClick, isWin, isLoss, countRemainingFlags, extractMinesFromBoard, flagAllMines, iterateNeighbors } from "@/lib/minesweeper";
 import { formatTimeMs } from "@/lib/utils";
 import { useMinesweeperControls } from "@/hooks/useMinesweeperControls";
+import { useSiteLayout } from "./Layout";
 
 import { Laugh, Meh, Skull, Smile } from "lucide-react";
 import { Button } from "./ui/button";
@@ -12,14 +13,12 @@ import TouchFlagButton from "./TouchFlagButton";
 
 export const GameBoard: React.FC<{
   config: BoardConfig;
-  zoom: number;
-  flagButtonSize: number;
-  flagButtonPosition: string;
   touchHoldDelay: number;
   isTouchscreen: boolean;
   addRecord: (record: TimeRecord) => void;
-}> = ({ config, zoom, flagButtonSize, flagButtonPosition, touchHoldDelay, isTouchscreen, addRecord }) => {
+ }> = ({ config, touchHoldDelay, isTouchscreen, addRecord }) => {
   const isDemoBoard = false;
+  const { chordingMode, zoom, flagButtonSize, flagButtonPosition } = useSiteLayout();
   const [board, setBoard] = useState<Board>(isDemoBoard ? createDemoBoard() : (createBoard(config) || []));
   const [isFirstClick, setIsFirstClick] = useState(true);
   const [isFlagToggled, setIsFlagToggled] = useState(false);
@@ -174,6 +173,7 @@ export const GameBoard: React.FC<{
     onChord: (row, col) => {
       setBoard(handleChord(board, row, col, config));
     },
+    chordingMode,
   });
 
   const {

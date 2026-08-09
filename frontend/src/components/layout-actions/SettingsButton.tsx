@@ -26,6 +26,8 @@ type SettingsButtonProps = {
   setFlagButtonSize: Dispatch<SetStateAction<number>>;
   flagButtonPosition: string;
   setFlagButtonPosition: Dispatch<SetStateAction<string>>;
+  chordingMode: "lmb" | "l+rmb";
+  setChordingMode: Dispatch<SetStateAction<"lmb" | "l+rmb">>;
   touchHoldDelay: number;
   setTouchHoldDelay: Dispatch<SetStateAction<number>>;
   resetPreferences: () => void;
@@ -39,6 +41,8 @@ const SettingsButton = ({
   setFlagButtonSize,
   flagButtonPosition,
   setFlagButtonPosition,
+  chordingMode,
+  setChordingMode,
   touchHoldDelay,
   setTouchHoldDelay,
   resetPreferences,
@@ -65,6 +69,18 @@ const SettingsButton = ({
           <div className="flex flex-row justify-between items-center gap-3">
             <span className="w-1/2">Board scale: {zoom}%</span>
             <Slider className="w-1/2" value={[zoom]} onValueChange={(value) => setZoom(value[0])} min={60} max={200} step={10} />
+          </div>
+          <div className="flex flex-row justify-between items-center gap-3">
+            <span className="w-1/2">Chording</span>
+            <Select value={chordingMode} onValueChange={(value) => setChordingMode(value as "lmb" | "l+rmb")}>
+              <SelectTrigger className="w-[180px] max-w-1/2">
+                <SelectValue placeholder="LMB" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="lmb">LMB</SelectItem>
+                <SelectItem value="l+rmb">L+RMB</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           {isTouchscreen && (
             <>

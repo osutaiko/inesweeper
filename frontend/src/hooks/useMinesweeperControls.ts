@@ -8,6 +8,7 @@ type MinesweeperControlsOptions = {
   isTouchscreen?: boolean;
   touchHoldDelay?: number;
   isFlagToggled?: boolean;
+  chordingMode?: "lmb" | "l+rmb";
   canReveal: CellPredicate;
   canFlag: CellPredicate;
   canChord: CellPredicate;
@@ -22,6 +23,7 @@ export const useMinesweeperControls = ({
   isTouchscreen = false,
   touchHoldDelay = 200,
   isFlagToggled = false,
+  chordingMode = "lmb",
   canReveal,
   canFlag,
   canChord,
@@ -77,13 +79,12 @@ export const useMinesweeperControls = ({
 
     if (e.button === 0) {
       setIsLmbDown(false);
-      if (isRmbDown) {
+      if (canReveal(row, col)) {
+        onReveal(row, col);
+      }
+      if (chordingMode === 'lmb' || (chordingMode === 'l+rmb' && isRmbDown)) {
         if (canChord(row, col)) {
           onChord(row, col);
-        }
-      } else {
-        if (canReveal(row, col)) {
-          onReveal(row, col);
         }
       }
     } else if (e.button === 1) {
@@ -92,7 +93,7 @@ export const useMinesweeperControls = ({
       }
     } else if (e.button === 2) {
       setIsRmbDown(false);
-      if (isLmbDown) {
+      if (chordingMode === 'l+rmb' && isLmbDown) {
         if (canChord(row, col)) {
           onChord(row, col);
         }

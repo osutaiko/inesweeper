@@ -51,6 +51,7 @@ type SiteLayoutContextValue = {
   zoom: number;
   flagButtonSize: number;
   flagButtonPosition: string;
+  chordingMode: "lmb" | "l+rmb";
 };
 
 const SiteLayoutContext = createContext<SiteLayoutContextValue | null>(null);
@@ -72,6 +73,7 @@ const Layout = ({ children }: {
   const DEFAULT_ZOOM = 100;
   const DEFAULT_FLAG_BUTTON_SIZE = 72;
   const DEFAULT_FLAG_BUTTON_POSITION = "bottom-right";
+  const DEFAULT_CHORDING_MODE = "lmb";
   const DEFAULT_TOUCH_HOLD_DELAY = 200;
 
   // For conditional rendering of flag toggle
@@ -88,6 +90,7 @@ const Layout = ({ children }: {
   const [zoom, setZoom] = useState(DEFAULT_ZOOM);
   const [flagButtonSize, setFlagButtonSize] = useState(DEFAULT_FLAG_BUTTON_SIZE);
   const [flagButtonPosition, setFlagButtonPosition] = useState(DEFAULT_FLAG_BUTTON_POSITION);
+  const [chordingMode, setChordingMode] = useState<"lmb" | "l+rmb">(DEFAULT_CHORDING_MODE);
   const [touchHoldDelay, setTouchHoldDelay] = useState(DEFAULT_TOUCH_HOLD_DELAY);
 
   // Statistics
@@ -106,6 +109,7 @@ const Layout = ({ children }: {
     const savedZoom = localStorage.getItem("zoom");
     const savedFlagButtonSize = localStorage.getItem("flagButtonSize");
     const savedFlagButtonPosition = localStorage.getItem("flagButtonPosition");
+    const savedChordingMode = localStorage.getItem("chordingMode");
     const savedTouchHoldDelay = localStorage.getItem("touchHoldDelay");
 
     if (savedRecords) setRecords(JSON.parse(savedRecords));
@@ -113,6 +117,9 @@ const Layout = ({ children }: {
     if (savedZoom) setZoom(Number(savedZoom));
     if (savedFlagButtonSize) setFlagButtonSize(Number(savedFlagButtonSize));
     if (savedFlagButtonPosition) setFlagButtonPosition(savedFlagButtonPosition);
+    if (savedChordingMode === "lmb" || savedChordingMode === "l+rmb") {
+      setChordingMode(savedChordingMode);
+    }
     if (savedTouchHoldDelay) setTouchHoldDelay(Number(savedTouchHoldDelay));
   }, []);
 
@@ -206,6 +213,9 @@ const Layout = ({ children }: {
     localStorage.setItem("flagButtonPosition", flagButtonPosition);
   }, [flagButtonPosition]);
   useEffect(() => {
+    localStorage.setItem("chordingMode", chordingMode);
+  }, [chordingMode]);
+  useEffect(() => {
     localStorage.setItem("touchHoldDelay", touchHoldDelay.toString());
   }, [touchHoldDelay]);
 
@@ -213,6 +223,7 @@ const Layout = ({ children }: {
     setZoom(DEFAULT_ZOOM);
     setFlagButtonSize(DEFAULT_FLAG_BUTTON_SIZE);
     setFlagButtonPosition(DEFAULT_FLAG_BUTTON_POSITION);
+    setChordingMode(DEFAULT_CHORDING_MODE);
     setTouchHoldDelay(DEFAULT_TOUCH_HOLD_DELAY);
   };
 
@@ -302,6 +313,7 @@ const Layout = ({ children }: {
           zoom,
           flagButtonSize,
           flagButtonPosition,
+          chordingMode,
         }}
       >
         <div className="flex flex-col items-center min-h-screen overflow-hidden touch-none">
@@ -336,6 +348,8 @@ const Layout = ({ children }: {
               setFlagButtonSize={setFlagButtonSize}
               flagButtonPosition={flagButtonPosition}
               setFlagButtonPosition={setFlagButtonPosition}
+              chordingMode={chordingMode}
+              setChordingMode={setChordingMode}
               touchHoldDelay={touchHoldDelay}
               setTouchHoldDelay={setTouchHoldDelay}
               resetPreferences={resetPreferences}
@@ -372,9 +386,6 @@ const Layout = ({ children }: {
             <GameBoard 
               key={`${variant}-${difficulty}`}
               config={boardConfigLibrary[variant][difficulty]}
-              zoom={zoom}
-              flagButtonSize={flagButtonSize}
-              flagButtonPosition={flagButtonPosition}
               touchHoldDelay={touchHoldDelay}
               isTouchscreen={isTouchscreen}
               addRecord={addRecord}

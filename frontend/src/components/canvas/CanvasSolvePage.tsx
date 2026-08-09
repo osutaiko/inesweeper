@@ -3,10 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 import CanvasGameBoard from "./CanvasGameBoard";
-import { useSiteLayout } from "../Layout";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import { Toaster } from "../ui/sonner";
 import { loadCurrentAuthUser } from "@/lib/auth";
+import { useMediaQuery } from "@/lib/utils";
 import {
   getActiveCanvasLock,
   getCanvasChunkArea,
@@ -22,7 +22,7 @@ type SolverData = {
 const CanvasSolvePage = () => {
   const navigate = useNavigate();
   const [solverData, setSolverData] = useState<SolverData | null>(null);
-  const { isTouchscreen, zoom, flagButtonSize, flagButtonPosition } = useSiteLayout();
+  const isTouchscreen = useMediaQuery("(pointer: coarse) and (hover: none)");
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
@@ -101,9 +101,6 @@ const CanvasSolvePage = () => {
               chunk={solverData.chunk}
               chunkArea={solverData.chunkArea}
               isTouchscreen={isTouchscreen}
-              zoom={zoom}
-              flagButtonSize={flagButtonSize}
-              flagButtonPosition={flagButtonPosition}
             />
           }
         </main>

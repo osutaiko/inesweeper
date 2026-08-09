@@ -40,6 +40,7 @@ import {
 } from "@/lib/minesweeper";
 import type { Board, BoardConfig } from "@/lib/types";
 import { getMsParts, timeLeftUntil } from "@/lib/utils";
+import { useSiteLayout } from "../Layout";
 
 const CONTEXT_SIZE = 4;
 const SOLVER_SIZE = CHUNK_SIZE + CONTEXT_SIZE * 2;
@@ -59,9 +60,6 @@ type CanvasGameBoardProps = {
   chunk: CanvasChunk;
   chunkArea: CanvasChunkAreaResponse;
   isTouchscreen: boolean;
-  zoom: number;
-  flagButtonSize: number;
-  flagButtonPosition: string;
 };
 
 const getTargetChunkBoard = (board: Board) =>
@@ -111,11 +109,9 @@ const CanvasGameBoard = ({
   chunk,
   chunkArea,
   isTouchscreen,
-  zoom,
-  flagButtonSize,
-  flagButtonPosition,
 }: CanvasGameBoardProps) => {
   const navigate = useNavigate();
+  const { chordingMode, zoom, flagButtonSize, flagButtonPosition } = useSiteLayout();
   const [remainingMs, setRemainingMs] = useState(() =>
     timeLeftUntil(chunk.lockedUntil),
   );
@@ -304,6 +300,7 @@ const CanvasGameBoard = ({
     canTouchChord: (row, col) =>
       board[row][col].state.type === "revealed" &&
       board[row][col].state.num !== null,
+    chordingMode,
     onReveal: (row, col) => {
       applyBoardAction((currentBoard) =>
         handleClick(currentBoard, row, col, SOLVER_CONFIG),

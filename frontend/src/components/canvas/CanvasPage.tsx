@@ -13,10 +13,10 @@ import {
 } from "react-zoom-pan-pinch";
 
 import CanvasChunk from "./CanvasChunk";
-import { useSiteLayout } from "../Layout";
 import SelectedChunkOverlay from "./SelectedChunkOverlay";
 import { formatChunkCoordinates } from "@/lib/canvas/coordinates";
 import { formatChunkShareText } from "@/lib/canvas/share";
+import { loadCurrentAuthUser, type AuthUser } from "@/lib/auth";
 import {
   getActiveCanvasLock,
   getCanvasChunk,
@@ -185,7 +185,7 @@ const CanvasViewport = ({
 
 const CanvasPage = () => {
   const navigate = useNavigate();
-  const { authUser } = useSiteLayout();
+  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [chunkArea, setChunkArea] = useState<CanvasChunkAreaResponse | null>(null);
   const [selectedChunkId, setSelectedChunkId] = useState<string | null>(null);
   const [selectedChunk, setSelectedChunk] =
@@ -203,6 +203,10 @@ const CanvasPage = () => {
   });
   const [chunkAreaBounds, setChunkAreaBounds] =
     useState<ChunkAreaBounds | null>(null);
+
+  useEffect(() => {
+    void loadCurrentAuthUser().then(setAuthUser);
+  }, []);
 
   const updateChunkAreaBounds = (state: ChunkGridTransform) => {
     if (!gridRef.current) {
