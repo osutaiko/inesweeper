@@ -80,7 +80,7 @@ export const useMinesweeperControls = ({
       if (canReveal(row, col)) {
         onReveal(row, col);
       }
-      if (chordingMode === 'lmb' || (chordingMode === 'l+rmb' && isRmbDown)) {
+      if (chordingMode === "l+rmb" && isRmbDown) {
         if (canChord(row, col)) {
           onChord(row, col);
         }
