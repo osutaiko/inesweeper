@@ -77,11 +77,17 @@ export const useMinesweeperControls = ({
 
     if (e.button === 0) {
       setIsLmbDown(false);
-      if (canReveal(row, col)) {
-        onReveal(row, col);
-      }
-      if (chordingMode === "l+rmb" && isRmbDown) {
+      if (chordingMode === "lmb") {
         if (canChord(row, col)) {
+          onChord(row, col);
+        } else if (canReveal(row, col)) {
+          onReveal(row, col);
+        }
+      } else {
+        if (canReveal(row, col)) {
+          onReveal(row, col);
+        }
+        if (isRmbDown && canChord(row, col)) {
           onChord(row, col);
         }
       }
