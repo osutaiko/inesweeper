@@ -64,7 +64,13 @@ export const useMinesweeperControls = ({
       setIsLmbDown(true);
     } else if (e.button === 2) {
       setIsRmbDown(true);
-      if (canFlag(row, col)) {
+      if (chordingMode === "l+rmb") {
+        if (!isLmbDown) {
+          if (canFlag(row, col)) {
+            onFlag(row, col);
+          }
+        }
+      } else if (canFlag(row, col)) {
         onFlag(row, col);
       }
     }
@@ -84,11 +90,12 @@ export const useMinesweeperControls = ({
           onReveal(row, col);
         }
       } else {
-        if (canReveal(row, col)) {
+        if (isRmbDown) {
+          if (canChord(row, col)) {
+            onChord(row, col);
+          }
+        } else if (canReveal(row, col)) {
           onReveal(row, col);
-        }
-        if (isRmbDown && canChord(row, col)) {
-          onChord(row, col);
         }
       }
     } else if (e.button === 1) {
@@ -97,6 +104,11 @@ export const useMinesweeperControls = ({
       }
     } else if (e.button === 2) {
       setIsRmbDown(false);
+      if (chordingMode === "l+rmb" && isLmbDown) {
+        if (canChord(row, col)) {
+          onChord(row, col);
+        }
+      }
     }
   };
 
