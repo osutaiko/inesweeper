@@ -158,7 +158,9 @@ export const GameBoard: React.FC<{
     isFlagToggled,
     canReveal: () => true,
     canFlag: (row, col) => board[row][col].state.type !== "revealed",
-    canChord: () => true,
+    canChord: (row, col) =>
+      board[row][col].state.type === "revealed" &&
+      board[row][col].state.num !== null,
     canTouchChord: (row, col) =>
       board[row][col].state.type === "revealed",
     onReveal: (row, col) => {

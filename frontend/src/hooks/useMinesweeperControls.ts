@@ -64,10 +64,8 @@ export const useMinesweeperControls = ({
       setIsLmbDown(true);
     } else if (e.button === 2) {
       setIsRmbDown(true);
-      if (!isLmbDown) {
-        if (canFlag(row, col)) {
-          onFlag(row, col);
-        }
+      if (canFlag(row, col)) {
+        onFlag(row, col);
       }
     }
   };
@@ -93,11 +91,6 @@ export const useMinesweeperControls = ({
       }
     } else if (e.button === 2) {
       setIsRmbDown(false);
-      if (chordingMode === 'l+rmb' && isLmbDown) {
-        if (canChord(row, col)) {
-          onChord(row, col);
-        }
-      }
     }
   };
 
