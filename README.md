@@ -104,7 +104,7 @@ A Collection of Interesting Minesweeper Variants.
 </table>
 
 - Public infinite board divided by 16x16 chunks
-- Claim a chunk by locking a it and successfully solving
+- Claim a chunk by locking it and successfully solving
 
 ## Philosophy
 All variants featured in this site must have the exact same gameplay loop as Classic Minesweeper. Uncover all safe cells without stepping on a mine, numbers on a cell represent the mines around them in some way, and mines are randomly generated (unless I decide to add NG mode somehow). I don't want to add any game-breaking rulesets that doesn't feel like the original.
@@ -117,7 +117,4 @@ All variants featured in this site must have the exact same gameplay loop as Cla
   - Board customization (height, width, mine count)
   - More grid types (triangular, hexagonal)
   - Combine rulesets
-    
-### Multiplayer modes
-- [ ] Canvas: users can claim chunks by solving a part of a shared infinite board
 - [ ] Realtime PvP
