@@ -70,21 +70,9 @@ const SettingsButton = ({
             <span className="w-1/2">Board scale: {zoom}%</span>
             <Slider className="w-1/2" value={[zoom]} onValueChange={(value) => setZoom(value[0])} min={60} max={200} step={10} />
           </div>
-          <div className="flex flex-row justify-between items-center gap-3">
-            <span className="w-1/2">Chording</span>
-            <Select value={chordingMode} onValueChange={(value) => setChordingMode(value as "lmb" | "l+rmb")}>
-              <SelectTrigger className="w-[180px] max-w-1/2">
-                <SelectValue placeholder="LMB" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="lmb">LMB</SelectItem>
-                <SelectItem value="l+rmb">L+RMB</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          {isTouchscreen && (
+          <Separator className="my-2" />
+          {isTouchscreen ? (
             <>
-              <Separator className="my-2" />
               <div className="flex flex-row justify-between items-center gap-3">
                 <span className="w-1/2">Hold to flag time: {touchHoldDelay} ms</span>
                 <Slider className="w-1/2" value={[touchHoldDelay]} onValueChange={(value) => setTouchHoldDelay(value[0])} min={100} max={500} step={20} />
@@ -104,6 +92,21 @@ const SettingsButton = ({
                     <SelectItem value="bottom-right">Bottom Right</SelectItem>
                     <SelectItem value="center-left">Center Left</SelectItem>
                     <SelectItem value="center-right">Center Right</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="flex flex-row justify-between items-center gap-3">
+                <span className="w-1/2">Chording</span>
+                <Select value={chordingMode} onValueChange={(value) => setChordingMode(value as "lmb" | "l+rmb")}>
+                  <SelectTrigger className="w-[180px] max-w-1/2">
+                    <SelectValue placeholder="LMB" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="lmb">LMB</SelectItem>
+                    <SelectItem value="l+rmb">L+RMB</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
