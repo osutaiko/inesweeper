@@ -15,9 +15,12 @@ const PLACE_URL = "https://www.inesweeper.com/place";
 
 export const formatChunkShareText = (chunk: CanvasChunk) => {
   const coordinates = formatChunkCoordinates(chunk.chunkX, chunk.chunkY);
+  const shareUrl = new URL(PLACE_URL);
+  shareUrl.searchParams.set("X", String(chunk.chunkX));
+  shareUrl.searchParams.set("Y", String(chunk.chunkY));
 
   if (chunk.state !== "solved") {
-    return `Inesweeper Place 🚩 Chunk ${coordinates}\nNot claimed yet... Be the first one to claim!\n\n<${PLACE_URL}>`;
+    return `Inesweeper Place 🚩 Chunk ${coordinates}\nNot claimed yet... Be the first one to claim!\n\n<${shareUrl}>`;
   }
 
   const solvedBy = chunk.solverName ?? "[Unknown]";
@@ -26,7 +29,7 @@ export const formatChunkShareText = (chunk: CanvasChunk) => {
   const edgeNibbleMap = decodeEdgeNibbleMap(chunk.edgeNibbleMap);
 
   if (!mineBitmap || !edgeNibbleMap) {
-    return `${header}\n\n<${PLACE_URL}>`;
+    return `${header}\n\n<${shareUrl}>`;
   }
 
   const rows = Array.from({ length: CHUNK_SIZE }, (_, displayRow) => {
@@ -65,5 +68,5 @@ export const formatChunkShareText = (chunk: CanvasChunk) => {
     }).join("");
   });
 
-  return `${header}\n\`\`\`\n${rows.join("\n")}\n\`\`\`\n<${PLACE_URL}>`;
+  return `${header}\n\`\`\`\n${rows.join("\n")}\n\`\`\`\n<${shareUrl}>`;
 };
