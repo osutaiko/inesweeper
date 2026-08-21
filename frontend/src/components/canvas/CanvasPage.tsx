@@ -30,6 +30,7 @@ import { getMsParts, timeLeftUntil } from "@/lib/utils";
 const CHUNK_PIXEL_SIZE = 480;
 const CHUNK_ORIGIN_OFFSET = -CHUNK_PIXEL_SIZE / 2;
 const INITIAL_SCALE = 0.2;
+const QUERY_CHUNK_SCALE = 0.6;
 const GRID_DETAIL_SCALE = 0.1;
 const LOW_SCALE_GRID_STEP = 10;
 const MAX_MINE_BITMAP_AREA_SIZE = 512;
@@ -145,6 +146,7 @@ const CanvasViewport = ({
       {(chunkArea?.chunks ?? []).map((chunk) => (
         <div
           key={`${chunk.chunkX}:${chunk.chunkY}`}
+          id={`chunk-${chunk.chunkX}:${chunk.chunkY}`}
           className={`absolute ${
             showMySolvedOnly &&
             chunk.state === "solved" &&
@@ -225,6 +227,7 @@ const CanvasPage = () => {
   const [chunkAreaBounds, setChunkAreaBounds] =
     useState<ChunkAreaBounds | null>(null);
   const selectedChunkId = getSelectedChunkId(searchParams);
+  const initialSelectedChunkId = useRef(selectedChunkId);
 
   const updateSelectedChunk = (chunkId: string | null) => {
     setSelectedChunk(null);
@@ -324,13 +327,31 @@ const CanvasPage = () => {
     transformRef.current?.zoomOut(0.15, 150, "easeOut");
   };
 
-  const locateChunk = (chunkX: number, chunkY: number) => {
-    transformRef.current?.zoomToElement(
-      `chunk-${chunkX}:${chunkY}`,
-      0.6,
-      500,
-      "easeOut",
-    );
+  const locateChunk = (
+    chunkX: number,
+    chunkY: number,
+    transform = transformRef.current,
+  ) => {
+    const chunkId = `chunk-${chunkX}:${chunkY}`;
+
+    if (document.getElementById(chunkId)) {
+      transform?.zoomToElement(
+        chunkId,
+        QUERY_CHUNK_SCALE,
+        500,
+        "easeOut",
+      );
+    } else if (transform && gridRef.current) {
+      transform.setTransform(
+        gridRef.current.clientWidth / 2 -
+          chunkX * CHUNK_PIXEL_SIZE * QUERY_CHUNK_SCALE,
+        gridRef.current.clientHeight / 2 +
+          chunkY * CHUNK_PIXEL_SIZE * QUERY_CHUNK_SCALE,
+        QUERY_CHUNK_SCALE,
+        0,
+      );
+    }
+
     window.setTimeout(() => {
       const state = transformRef.current?.state;
       if (state) {
@@ -707,16 +728,25 @@ const CanvasPage = () => {
             initialScale={INITIAL_SCALE}
             minScale={0.08}
             maxScale={1.0}
-            centerOnInit
+            centerOnInit={false}
             centerZoomedOut={false}
             limitToBounds={false}
             smooth={false}
             wheel={{ step: 0.05 }}
-            onInit={({ state }) => {
-              if (gridRef.current) {
-                updateChunkGrid(gridRef.current, state);
+            onInit={(ref) => {
+              const { state } = ref;
+              const initialChunkId = initialSelectedChunkId.current;
+              if (initialChunkId && gridRef.current) {
+                const [chunkX, chunkY] = initialChunkId.split(":").map(Number);
+                locateChunk(chunkX, chunkY, ref);
+                initialSelectedChunkId.current = null;
+              } else {
+                ref.centerView(INITIAL_SCALE, 0);
+                if (gridRef.current) {
+                  updateChunkGrid(gridRef.current, state);
+                }
+                updateChunkAreaBounds(state);
               }
-              updateChunkAreaBounds(state);
             }}
             onTransform={(_, transform) => {
               if (gridRef.current) {
