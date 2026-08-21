@@ -13,6 +13,7 @@ export type CanvasChunk = {
   solverUserId: string | null;
   solverName: string | null;
   solvedAt: string | null;
+  failedMines: number[];
   mineBitmap: string | null;
   edgeNibbleMap: string | null;
   isSolvedByMe?: boolean;
@@ -152,6 +153,7 @@ const decodeChunkStates = (
       solverUserId: null,
       solverName: null,
       solvedAt: null,
+      failedMines: [],
       mineBitmap,
       edgeNibbleMap,
       isSolvedByMe: solvedByMeStream[index] ?? false,
@@ -316,7 +318,7 @@ export const solveCanvasChunk = async () => {
   return (await response.json()) as CanvasChunk;
 };
 
-export const failCanvasChunk = async () => {
+export const failCanvasChunk = async (failedMineIndex?: number) => {
   const accessToken = await getAuthAccessToken();
   if (!accessToken) {
     throw new Error("Login required");
@@ -326,7 +328,9 @@ export const failCanvasChunk = async () => {
     method: "POST",
     headers: {
       Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
     },
+    body: JSON.stringify({ failedMineIndex }),
   });
 
   if (!response.ok) {

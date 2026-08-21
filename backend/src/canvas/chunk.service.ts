@@ -11,6 +11,7 @@ import {
   buildChunkEdgeNibbleMap,
   buildChunkMineBitmap,
 } from './chunk-board';
+import { CHUNK_SIZE } from './coordinates';
 import type { Chunk, ChunkRecord } from './chunk.types';
 
 type ChunkRow = {
@@ -22,6 +23,7 @@ type ChunkRow = {
   locked_until: string | null;
   solver_user_id: string | null;
   solved_at: string | null;
+  failed_mines: number[] | null;
 };
 
 type ChunkStateRow = Pick<
@@ -88,6 +90,7 @@ export class ChunkService {
       lockedUntil: row.locked_until,
       solverUserId: row.solver_user_id,
       solvedAt: row.solved_at,
+      failedMines: row.failed_mines ?? [],
     };
   }
 
@@ -126,6 +129,7 @@ export class ChunkService {
           locked_until: chunk.lockedUntil,
           solver_user_id: chunk.solverUserId,
           solved_at: chunk.solvedAt,
+          failed_mines: chunk.failedMines,
         },
         {
           onConflict: 'chunk_x,chunk_y',
@@ -195,6 +199,7 @@ export class ChunkService {
       lockedUntil: null,
       solverUserId: null,
       solvedAt: null,
+      failedMines: [],
     } satisfies ChunkRecord;
   }
 
@@ -536,7 +541,7 @@ export class ChunkService {
     return this.withChunkMineBitmap(saved, user.id, user.nickname);
   }
 
-  async failChunk(req: Request) {
+  async failChunk(req: Request, failedMineIndex?: number) {
     const user = await this.requireUser(req);
 
     if (!user) {
@@ -565,6 +570,18 @@ export class ChunkService {
 
     const row = data as ChunkRow;
     const failedAt = Date.now();
+    const failedMines = [...(row.failed_mines ?? [])];
+    const isValidFailedMineIndex =
+      typeof failedMineIndex === 'number' &&
+      Number.isInteger(failedMineIndex) &&
+      failedMineIndex >= 0 &&
+      failedMineIndex < CHUNK_SIZE * CHUNK_SIZE;
+    if (
+      isValidFailedMineIndex &&
+      !failedMines.includes(failedMineIndex)
+    ) {
+      failedMines.push(failedMineIndex);
+    }
     const saved = await this.setChunkRecord(client, {
       ...this.rowToChunk(row),
       state: 'open',
@@ -573,6 +590,7 @@ export class ChunkService {
       lockedUntil: null,
       solverUserId: null,
       solvedAt: null,
+      failedMines,
     });
     const nextLockAt = failedAt + this.failureCooldownMs;
     this.nextLockAtByUserId.set(user.id, nextLockAt);

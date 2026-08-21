@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Get,
   Param,
@@ -67,7 +68,10 @@ export class ChunkController {
   }
 
   @Post('fail')
-  async failChunk(@Req() req: Request) {
-    return this.chunkService.failChunk(req);
+  async failChunk(
+    @Req() req: Request,
+    @Body() body: { failedMineIndex?: number },
+  ) {
+    return this.chunkService.failChunk(req, body.failedMineIndex);
   }
 }

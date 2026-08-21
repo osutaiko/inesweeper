@@ -9,6 +9,7 @@ export type Chunk = {
   solverUserId: string | null;
   solverName: string | null;
   solvedAt: string | null;
+  failedMines: number[];
   mineBitmap: string | null;
   edgeNibbleMap: string | null;
 };
@@ -22,6 +23,7 @@ export type ChunkRecord = {
   lockedUntil: string | null;
   solverUserId: string | null;
   solvedAt: string | null;
+  failedMines: number[];
 };
 
 export type ChunkArea = {

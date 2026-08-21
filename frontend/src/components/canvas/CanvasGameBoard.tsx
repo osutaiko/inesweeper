@@ -73,6 +73,10 @@ const isInsideTargetChunk = (row: number, col: number) =>
   row >= CONTEXT_SIZE &&
   row < CONTEXT_SIZE + CHUNK_SIZE;
 
+const getTargetFailedMineIndex = (row: number, col: number) =>
+  (CHUNK_SIZE - 1 - (row - CONTEXT_SIZE)) * CHUNK_SIZE +
+  (col - CONTEXT_SIZE);
+
 const chordInitialBorderCells = (board: Board) => {
   let chordedBoard = board;
   const borderStart = CONTEXT_SIZE - 1;
@@ -138,6 +142,10 @@ const CanvasGameBoard = ({
       areaChunk,
     ]),
   );
+  const failedMineSet = useMemo(
+    () => new Set(chunk.failedMines),
+    [chunk.failedMines],
+  );
   const initialBoard: Board = useMemo(
     () =>
       Array.from({ length: SOLVER_SIZE }, (_, row) =>
@@ -192,10 +200,15 @@ const CanvasGameBoard = ({
             boundaryIndex >= 0 && edgeNibbleMap
               ? edgeNibbleMap[boundaryIndex] ?? 0
               : 0;
+          const isFailedMine =
+            isInsideTargetChunk(row, col) &&
+            failedMineSet.has(getTargetFailedMineIndex(row, col));
 
           return {
             mineNum: isMine ? 1 : 0,
-            state: isSolvedContext
+            state: isFailedMine
+              ? { type: "flagged" as const, flagNum: 1 }
+              : isSolvedContext
               ? isMine
                 ? { type: "flagged" as const, flagNum: 1 }
                 : {
@@ -206,7 +219,7 @@ const CanvasGameBoard = ({
           };
         }),
       ),
-    [chunk.chunkX, chunk.chunkY, chunkByCoord],
+    [chunk.chunkX, chunk.chunkY, chunkByCoord, failedMineSet],
   );
   const [initialChordedBoard] = useState<Board>(() =>
     chordInitialBorderCells(initialBoard),
@@ -217,7 +230,10 @@ const CanvasGameBoard = ({
     setBoard(initialChordedBoard);
   }, [initialChordedBoard]);
 
-  const doAfterLoss = (reason: "mine" | "expired") => {
+  const doAfterLoss = (
+    reason: "mine" | "expired",
+    failedMineIndex?: number,
+  ) => {
     if (isGameOverRef.current) {
       return;
     }
@@ -225,7 +241,7 @@ const CanvasGameBoard = ({
     isGameOverRef.current = true;
     setGameOverReason(reason);
     setIsGameOverDialogOpen(true);
-    void failCanvasChunk()
+    void failCanvasChunk(failedMineIndex)
       .then(({ nextLockAt }) => {
         setNextClaimAt(nextLockAt);
         setNextClaimInMs(timeLeftUntil(nextLockAt));
@@ -271,7 +287,7 @@ const CanvasGameBoard = ({
     setBoard(updatedBoard);
     if (loss) {
       setExplodedCell(loss);
-      doAfterLoss("mine");
+      doAfterLoss("mine", getTargetFailedMineIndex(loss.row, loss.col));
     } else if (isWin(getTargetChunkBoard(updatedBoard))) {
       setBoard(flagAllMines(updatedBoard, isInsideTargetChunk));
       void doAfterWin();
@@ -290,9 +306,12 @@ const CanvasGameBoard = ({
       localStorage.getItem("touchHoldDelay") ?? 200,
     ),
     isFlagToggled,
-    canReveal: isInsideTargetChunk,
+    canReveal: (row, col) =>
+      isInsideTargetChunk(row, col) &&
+      !failedMineSet.has(getTargetFailedMineIndex(row, col)),
     canFlag: (row, col) =>
       isInsideTargetChunk(row, col) &&
+      !failedMineSet.has(getTargetFailedMineIndex(row, col)) &&
       board[row][col].state.type !== "revealed",
     canChord: (row, col) =>
       board[row][col].state.type === "revealed" &&
@@ -440,6 +459,12 @@ const CanvasGameBoard = ({
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
             onHoveredCellChange={() => {}}
+            failedCells={Array.from(failedMineSet, (index) => ({
+              row:
+                CONTEXT_SIZE +
+                (CHUNK_SIZE - 1 - Math.floor(index / CHUNK_SIZE)),
+              col: CONTEXT_SIZE + (index % CHUNK_SIZE),
+            }))}
             getCellClassName={(row, col) => {
               const classes = [];
               const contextDistance = Math.max(

@@ -1,5 +1,5 @@
 import React from "react";
-import { Square } from "lucide-react";
+import { Skull, Square } from "lucide-react";
 
 import { Board, BoardConfig } from "@/lib/types";
 import { CompassArrow } from "./CompassArrow";
@@ -24,6 +24,7 @@ type GameBoardGridProps = {
   onTouchEnd: (event: React.TouchEvent, row: number, col: number) => void;
   onHoveredCellChange: (cell: CellPosition | null) => void;
   getCellClassName?: (row: number, col: number) => string;
+  failedCells?: CellPosition[];
 };
 
 const getNumberColorClass = (num: number | null) => {
@@ -74,6 +75,7 @@ export const GameBoardGrid = ({
   onTouchEnd,
   onHoveredCellChange,
   getCellClassName,
+  failedCells = [],
 }: GameBoardGridProps) => {
   const isColorsVariant = config.mineTypeDeviant === "rgb";
 
@@ -86,6 +88,10 @@ export const GameBoardGrid = ({
             typeof cell.state.num === "object"
               ? cell.state.num
               : null;
+          const isFailedCell = failedCells.some(
+            ({ row: failedRow, col: failedCol }) =>
+              failedRow === rowIndex && failedCol === colIndex,
+          );
           const getBgClass = () => {
             if (cell.state.type === "revealed") {
               if (
@@ -243,6 +249,9 @@ export const GameBoardGrid = ({
                 <span className="text-[18px] ml-[2px] leading-none opacity-15">
                   `
                 </span>
+              )}
+              {isFailedCell && (
+                <Skull className="pointer-events-none absolute bottom-0.5 right-0 size-3 text-red-500" />
               )}
             </div>
           );
