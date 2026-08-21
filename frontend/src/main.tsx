@@ -1,11 +1,9 @@
-import { useEffect } from "react";
 import ReactDOM from "react-dom/client";
 import {
   BrowserRouter,
   Navigate,
   Route,
   Routes,
-  useLocation,
 } from "react-router-dom";
 import "./index.css";
 
@@ -15,18 +13,7 @@ import CanvasSolvePage from "./components/canvas/CanvasSolvePage";
 import PrivacyPolicy from "./components/PrivacyPolicy";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
-
-const DocumentTitle = () => {
-  const { pathname } = useLocation();
-
-  useEffect(() => {
-    document.title = pathname.startsWith("/place")
-      ? "Inesweeper Place"
-      : "Inesweeper";
-  }, [pathname]);
-
-  return null;
-};
+import { DocumentTitle } from "./components/DocumentTitle";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <BrowserRouter>
