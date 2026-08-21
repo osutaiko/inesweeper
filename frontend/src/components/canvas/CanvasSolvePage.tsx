@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 import CanvasGameBoard from "./CanvasGameBoard";
-import { ScrollArea, ScrollBar } from "../ui/scroll-area";
-import { Toaster } from "../ui/sonner";
+import { ScrollArea, ScrollBar } from "../ui/shadcn/scroll-area";
+import { Toaster } from "../ui/shadcn/sonner";
 import { loadCurrentAuthUser } from "@/lib/auth";
 import { useMediaQuery } from "@/lib/utils";
 import {

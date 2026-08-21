@@ -1,6 +1,6 @@
 import type { TimeRecord } from "@/lib/types";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/shadcn/button";
 import {
   Dialog,
   DialogContent,
@@ -8,9 +8,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
+} from "@/components/ui/shadcn/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/shadcn/tabs";
+import { ScrollArea } from "@/components/ui/shadcn/scroll-area";
 import { ChartColumnIncreasing } from "lucide-react";
 
 import { ScoreTable } from "./ScoreTable";

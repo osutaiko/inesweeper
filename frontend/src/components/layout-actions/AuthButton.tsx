@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/shadcn/button";
 import {
   Dialog,
   DialogContent,
@@ -7,7 +7,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/components/ui/shadcn/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,9 +15,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { Spinner } from "@/components/ui/spinner";
+} from "@/components/ui/shadcn/dropdown-menu";
+import { Input } from "@/components/ui/shadcn/input";
+import { Spinner } from "@/components/ui/shadcn/spinner";
 import {
   checkNicknameAvailability,
   NICKNAME_PATTERN,

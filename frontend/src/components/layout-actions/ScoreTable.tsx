@@ -1,6 +1,6 @@
 import type { TimeRecord } from "@/lib/types";
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/shadcn/table";
 
 import { boardConfigLibrary, difficultyMap, variantMap } from "@/lib/constants";
 import { formatTimeMs } from "@/lib/utils";

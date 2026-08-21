@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ChartColumnIncreasing } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/shadcn/button";
 import {
   Dialog,
   DialogContent,
@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@/components/ui/shadcn/dialog";
 import {
   Table,
   TableBody,
@@ -18,7 +18,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/components/ui/shadcn/table";
 import { getCanvasStats, type CanvasStats } from "@/lib/canvas/api";
 
 const formatCount = (count: number | null | undefined) =>

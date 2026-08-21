@@ -28,9 +28,9 @@ import {
   SelectSeparator,
   SelectTrigger,
   SelectValue,
-} from "./ui/select";
-import { ScrollArea, ScrollBar } from "./ui/scroll-area";
-import { Button } from "./ui/button";
+} from "./ui/shadcn/select";
+import { ScrollArea, ScrollBar } from "./ui/shadcn/scroll-area";
+import { Button } from "./ui/shadcn/button";
 
 import InesweeperLogo from "@/assets/images/inesweeper-logo.svg";
 import {

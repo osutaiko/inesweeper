@@ -1,6 +1,6 @@
 import { Shovel, Skull } from "lucide-react";
 
-import { Button } from "./ui/button";
+import { Button } from "./ui/shadcn/button";
 
 type TouchFlagButtonProps = {
   flagButtonSize: number;

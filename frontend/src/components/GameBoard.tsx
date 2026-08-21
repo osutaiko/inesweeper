@@ -7,7 +7,7 @@ import { useMinesweeperControls } from "@/hooks/useMinesweeperControls";
 import { useSiteLayout } from "./Layout";
 
 import { Laugh, Meh, Skull, Smile } from "lucide-react";
-import { Button } from "./ui/button";
+import { Button } from "./ui/shadcn/button";
 import { GameBoardGrid, getColorClass } from "./GameBoardGrid";
 import TouchFlagButton from "./TouchFlagButton";
 

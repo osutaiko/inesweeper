@@ -3,9 +3,9 @@ import { House, Minus, Plus, ScanSquare, Share2 } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 
-import { Button } from "../ui/button";
-import { Toggle } from "../ui/toggle";
-import { Toaster } from "../ui/sonner";
+import { Button } from "../ui/shadcn/button";
+import { Toggle } from "../ui/shadcn/toggle";
+import { Toaster } from "../ui/shadcn/sonner";
 import {
   TransformComponent,
   TransformWrapper,

@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 import { GameBoardGrid } from "../GameBoardGrid";
 import TouchFlagButton from "../TouchFlagButton";
-import { Button } from "../ui/button";
+import { Button } from "../ui/shadcn/button";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +12,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "../ui/dialog";
+} from "../ui/shadcn/dialog";
 import {
   decodeEdgeNibbleMap,
   decodeMineBitmap,

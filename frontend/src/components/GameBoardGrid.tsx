@@ -2,7 +2,7 @@ import React from "react";
 import { Skull, Square } from "lucide-react";
 
 import { Board, BoardConfig } from "@/lib/types";
-import { CompassArrow } from "./CompassArrow";
+import { CompassArrow } from "./ui/CompassArrow";
 
 type CellPosition = {
   row: number;
