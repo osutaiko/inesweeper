@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { House, Minus, Plus, ScanSquare, Share2, Square } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 
 import { Button } from "../ui/button";
@@ -44,6 +44,27 @@ type ChunkAreaBounds = [number, number, number, number];
 
 const getChunkAreaSize = ([fromX, fromY, toX, toY]: ChunkAreaBounds) =>
   (toX - fromX + 1) * (toY - fromY + 1);
+
+const getSelectedChunkId = (searchParams: URLSearchParams) => {
+  const chunkX = searchParams.get("X");
+  const chunkY = searchParams.get("Y");
+
+  if (chunkX === null || chunkY === null) {
+    return null;
+  }
+
+  if (!chunkX || !chunkY) {
+    return null;
+  }
+
+  const parsedChunkX = Number(chunkX);
+  const parsedChunkY = Number(chunkY);
+
+  return Number.isInteger(parsedChunkX) &&
+    Number.isInteger(parsedChunkY)
+    ? `${parsedChunkX}:${parsedChunkY}`
+    : null;
+};
 
 const updateChunkGrid = (
   element: HTMLDivElement,
@@ -185,9 +206,9 @@ const CanvasViewport = ({
 
 const CanvasPage = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [chunkArea, setChunkArea] = useState<CanvasChunkAreaResponse | null>(null);
-  const [selectedChunkId, setSelectedChunkId] = useState<string | null>(null);
   const [selectedChunk, setSelectedChunk] =
     useState<CanvasChunkData | null>(null);
   const [activeLock, setActiveLock] = useState<CanvasChunkData | null>(null);
@@ -203,6 +224,23 @@ const CanvasPage = () => {
   });
   const [chunkAreaBounds, setChunkAreaBounds] =
     useState<ChunkAreaBounds | null>(null);
+  const selectedChunkId = getSelectedChunkId(searchParams);
+
+  const updateSelectedChunk = (chunkId: string | null) => {
+    setSelectedChunk(null);
+    const nextSearchParams = new URLSearchParams(searchParams);
+
+    if (chunkId === null) {
+      nextSearchParams.delete("X");
+      nextSearchParams.delete("Y");
+    } else {
+      const [chunkX, chunkY] = chunkId.split(":");
+      nextSearchParams.set("X", chunkX);
+      nextSearchParams.set("Y", chunkY);
+    }
+
+    setSearchParams(nextSearchParams, { replace: true });
+  };
 
   useEffect(() => {
     void loadCurrentAuthUser().then(setAuthUser);
@@ -701,8 +739,7 @@ const CanvasPage = () => {
                 contentClass="bg-transparent"
                 wrapperProps={{
                   onPointerDown: (event) => {
-                    setSelectedChunkId(null);
-                    setSelectedChunk(null);
+                    updateSelectedChunk(null);
                     gestureRef.current = {
                       startX: event.clientX,
                       startY: event.clientY,
@@ -740,7 +777,7 @@ const CanvasPage = () => {
                         (contentY - CHUNK_ORIGIN_OFFSET) / CHUNK_PIXEL_SIZE,
                       );
 
-                      setSelectedChunkId(`${chunkX}:${chunkY}`);
+                      updateSelectedChunk(`${chunkX}:${chunkY}`);
                     }
 
                     gestureRef.current.startX = 0;
@@ -750,8 +787,7 @@ const CanvasPage = () => {
                     gestureRef.current.dragged = false;
                   },
                   onWheel: () => {
-                    setSelectedChunkId(null);
-                    setSelectedChunk(null);
+                    updateSelectedChunk(null);
                   },
                 }}
               >
@@ -765,7 +801,7 @@ const CanvasPage = () => {
                       return;
                     }
 
-                    setSelectedChunkId(chunkId);
+                    updateSelectedChunk(chunkId);
                   }}
                 />
               </TransformComponent>
