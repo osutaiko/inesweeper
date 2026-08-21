@@ -89,8 +89,8 @@ A Collection of Interesting Minesweeper Variants.
   </tbody>
 </table>
 
-### Place
-`Inesweeper Place` is the shared-board mode at [`/place`](https://inesweeper.com/place).
+### [Place](https://inesweeper.com/place)
+The multiplayer shared-board mode.
 
 <table>
   <tr>
@@ -110,7 +110,7 @@ A Collection of Interesting Minesweeper Variants.
 All variants featured in this site must have the exact same gameplay loop as Classic Minesweeper. Uncover all safe cells without stepping on a mine, numbers on a cell represent the mines around them in some way, and mines are randomly generated (unless I decide to add NG mode somehow). I don't want to add any game-breaking rulesets that doesn't feel like the original.
 
 ## TODO
-- [ ] UI customization (color, contrast)
+- [ ] UI customization (color theme, contrast)
 - [ ] No guessing mode: with universal solver (wip: solver.ts) or solvable board database
 - [ ] Import/export games
 - [ ] Playground
