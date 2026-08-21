@@ -331,6 +331,7 @@ const CanvasPage = () => {
     chunkX: number,
     chunkY: number,
     transform = transformRef.current,
+    animationTime = 500,
   ) => {
     const chunkId = `chunk-${chunkX}:${chunkY}`;
 
@@ -338,7 +339,7 @@ const CanvasPage = () => {
       transform?.zoomToElement(
         chunkId,
         QUERY_CHUNK_SCALE,
-        500,
+        animationTime,
         "easeOut",
       );
     } else if (transform && gridRef.current) {
@@ -348,7 +349,7 @@ const CanvasPage = () => {
         gridRef.current.clientHeight / 2 +
           chunkY * CHUNK_PIXEL_SIZE * QUERY_CHUNK_SCALE,
         QUERY_CHUNK_SCALE,
-        0,
+        animationTime,
       );
     }
 
@@ -738,7 +739,7 @@ const CanvasPage = () => {
               const initialChunkId = initialSelectedChunkId.current;
               if (initialChunkId && gridRef.current) {
                 const [chunkX, chunkY] = initialChunkId.split(":").map(Number);
-                locateChunk(chunkX, chunkY, ref);
+                locateChunk(chunkX, chunkY, ref, 0);
                 initialSelectedChunkId.current = null;
               } else {
                 ref.centerView(INITIAL_SCALE, 0);
