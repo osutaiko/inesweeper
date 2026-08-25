@@ -126,10 +126,11 @@ const CanvasPage = () => {
       return;
     }
 
-    const left = -state.positionX / state.scale;
-    const right = (gridRef.current.clientWidth - state.positionX) / state.scale;
-    const top = -state.positionY / state.scale;
-    const bottom = (gridRef.current.clientHeight - state.positionY) / state.scale;
+    const clampedScale = Math.max(state.scale, 0.075)
+    const left = -state.positionX / clampedScale;
+    const right = (gridRef.current.clientWidth - state.positionX) / clampedScale;
+    const top = -state.positionY / clampedScale;
+    const bottom = (gridRef.current.clientHeight - state.positionY) / clampedScale;
     const viewportBounds: ChunkAreaBounds = [
       Math.floor((left - CHUNK_ORIGIN_OFFSET) / CHUNK_PIXEL_SIZE),
       -Math.floor((bottom - CHUNK_ORIGIN_OFFSET) / CHUNK_PIXEL_SIZE),
@@ -599,7 +600,7 @@ const CanvasPage = () => {
           <TransformWrapper
             ref={transformRef}
             initialScale={INITIAL_SCALE}
-            minScale={0.08}
+            minScale={0.075}
             maxScale={1.0}
             centerOnInit={false}
             centerZoomedOut={false}
