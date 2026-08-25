@@ -29,6 +29,7 @@ import {
   iterateAdjacentOffsets,
 } from "@/lib/canvas/coordinates";
 import { useMinesweeperControls } from "@/hooks/useMinesweeperControls";
+import { usePersistentState } from "@/hooks/usePersistentState";
 import {
   countRemainingFlags,
   flagAllMines,
@@ -116,6 +117,7 @@ const CanvasGameBoard = ({
 }: CanvasGameBoardProps) => {
   const navigate = useNavigate();
   const { chordingMode, zoom, flagButtonSize, flagButtonPosition } = useSiteLayout();
+  const [touchHoldDelay] = usePersistentState("touchHoldDelay", 200, Number);
   const [remainingMs, setRemainingMs] = useState(() =>
     timeLeftUntil(chunk.lockedUntil),
   );
@@ -302,9 +304,7 @@ const CanvasGameBoard = ({
   } = useMinesweeperControls({
     disabled: gameOverReason !== null,
     isTouchscreen,
-    touchHoldDelay: Number(
-      localStorage.getItem("touchHoldDelay") ?? 200,
-    ),
+    touchHoldDelay,
     isFlagToggled,
     canReveal: (row, col) =>
       isInsideTargetChunk(row, col) &&

@@ -12,6 +12,7 @@ import { ThemeProvider } from "./theme-provider";
 import { DifficultyName, TimeRecord, VariantName } from "@/lib/types";
 import { boardConfigLibrary, difficultyMap, variantGroups } from "@/lib/constants";
 import { useMediaQuery } from "@/lib/utils";
+import { usePersistentState } from "@/hooks/usePersistentState";
 import {
   loadCurrentAuthUser,
   subscribeToAuthUser,
@@ -87,11 +88,21 @@ const Layout = ({ children }: {
   const [difficulty, setDifficulty] = useState<DifficultyName>("beg");
 
   // Settings
-  const [zoom, setZoom] = useState(DEFAULT_ZOOM);
-  const [flagButtonSize, setFlagButtonSize] = useState(DEFAULT_FLAG_BUTTON_SIZE);
-  const [flagButtonPosition, setFlagButtonPosition] = useState(DEFAULT_FLAG_BUTTON_POSITION);
-  const [chordingMode, setChordingMode] = useState<"lmb" | "l+rmb">(DEFAULT_CHORDING_MODE);
-  const [touchHoldDelay, setTouchHoldDelay] = useState(DEFAULT_TOUCH_HOLD_DELAY);
+  const [zoom, setZoom] = usePersistentState("zoom", DEFAULT_ZOOM, Number);
+  const [flagButtonSize, setFlagButtonSize] = usePersistentState("flagButtonSize", DEFAULT_FLAG_BUTTON_SIZE, Number);
+  const [flagButtonPosition, setFlagButtonPosition] = usePersistentState("flagButtonPosition", DEFAULT_FLAG_BUTTON_POSITION);
+  const [chordingMode, setChordingMode] = usePersistentState<"lmb" | "l+rmb">(
+    "chordingMode",
+    DEFAULT_CHORDING_MODE,
+    (value) => {
+      if (value === "lmb" || value === "l+rmb") {
+        return value;
+      }
+
+      return DEFAULT_CHORDING_MODE;
+    },
+  );
+  const [touchHoldDelay, setTouchHoldDelay] = usePersistentState("touchHoldDelay", DEFAULT_TOUCH_HOLD_DELAY, Number);
 
   // Statistics
   const [records, setRecords] = useState<TimeRecord[]>([]);
@@ -102,25 +113,13 @@ const Layout = ({ children }: {
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [authLoaded, setAuthLoaded] = useState(false);
 
-  // Fetch local settings guest records from localstorage
+  // Fetch local records from localstorage
   useEffect(() => {
     const savedRecords = localStorage.getItem("gameRecords");
     const savedGuestBestRecords = localStorage.getItem("guestBestRecords");
-    const savedZoom = localStorage.getItem("zoom");
-    const savedFlagButtonSize = localStorage.getItem("flagButtonSize");
-    const savedFlagButtonPosition = localStorage.getItem("flagButtonPosition");
-    const savedChordingMode = localStorage.getItem("chordingMode");
-    const savedTouchHoldDelay = localStorage.getItem("touchHoldDelay");
 
     if (savedRecords) setRecords(JSON.parse(savedRecords));
     if (savedGuestBestRecords) setGuestBestRecords(JSON.parse(savedGuestBestRecords));
-    if (savedZoom) setZoom(Number(savedZoom));
-    if (savedFlagButtonSize) setFlagButtonSize(Number(savedFlagButtonSize));
-    if (savedFlagButtonPosition) setFlagButtonPosition(savedFlagButtonPosition);
-    if (savedChordingMode === "lmb" || savedChordingMode === "l+rmb") {
-      setChordingMode(savedChordingMode);
-    }
-    if (savedTouchHoldDelay) setTouchHoldDelay(Number(savedTouchHoldDelay));
   }, []);
 
   // Load anonymous global hi-scores
@@ -201,23 +200,6 @@ const Layout = ({ children }: {
 
     return () => controller.abort();
   }, [authLoaded, authUser]);
-
-  // localStorage store UI settings
-  useEffect(() => {
-    localStorage.setItem("zoom", zoom.toString());
-  }, [zoom]);
-  useEffect(() => {
-    localStorage.setItem("flagButtonSize", flagButtonSize.toString());
-  }, [flagButtonSize]);
-  useEffect(() => {
-    localStorage.setItem("flagButtonPosition", flagButtonPosition);
-  }, [flagButtonPosition]);
-  useEffect(() => {
-    localStorage.setItem("chordingMode", chordingMode);
-  }, [chordingMode]);
-  useEffect(() => {
-    localStorage.setItem("touchHoldDelay", touchHoldDelay.toString());
-  }, [touchHoldDelay]);
 
   const resetPreferences = () => {
     setZoom(DEFAULT_ZOOM);
