@@ -47,7 +47,12 @@ export const CanvasChunkPreview = ({
       context.fillStyle = gameBorder;
       context.fillRect(0, 0, CHUNK_PIXEL_SIZE, CHUNK_PIXEL_SIZE);
       context.textAlign = "center";
-      context.textBaseline = "middle";
+      context.textBaseline = "alphabetic";
+      context.font = "18px MineSweeper";
+      const metrics = context.measureText("8");
+      const textHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+      const textCenterXOffset = (metrics.actualBoundingBoxLeft - metrics.actualBoundingBoxRight) / 2;
+      const textCenterYOffset = metrics.actualBoundingBoxAscent - textHeight / 2;
 
       for (let displayRow = 0; displayRow < CHUNK_SIZE; displayRow++) {
         const localY = CHUNK_SIZE - 1 - displayRow;
@@ -108,21 +113,19 @@ export const CanvasChunkPreview = ({
 
           if (isMine) {
             context.fillStyle = "#ef4444";
-            context.font = "18px MineSweeper";
             context.fillText(
               "`",
-              cellX + CELL_SIZE / 2 + 1,
-              cellY + CELL_SIZE / 2,
+              cellX + CELL_SIZE / 2 + textCenterXOffset,
+              cellY + CELL_SIZE / 2 + textCenterYOffset,
             );
           } else if (neighborCount) {
             context.fillStyle = styles.getPropertyValue(
               getNumberColorProperty(neighborCount),
             );
-            context.font = "18px MineSweeper";
             context.fillText(
               String(neighborCount),
-              cellX + CELL_SIZE / 2 + 1,
-              cellY + CELL_SIZE / 2,
+              cellX + CELL_SIZE / 2 + textCenterXOffset,
+              cellY + CELL_SIZE / 2 + textCenterYOffset,
             );
           }
         }
