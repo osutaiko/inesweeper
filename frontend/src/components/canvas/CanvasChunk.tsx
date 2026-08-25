@@ -12,6 +12,7 @@ export type CanvasChunkProps = {
   colorClassName: string;
   mineBitmap: string | null;
   edgeNibbleMap: string | null;
+  transformScale: number;
   onClick: () => void;
 };
 
@@ -22,6 +23,7 @@ const CanvasChunk = ({
   colorClassName,
   mineBitmap,
   edgeNibbleMap,
+  transformScale,
   onClick,
 }: CanvasChunkProps) => {
   const renderDetails = mineBitmap !== null;
@@ -54,6 +56,7 @@ const CanvasChunk = ({
           chunkY={chunkY}
           mineBitmap={mineBitmap}
           edgeNibbleMap={edgeNibbleMap}
+          transformScale={transformScale}
         />
       )}
     </div>

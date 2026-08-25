@@ -11,6 +11,7 @@ type CanvasViewportProps = {
   chunkArea: CanvasChunkAreaResponse | null;
   selectedChunkId: string | null;
   showMySolvedOnly: boolean;
+  transformScale: number;
   onChunkClick: (chunkId: string) => void;
 };
 
@@ -18,6 +19,7 @@ export const CanvasViewport = ({
   chunkArea,
   selectedChunkId,
   showMySolvedOnly,
+  transformScale,
   onChunkClick,
 }: CanvasViewportProps) => {
   const chunkByCoord = new Map(
@@ -99,6 +101,7 @@ export const CanvasViewport = ({
             }
             mineBitmap={chunk.mineBitmap}
             edgeNibbleMap={chunk.edgeNibbleMap}
+            transformScale={transformScale}
             onClick={() => onChunkClick(`${chunk.chunkX}:${chunk.chunkY}`)}
           />
         </div>

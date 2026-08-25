@@ -19,9 +19,10 @@ export const CanvasChunkPreview = ({
   chunkY,
   mineBitmap,
   edgeNibbleMap,
+  transformScale,
 }: Pick<
   CanvasChunkProps,
-  "chunkX" | "chunkY" | "mineBitmap" | "edgeNibbleMap"
+  "chunkX" | "chunkY" | "mineBitmap" | "edgeNibbleMap" | "transformScale"
 >) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -39,6 +40,16 @@ export const CanvasChunkPreview = ({
     const mineBitmapBytes = decodeMineBitmap(mineBitmap);
     const edgeNibbleMapBytes = decodeEdgeNibbleMap(edgeNibbleMap);
     const draw = () => {
+      const resolution = Math.min(
+        2,
+        Math.max(1, (window.devicePixelRatio || 1) / transformScale),
+      );
+      const scaledSize = Math.round(CHUNK_PIXEL_SIZE * resolution);
+
+      canvas.width = scaledSize;
+      canvas.height = scaledSize;
+      context.setTransform(resolution, 0, 0, resolution, 0, 0);
+
       const styles = getComputedStyle(document.documentElement);
       const gameBorder = styles.getPropertyValue("--game-border");
       const gameHidden = styles.getPropertyValue("--game-hidden");
@@ -142,15 +153,13 @@ export const CanvasChunkPreview = ({
     });
 
     return () => themeObserver.disconnect();
-  }, [chunkX, chunkY, edgeNibbleMap, mineBitmap]);
+  }, [chunkX, chunkY, edgeNibbleMap, mineBitmap, transformScale]);
 
   return (
     <canvas
       ref={canvasRef}
       aria-hidden
       className="absolute inset-0 z-10 size-full"
-      height={CHUNK_PIXEL_SIZE}
-      width={CHUNK_PIXEL_SIZE}
     />
   );
 };

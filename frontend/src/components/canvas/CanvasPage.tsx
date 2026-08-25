@@ -89,6 +89,7 @@ const CanvasPage = () => {
   const [activeLockRemainingMs, setActiveLockRemainingMs] = useState(0);
   const [lockingChunkId, setLockingChunkId] = useState<string | null>(null);
   const [showMySolvedOnly, setShowMySolvedOnly] = useState(false);
+  const [transformScale, setTransformScale] = useState(INITIAL_SCALE);
   const gridRef = useRef<HTMLDivElement>(null);
   const transformRef = useRef<ReactZoomPanPinchRef | null>(null);
   const gestureRef = useRef({
@@ -623,6 +624,7 @@ const CanvasPage = () => {
               }
             }}
             onTransform={(_, transform) => {
+              setTransformScale(transform.scale);
               if (gridRef.current) {
                 updateChunkGrid(gridRef.current, transform);
               }
@@ -699,6 +701,7 @@ const CanvasPage = () => {
                   chunkArea={chunkArea}
                   selectedChunkId={selectedChunkId}
                   showMySolvedOnly={showMySolvedOnly}
+                  transformScale={transformScale}
                   onChunkClick={(chunkId) => {
                     if (gestureRef.current.dragged) {
                       gestureRef.current.dragged = false;
