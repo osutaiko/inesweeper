@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Button } from "../ui/shadcn/button";
 import { Toggle } from "../ui/shadcn/toggle";
 import { Toaster } from "../ui/shadcn/sonner";
+import { Spinner } from "../ui/shadcn/spinner";
 import {
   TransformComponent,
   TransformWrapper,
@@ -83,8 +84,8 @@ const CanvasPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [chunkArea, setChunkArea] = useState<CanvasChunkAreaResponse | null>(null);
-  const [selectedChunk, setSelectedChunk] =
-    useState<CanvasChunkData | null>(null);
+  const [selectedChunk, setSelectedChunk] = useState<CanvasChunkData | null>(null);
+  const [isSelectedChunkLoading, setIsSelectedChunkLoading] = useState(false);
   const [activeLock, setActiveLock] = useState<CanvasChunkData | null>(null);
   const [activeLockRemainingMs, setActiveLockRemainingMs] = useState(0);
   const [lockingChunkId, setLockingChunkId] = useState<string | null>(null);
@@ -336,12 +337,16 @@ const CanvasPage = () => {
   useEffect(() => {
     if (!selectedChunkId) {
       setSelectedChunk(null);
+      setIsSelectedChunkLoading(false);
       return;
     }
 
     let isActive = true;
     const abortController = new AbortController();
     const [chunkX, chunkY] = selectedChunkId.split(":").map(Number);
+
+    setIsSelectedChunkLoading(true);
+    setSelectedChunk(null);
 
     void getCanvasChunk(chunkX, chunkY, abortController.signal)
       .then((chunk) => {
@@ -352,6 +357,11 @@ const CanvasPage = () => {
       .catch(() => {
         if (isActive) {
           toast.error("Failed to load chunk");
+        }
+      })
+      .finally(() => {
+        if (isActive) {
+          setIsSelectedChunkLoading(false);
         }
       });
 
@@ -513,6 +523,12 @@ const CanvasPage = () => {
               </Button>
             </div>
           }
+
+          {selectedChunkId && isSelectedChunkLoading && !selectedChunk && (
+            <div className="absolute bottom-0 md:bottom-4 left-1/2 gap-0 -translate-x-1/2 z-50 bg-card border flex items-center justify-center w-full max-w-[600px] px-4 py-6 md:py-8 shadow-lg">
+              <Spinner className="size-6 text-muted-foreground" />
+            </div>
+          )}
 
           {selectedChunk &&
             <div className="absolute bottom-0 md:bottom-4 left-1/2 gap-0 -translate-x-1/2 z-50 bg-card border flex flex-col w-full max-w-[600px] px-4 py-2 md:py-4 shadow-lg">
