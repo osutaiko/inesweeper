@@ -42,7 +42,7 @@ export const CanvasChunkPreview = ({
     const draw = () => {
       const resolution = Math.min(
         2,
-        Math.max(1, (window.devicePixelRatio || 1) / transformScale),
+        Math.max(0.25, (window.devicePixelRatio || 1) * transformScale),
       );
       const scaledSize = Math.round(CHUNK_PIXEL_SIZE * resolution);
 

@@ -44,6 +44,7 @@ svg.lucide {
 
 body {
   font-family: "KodeMono", sans-serif;
+  overscroll-behavior: none;
 }
 
 @layer base {
