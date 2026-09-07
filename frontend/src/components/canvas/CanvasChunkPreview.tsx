@@ -36,7 +36,7 @@ export const CanvasChunkPreview = ({
       return;
     }
 
-    const context = canvas.getContext("2d", { alpha: false });
+    const context = canvas.getContext("2d", { alpha: false, willReadFrequently: true });
     if (!context) {
       return;
     }
