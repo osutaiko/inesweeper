@@ -25,6 +25,10 @@ export const CanvasChunkPreview = ({
   "chunkX" | "chunkY" | "mineBitmap" | "edgeNibbleMap" | "transformScale"
 >) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const resolution = Math.min(
+    2,
+    Math.max(0.25, Math.ceil((window.devicePixelRatio || 1) * transformScale * 4) / 4),
+  );
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -40,14 +44,12 @@ export const CanvasChunkPreview = ({
     const mineBitmapBytes = decodeMineBitmap(mineBitmap);
     const edgeNibbleMapBytes = decodeEdgeNibbleMap(edgeNibbleMap);
     const draw = () => {
-      const resolution = Math.min(
-        2,
-        Math.max(0.25, (window.devicePixelRatio || 1) * transformScale),
-      );
       const scaledSize = Math.round(CHUNK_PIXEL_SIZE * resolution);
 
-      canvas.width = scaledSize;
-      canvas.height = scaledSize;
+      if (canvas.width !== scaledSize || canvas.height !== scaledSize) {
+        canvas.width = scaledSize;
+        canvas.height = scaledSize;
+      }
       context.setTransform(resolution, 0, 0, resolution, 0, 0);
 
       const styles = getComputedStyle(document.documentElement);
@@ -153,7 +155,7 @@ export const CanvasChunkPreview = ({
     });
 
     return () => themeObserver.disconnect();
-  }, [chunkX, chunkY, edgeNibbleMap, mineBitmap, transformScale]);
+  }, [chunkX, chunkY, edgeNibbleMap, mineBitmap, resolution]);
 
   return (
     <canvas
