@@ -65,6 +65,7 @@ export default {
            blueborder: 'var(--game-blueborder)',
            chunkopen: 'var(--game-chunkopen)',
            chunklocked: 'var(--game-chunklocked)',
+           chunkselected: 'var(--game-chunkselected)',
            number: {
              '1': 'var(--game-number-1)',
              '2': 'var(--game-number-2)',

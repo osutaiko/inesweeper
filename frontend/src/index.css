@@ -82,6 +82,7 @@ body {
     --game-blueborder: oklch(85% 0.14 195);
     --game-chunkopen: oklch(95% 0.02 145);
     --game-chunklocked: oklch(93% 0.02 18);
+    --game-chunkselected: oklch(0.95 0.19 105);
     
     --game-number-1: oklch(48% 0.30 275);
     --game-number-2: oklch(55% 0.18 143);
@@ -133,6 +134,7 @@ body {
     --game-blueborder: oklch(43% 0.07 195);
     --game-chunkopen: oklch(29% 0.04 145);
     --game-chunklocked: oklch(28% 0.05 21);
+    --game-chunkselected: oklch(0.95 0.19 105);
     
     --game-number-1: oklch(63% 0.20 274);
     --game-number-2: oklch(64% 0.21 143);
