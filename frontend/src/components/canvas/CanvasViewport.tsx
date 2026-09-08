@@ -126,7 +126,6 @@ export const CanvasViewport = ({
       })}
       {selectedChunkId && (
         <SelectedChunkOverlay
-          key={selectedChunkId}
           chunkId={selectedChunkId}
           chunkOriginOffset={CHUNK_ORIGIN_OFFSET}
           chunkPixelSize={CHUNK_PIXEL_SIZE}
